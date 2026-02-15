@@ -1,0 +1,56 @@
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  flex-wrap: wrap;
+}
+
+.roundInfo {
+  font-weight: 600;
+  color: #333;
+}
+
+.replayBadge {
+  display: inline-block;
+  background: #ff9800;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.score {
+  color: #555;
+}
+
+.scoreLabel {
+  font-weight: 400;
+}
+
+.scoreValue {
+  font-weight: 700;
+  color: #333;
+}
+
+.timer {
+  font-variant-numeric: tabular-nums;
+  color: #666;
+  min-width: 48px;
+  text-align: right;
+}
+
+@media (max-width: 480px) {
+  .status {
+    font-size: 0.9rem;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+}

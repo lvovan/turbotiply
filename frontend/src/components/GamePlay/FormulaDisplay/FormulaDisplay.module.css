@@ -1,0 +1,42 @@
+.formula {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 2.5rem;
+  font-weight: 700;
+  padding: 24px 16px;
+  user-select: none;
+}
+
+.value {
+  min-width: 48px;
+  text-align: center;
+}
+
+.hidden {
+  min-width: 48px;
+  text-align: center;
+  color: var(--accent-color, #6c63ff);
+  background: rgba(108, 99, 255, 0.1);
+  border-radius: 8px;
+  padding: 4px 8px;
+}
+
+.operator {
+  color: #666;
+  font-weight: 400;
+}
+
+@media (max-width: 480px) {
+  .formula {
+    font-size: 1.8rem;
+    gap: 8px;
+    padding: 16px 8px;
+  }
+
+  .value,
+  .hidden {
+    min-width: 36px;
+  }
+}

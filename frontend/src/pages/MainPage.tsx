@@ -1,10 +1,65 @@
-import { Navigate } from 'react-router-dom';
+import { useRef, useCallback } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useSession } from '../hooks/useSession.tsx';
+import { useGame } from '../hooks/useGame';
+import { useRoundTimer } from '../hooks/useRoundTimer';
+import { FEEDBACK_DURATION_MS } from '../constants/scoring';
 import Header from '../components/Header/Header';
+import FormulaDisplay from '../components/GamePlay/FormulaDisplay/FormulaDisplay';
+import AnswerInput from '../components/GamePlay/AnswerInput/AnswerInput';
+import RoundFeedback from '../components/GamePlay/RoundFeedback/RoundFeedback';
+import GameStatus from '../components/GamePlay/GameStatus/GameStatus';
+import ScoreSummary from '../components/GamePlay/ScoreSummary/ScoreSummary';
 
-/** Stub main experience page. Redirects to welcome if no session is active. */
+/**
+ * Main gameplay page. Orchestrates the full game lifecycle:
+ * not-started → playing → (optional) replay → completed.
+ */
 export default function MainPage() {
+  const navigate = useNavigate();
   const { session, isActive } = useSession();
+  const { gameState, currentRound, correctAnswer, startGame, submitAnswer, nextRound, resetGame } =
+    useGame();
+  const { displayRef, start, stop, reset } = useRoundTimer();
+  const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleStartGame = useCallback(() => {
+    startGame();
+    start();
+  }, [startGame, start]);
+
+  const handleSubmit = useCallback(
+    (answer: number) => {
+      const elapsed = stop();
+      submitAnswer(answer, elapsed);
+
+      // Show feedback for FEEDBACK_DURATION_MS, then advance
+      feedbackTimeoutRef.current = setTimeout(() => {
+        nextRound();
+        reset();
+        start();
+        feedbackTimeoutRef.current = null;
+      }, FEEDBACK_DURATION_MS);
+    },
+    [stop, submitAnswer, nextRound, reset, start],
+  );
+
+  const handlePlayAgain = useCallback(() => {
+    if (feedbackTimeoutRef.current) {
+      clearTimeout(feedbackTimeoutRef.current);
+      feedbackTimeoutRef.current = null;
+    }
+    resetGame();
+  }, [resetGame]);
+
+  const handleBackToMenu = useCallback(() => {
+    if (feedbackTimeoutRef.current) {
+      clearTimeout(feedbackTimeoutRef.current);
+      feedbackTimeoutRef.current = null;
+    }
+    resetGame();
+    navigate('/');
+  }, [resetGame, navigate]);
 
   if (!isActive || !session) {
     return <Navigate to="/" replace />;
@@ -14,8 +69,55 @@ export default function MainPage() {
     <div>
       <Header />
       <main style={{ padding: '24px 16px', textAlign: 'center' }}>
-        <h1>Main Experience</h1>
-        <p>Welcome, {session.playerName}! The game will be here soon.</p>
+        {gameState.status === 'not-started' && (
+          <div>
+            <h1>Ready to play?</h1>
+            <p>Answer 10 multiplication questions as fast as you can!</p>
+            <button onClick={handleStartGame}>Start Game</button>
+          </div>
+        )}
+
+        {(gameState.status === 'playing' || gameState.status === 'replay') && currentRound && (
+          <div>
+            <GameStatus
+              roundNumber={gameState.currentRoundIndex + 1}
+              totalRounds={
+                gameState.status === 'replay'
+                  ? gameState.replayQueue.length
+                  : gameState.rounds.length
+              }
+              score={gameState.score}
+              timerRef={displayRef}
+              isReplay={gameState.status === 'replay'}
+            />
+
+            <FormulaDisplay formula={currentRound.formula} />
+
+            {gameState.currentPhase === 'input' && (
+              <AnswerInput onSubmit={handleSubmit} disabled={false} />
+            )}
+
+            <div aria-live="assertive" role="status">
+              {gameState.currentPhase === 'feedback' &&
+                currentRound.isCorrect !== null &&
+                correctAnswer !== null && (
+                  <RoundFeedback
+                    isCorrect={currentRound.isCorrect}
+                    correctAnswer={correctAnswer}
+                  />
+                )}
+            </div>
+          </div>
+        )}
+
+        {gameState.status === 'completed' && (
+          <ScoreSummary
+            rounds={gameState.rounds}
+            score={gameState.score}
+            onPlayAgain={handlePlayAgain}
+            onBackToMenu={handleBackToMenu}
+          />
+        )}
       </main>
     </div>
   );

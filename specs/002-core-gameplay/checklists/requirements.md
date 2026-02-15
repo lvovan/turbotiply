@@ -1,4 +1,4 @@
-# Specification Quality Checklist: Player Sessions
+# Specification Quality Checklist: Core Gameplay
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-02-14
@@ -32,5 +32,6 @@
 ## Notes
 
 - All items pass. Spec is ready for `/speckit.clarify` or `/speckit.plan`.
-- Assumptions section documents reasonable defaults (no auth, no cross-device sync, front-end only sessions, main experience out of scope).
-- No [NEEDS CLARIFICATION] markers were needed — all aspects had reasonable defaults derived from the constitution and user description.
+- The user's input was exceptionally detailed (scoring table, formula generation rules, replay mechanics), so no [NEEDS CLARIFICATION] markers were needed.
+- Score persistence/leaderboards explicitly declared out of scope (separate feature).
+- Game state is ephemeral — no mid-game save, consistent with constitution v1.1.0 session model.

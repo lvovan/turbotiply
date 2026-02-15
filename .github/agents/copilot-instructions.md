@@ -1,10 +1,11 @@
-# turbotiply Development Guidelines
+﻿# turbotiply Development Guidelines
 
 Auto-generated from all feature plans. Last updated: 2026-02-14
 
 ## Active Technologies
 - TypeScript ~5.9.3, React 19.2, Node.js 18+ + React, React Router DOM 7.13, Vite 7.3 (main)
 - `localStorage` (player profiles), `sessionStorage` (active session — tab-scoped) (main)
+- None for game state — ephemeral in-memory only. Player session from sessionStorage (feature 001). (002-core-gameplay)
 
 - TypeScript 5.x (frontend), Python 3.11+ (backend — serves static files only for this feature) + React 18+, Vite (bundler), React Router (navigation), FastAPI (backend — static file serving only) (main)
 
@@ -25,6 +26,7 @@ cd src; pytest; ruff check .
 TypeScript 5.x (frontend): Follow standard conventions
 
 ## Recent Changes
+- 002-core-gameplay: Added TypeScript ~5.9.3, React 19.2, Node.js 18+ + React, React Router DOM 7.13, Vite 7.3
 - main: Added TypeScript ~5.9.3, React 19.2, Node.js 18+ + React, React Router DOM 7.13, Vite 7.3
 
 - main: Added TypeScript 5.x (frontend), Python 3.11+ (backend — serves static files only for this feature) + React 18+, Vite (bundler), React Router (navigation), FastAPI (backend — static file serving only)
