@@ -1,10 +1,12 @@
-import type { Player, PlayerStore } from '../types/player';
+import type { Player, PlayerStore, GameRecord } from '../types/player';
+
+export type { GameRecord } from '../types/player';
 
 /** localStorage key for player data. */
 export const STORAGE_KEY = 'turbotiply_players';
 
 /** Current schema version. */
-const CURRENT_VERSION = 3;
+const CURRENT_VERSION = 4;
 
 /** Maximum number of players stored. */
 const MAX_PLAYERS = 50;
@@ -67,9 +69,25 @@ function readStore(): PlayerStore {
     // Migrate v2 → v3: remove colorId from all players
     if (parsed.version === 2) {
       for (const player of parsed.players) {
-        delete (player as Record<string, unknown>)['colorId'];
+        delete (player as unknown as Record<string, unknown>)['colorId'];
       }
       parsed.version = 3;
+      writeStore(parsed);
+    }
+
+    // Migrate v3 → v4: add gameHistory to all players
+    if (parsed.version === 3) {
+      for (const player of parsed.players) {
+        if (player.gamesPlayed > 0) {
+          player.gameHistory = [{
+            score: Math.round(player.totalScore / player.gamesPlayed),
+            completedAt: player.lastActive,
+          }];
+        } else {
+          player.gameHistory = [];
+        }
+      }
+      parsed.version = 4;
       writeStore(parsed);
     }
 
@@ -152,7 +170,7 @@ export function savePlayer(data: Pick<Player, 'name' | 'avatarId'>): SavePlayerR
   let player: Player;
 
   if (existingIndex >= 0) {
-    // Overwrite: preserve createdAt, update everything else
+    // Overwrite: preserve createdAt and gameHistory, update everything else
     const existing = store.players[existingIndex];
     player = {
       name: trimmedName,
@@ -161,6 +179,7 @@ export function savePlayer(data: Pick<Player, 'name' | 'avatarId'>): SavePlayerR
       createdAt: existing.createdAt,
       totalScore: existing.totalScore ?? 0,
       gamesPlayed: existing.gamesPlayed ?? 0,
+      gameHistory: existing.gameHistory ?? [],
     };
     store.players[existingIndex] = player;
   } else {
@@ -172,6 +191,7 @@ export function savePlayer(data: Pick<Player, 'name' | 'avatarId'>): SavePlayerR
       createdAt: now,
       totalScore: 0,
       gamesPlayed: 0,
+      gameHistory: [],
     };
     store.players.push(player);
   }
@@ -238,8 +258,58 @@ export function updatePlayerScore(name: string, gameScore: number): void {
   const lowerName = name.toLowerCase();
   const player = store.players.find((p) => p.name.toLowerCase() === lowerName);
   if (player) {
+    // Append GameRecord
+    if (!player.gameHistory) {
+      player.gameHistory = [];
+    }
+    player.gameHistory.push({ score: gameScore, completedAt: Date.now() });
+    // Enforce 100-record cap
+    if (player.gameHistory.length > 100) {
+      player.gameHistory = player.gameHistory.slice(-100);
+    }
+    // Legacy fields retained for backward compatibility
     player.totalScore = (player.totalScore ?? 0) + gameScore;
     player.gamesPlayed = (player.gamesPlayed ?? 0) + 1;
     writeStore(store);
   }
+}
+
+/**
+ * Computes the arithmetic mean of a player's most recent game scores.
+ * @param player — Player object
+ * @param count — Number of recent games to average (default: 10)
+ * @returns Math.round(mean) or null if no history
+ */
+export function getRecentAverage(player: Player, count: number = 10): number | null {
+  const history = player.gameHistory ?? [];
+  if (history.length === 0) return null;
+  const slice = history.slice(-count);
+  const sum = slice.reduce((acc, r) => acc + r.score, 0);
+  return Math.round(sum / slice.length);
+}
+
+/**
+ * Returns the player's most recent game scores sorted by score descending.
+ * Ties broken by most recent completedAt first.
+ * @param player — Player object
+ * @param count — Number of recent games to retrieve (default: 5)
+ * @returns Sorted array of GameRecord
+ */
+export function getRecentHighScores(player: Player, count: number = 5): GameRecord[] {
+  const history = player.gameHistory ?? [];
+  if (history.length === 0) return [];
+  const slice = history.slice(-count);
+  return [...slice].sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return b.completedAt - a.completedAt;
+  });
+}
+
+/**
+ * Returns the player's full game history in chronological order (defensive copy).
+ * @param player — Player object
+ * @returns Copy of gameHistory array
+ */
+export function getGameHistory(player: Player): GameRecord[] {
+  return [...(player.gameHistory ?? [])];
 }

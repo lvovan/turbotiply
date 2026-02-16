@@ -1,5 +1,6 @@
 import type { Player } from '../../types/player';
 import { getAvatarEmoji } from '../../constants/avatarEmojis';
+import { getRecentAverage } from '../../services/playerStorage';
 import styles from './PlayerCard.module.css';
 
 interface PlayerCardProps {
@@ -12,10 +13,8 @@ interface PlayerCardProps {
  * Single-line player card: avatar | name | avg score | delete button.
  */
 export default function PlayerCard({ player, onSelect, onDelete }: PlayerCardProps) {
-  const avgScore =
-    player.gamesPlayed > 0
-      ? `Avg: ${Math.round(player.totalScore / player.gamesPlayed)}`
-      : '—';
+  const recentAvg = getRecentAverage(player, 10);
+  const avgScore = recentAvg !== null ? `Avg: ${recentAvg}` : '—';
 
   return (
     <div className={styles.card}>

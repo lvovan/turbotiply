@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { useSession } from '../hooks/useSession.tsx';
 import { useGame } from '../hooks/useGame';
 import { useRoundTimer } from '../hooks/useRoundTimer';
-import { updatePlayerScore } from '../services/playerStorage';
+import { updatePlayerScore, getPlayers, getRecentHighScores, getGameHistory } from '../services/playerStorage';
 import { FEEDBACK_DURATION_MS } from '../constants/scoring';
 import Header from '../components/Header/Header';
 import FormulaDisplay from '../components/GamePlay/FormulaDisplay/FormulaDisplay';
@@ -11,6 +11,8 @@ import AnswerInput from '../components/GamePlay/AnswerInput/AnswerInput';
 import RoundFeedback from '../components/GamePlay/RoundFeedback/RoundFeedback';
 import GameStatus from '../components/GamePlay/GameStatus/GameStatus';
 import ScoreSummary from '../components/GamePlay/ScoreSummary/ScoreSummary';
+import RecentHighScores from '../components/GamePlay/RecentHighScores/RecentHighScores';
+import ProgressionGraph from '../components/GamePlay/ProgressionGraph/ProgressionGraph';
 
 /**
  * Main gameplay page. Orchestrates the full game lifecycle:
@@ -78,6 +80,14 @@ export default function MainPage() {
     return <Navigate to="/" replace />;
   }
 
+  // Look up current player from storage for score display
+  const currentPlayer = getPlayers().find(
+    (p) => p.name.toLowerCase() === session.playerName.toLowerCase(),
+  );
+  const recentScores = currentPlayer ? getRecentHighScores(currentPlayer, 5) : [];
+  const gameHistory = currentPlayer ? getGameHistory(currentPlayer) : [];
+  const hasNoGames = !currentPlayer || currentPlayer.gamesPlayed === 0;
+
   return (
     <div>
       <Header />
@@ -86,6 +96,8 @@ export default function MainPage() {
           <div>
             <h1>Ready to play?</h1>
             <p>Answer 10 multiplication questions as fast as you can!</p>
+            <RecentHighScores scores={recentScores} isEmpty={hasNoGames} />
+            {gameHistory.length >= 2 && <ProgressionGraph history={gameHistory} />}
             <button onClick={handleStartGame}>Start Game</button>
           </div>
         )}

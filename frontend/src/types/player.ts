@@ -1,3 +1,11 @@
+/** An individual completed game result, stored within a player's gameHistory. */
+export interface GameRecord {
+  /** Total points earned in the game session (0–50 range based on scoring tiers). */
+  score: number;
+  /** Epoch ms timestamp of game completion. */
+  completedAt: number;
+}
+
 /** Represents a player profile stored in localStorage. */
 export interface Player {
   /** Display name chosen by the child (1–20 chars, trimmed). */
@@ -12,6 +20,8 @@ export interface Player {
   totalScore: number;
   /** Count of completed games. Default 0. */
   gamesPlayed: number;
+  /** Ordered list of individual game results (oldest first). Capped at 100. Optional for pre-v4 data. */
+  gameHistory?: GameRecord[];
 }
 
 /** Represents a single play session, stored in sessionStorage (tab-scoped). */

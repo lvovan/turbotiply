@@ -13,7 +13,10 @@ import FormulaDisplay from '../../src/components/GamePlay/FormulaDisplay/Formula
 import AnswerInput from '../../src/components/GamePlay/AnswerInput/AnswerInput';
 import RoundFeedback from '../../src/components/GamePlay/RoundFeedback/RoundFeedback';
 import ScoreSummary from '../../src/components/GamePlay/ScoreSummary/ScoreSummary';
+import RecentHighScores from '../../src/components/GamePlay/RecentHighScores/RecentHighScores';
+import ProgressionGraph from '../../src/components/GamePlay/ProgressionGraph/ProgressionGraph';
 import type { Round } from '../../src/types/game';
+import type { GameRecord } from '../../src/types/player';
 
 function renderWithProviders(ui: React.ReactElement) {
   return render(
@@ -138,6 +141,45 @@ describe('Accessibility — Gameplay (axe)', () => {
     ];
     const { container } = render(
       <ScoreSummary rounds={rounds} score={3} onPlayAgain={() => {}} onBackToMenu={() => {}} />,
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+});
+
+describe('Accessibility — Score Display (axe)', () => {
+  it('RecentHighScores (with scores) has no a11y violations', async () => {
+    const scores: GameRecord[] = [
+      { score: 45, completedAt: 500 },
+      { score: 38, completedAt: 400 },
+      { score: 30, completedAt: 300 },
+      { score: 22, completedAt: 200 },
+      { score: 15, completedAt: 100 },
+    ];
+    const { container } = render(
+      <RecentHighScores scores={scores} isEmpty={false} />,
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  it('RecentHighScores (empty state) has no a11y violations', async () => {
+    const { container } = render(
+      <RecentHighScores scores={[]} isEmpty={true} />,
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  it('ProgressionGraph (with data) has no a11y violations', async () => {
+    const history: GameRecord[] = [
+      { score: 10, completedAt: 100 },
+      { score: 25, completedAt: 200 },
+      { score: 18, completedAt: 300 },
+      { score: 35, completedAt: 400 },
+    ];
+    const { container } = render(
+      <ProgressionGraph history={history} />,
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();

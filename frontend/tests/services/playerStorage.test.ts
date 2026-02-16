@@ -11,8 +11,12 @@ import {
   clearAllStorage,
   updatePlayerScore,
   AVATAR_REMAP,
+  getRecentAverage,
+  getRecentHighScores,
+  getGameHistory,
 } from '../../src/services/playerStorage';
 import type { PlayerStore } from '../../src/types/player';
+import type { GameRecord } from '../../src/types/player';
 
 describe('playerStorage', () => {
   beforeEach(() => {
@@ -246,9 +250,9 @@ describe('playerStorage', () => {
       expect(players[0].totalScore).toBe(0);
       expect(players[0].gamesPlayed).toBe(0);
 
-      // Verify store was updated to v3 (migrated through v2 then v3)
+      // Verify store was updated to v4 (migrated through v2, v3, then v4)
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!) as PlayerStore;
-      expect(stored.version).toBe(3);
+      expect(stored.version).toBe(4);
     });
   });
 
@@ -288,7 +292,7 @@ describe('playerStorage', () => {
       getPlayers();
 
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!) as PlayerStore;
-      expect(stored.version).toBe(3);
+      expect(stored.version).toBe(4);
       expect((stored.players[0] as Record<string, unknown>)['colorId']).toBeUndefined();
     });
 
@@ -395,6 +399,375 @@ describe('playerStorage', () => {
     it('is a no-op if player does not exist', () => {
       updatePlayerScore('Ghost', 10);
       expect(getPlayers()).toHaveLength(0);
+    });
+
+    it('appends a GameRecord with score and timestamp', () => {
+      const now = 5000;
+      vi.spyOn(Date, 'now').mockReturnValue(now);
+      savePlayer({ name: 'Mia', avatarId: 'cat' });
+
+      vi.spyOn(Date, 'now').mockReturnValue(6000);
+      updatePlayerScore('Mia', 25);
+
+      const players = getPlayers();
+      expect(players[0].gameHistory).toBeDefined();
+      expect(players[0].gameHistory).toHaveLength(1);
+      expect(players[0].gameHistory![0].score).toBe(25);
+      expect(players[0].gameHistory![0].completedAt).toBe(6000);
+
+      vi.restoreAllMocks();
+    });
+
+    it('appends multiple GameRecords in chronological order', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(1000);
+      savePlayer({ name: 'Mia', avatarId: 'cat' });
+
+      vi.spyOn(Date, 'now').mockReturnValue(2000);
+      updatePlayerScore('Mia', 10);
+      vi.spyOn(Date, 'now').mockReturnValue(3000);
+      updatePlayerScore('Mia', 20);
+      vi.spyOn(Date, 'now').mockReturnValue(4000);
+      updatePlayerScore('Mia', 30);
+
+      const players = getPlayers();
+      expect(players[0].gameHistory).toHaveLength(3);
+      expect(players[0].gameHistory![0].score).toBe(10);
+      expect(players[0].gameHistory![1].score).toBe(20);
+      expect(players[0].gameHistory![2].score).toBe(30);
+
+      vi.restoreAllMocks();
+    });
+
+    it('enforces 100-record cap by discarding oldest', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(1000);
+      savePlayer({ name: 'Mia', avatarId: 'cat' });
+
+      // Add 100 records
+      for (let i = 0; i < 100; i++) {
+        vi.spyOn(Date, 'now').mockReturnValue(2000 + i);
+        updatePlayerScore('Mia', i);
+      }
+
+      let players = getPlayers();
+      expect(players[0].gameHistory).toHaveLength(100);
+
+      // Add 101st — oldest (score=0) should be discarded
+      vi.spyOn(Date, 'now').mockReturnValue(9999);
+      updatePlayerScore('Mia', 999);
+
+      players = getPlayers();
+      expect(players[0].gameHistory).toHaveLength(100);
+      expect(players[0].gameHistory![0].score).toBe(1); // oldest remaining
+      expect(players[0].gameHistory![99].score).toBe(999); // newest
+
+      vi.restoreAllMocks();
+    });
+
+    it('still updates totalScore and gamesPlayed alongside gameHistory', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(1000);
+      savePlayer({ name: 'Mia', avatarId: 'cat' });
+
+      vi.spyOn(Date, 'now').mockReturnValue(2000);
+      updatePlayerScore('Mia', 15);
+      vi.spyOn(Date, 'now').mockReturnValue(3000);
+      updatePlayerScore('Mia', 25);
+
+      const players = getPlayers();
+      expect(players[0].totalScore).toBe(40);
+      expect(players[0].gamesPlayed).toBe(2);
+      expect(players[0].gameHistory).toHaveLength(2);
+
+      vi.restoreAllMocks();
+    });
+  });
+
+  describe('v3 → v4 migration', () => {
+    it('creates synthetic GameRecord for players with gamesPlayed > 0', () => {
+      const v3Store = {
+        version: 3,
+        players: [
+          { name: 'Alice', avatarId: 'cat', lastActive: 5000, createdAt: 1000, totalScore: 100, gamesPlayed: 4 },
+        ],
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(v3Store));
+
+      const players = getPlayers();
+      expect(players[0].gameHistory).toBeDefined();
+      expect(players[0].gameHistory).toHaveLength(1);
+      expect(players[0].gameHistory![0].score).toBe(25); // Math.round(100/4)
+      expect(players[0].gameHistory![0].completedAt).toBe(5000); // lastActive
+    });
+
+    it('sets gameHistory to empty array for players with gamesPlayed === 0', () => {
+      const v3Store = {
+        version: 3,
+        players: [
+          { name: 'Bob', avatarId: 'robot', lastActive: 3000, createdAt: 2000, totalScore: 0, gamesPlayed: 0 },
+        ],
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(v3Store));
+
+      const players = getPlayers();
+      expect(players[0].gameHistory).toBeDefined();
+      expect(players[0].gameHistory).toEqual([]);
+    });
+
+    it('bumps version to 4 and persists migration', () => {
+      const v3Store = {
+        version: 3,
+        players: [
+          { name: 'A', avatarId: 'cat', lastActive: 100, createdAt: 50, totalScore: 30, gamesPlayed: 3 },
+        ],
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(v3Store));
+
+      getPlayers(); // triggers migration
+
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!) as PlayerStore;
+      expect(stored.version).toBe(4);
+      expect(stored.players[0].gameHistory).toBeDefined();
+      expect(stored.players[0].gameHistory).toHaveLength(1);
+    });
+
+    it('handles multiple players in migration', () => {
+      const v3Store = {
+        version: 3,
+        players: [
+          { name: 'Alice', avatarId: 'cat', lastActive: 5000, createdAt: 1000, totalScore: 100, gamesPlayed: 10 },
+          { name: 'Bob', avatarId: 'robot', lastActive: 3000, createdAt: 2000, totalScore: 0, gamesPlayed: 0 },
+          { name: 'Charlie', avatarId: 'star', lastActive: 4000, createdAt: 1500, totalScore: 75, gamesPlayed: 5 },
+        ],
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(v3Store));
+
+      const players = getPlayers();
+      const alice = players.find(p => p.name === 'Alice')!;
+      const bob = players.find(p => p.name === 'Bob')!;
+      const charlie = players.find(p => p.name === 'Charlie')!;
+
+      expect(alice.gameHistory).toHaveLength(1);
+      expect(alice.gameHistory![0].score).toBe(10); // Math.round(100/10)
+      expect(bob.gameHistory).toEqual([]);
+      expect(charlie.gameHistory).toHaveLength(1);
+      expect(charlie.gameHistory![0].score).toBe(15); // Math.round(75/5)
+    });
+
+    it('retains totalScore and gamesPlayed fields after migration', () => {
+      const v3Store = {
+        version: 3,
+        players: [
+          { name: 'Alice', avatarId: 'cat', lastActive: 5000, createdAt: 1000, totalScore: 100, gamesPlayed: 4 },
+        ],
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(v3Store));
+
+      const players = getPlayers();
+      expect(players[0].totalScore).toBe(100);
+      expect(players[0].gamesPlayed).toBe(4);
+    });
+  });
+
+  describe('savePlayer gameHistory initialization', () => {
+    it('initializes gameHistory as empty array for new players', () => {
+      savePlayer({ name: 'NewKid', avatarId: 'cat' });
+
+      const players = getPlayers();
+      expect(players[0].gameHistory).toBeDefined();
+      expect(players[0].gameHistory).toEqual([]);
+    });
+
+    it('preserves existing gameHistory when overwriting a player', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(1000);
+      savePlayer({ name: 'Mia', avatarId: 'cat' });
+
+      vi.spyOn(Date, 'now').mockReturnValue(2000);
+      updatePlayerScore('Mia', 25);
+
+      vi.spyOn(Date, 'now').mockReturnValue(3000);
+      savePlayer({ name: 'Mia', avatarId: 'robot' }); // overwrite with new avatar
+
+      const players = getPlayers();
+      expect(players[0].avatarId).toBe('robot');
+      expect(players[0].gameHistory).toHaveLength(1);
+      expect(players[0].gameHistory![0].score).toBe(25);
+
+      vi.restoreAllMocks();
+    });
+  });
+
+  describe('getRecentAverage', () => {
+    it('returns null when gameHistory is absent', () => {
+      const player = { name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 0 };
+      expect(getRecentAverage(player)).toBeNull();
+    });
+
+    it('returns null when gameHistory is empty', () => {
+      const player = { name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 0, gameHistory: [] };
+      expect(getRecentAverage(player)).toBeNull();
+    });
+
+    it('returns Math.round(mean) of all scores when fewer than 10 games', () => {
+      const player = {
+        name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 3,
+        gameHistory: [
+          { score: 10, completedAt: 100 },
+          { score: 20, completedAt: 200 },
+          { score: 30, completedAt: 300 },
+        ],
+      };
+      // mean = (10 + 20 + 30) / 3 = 20
+      expect(getRecentAverage(player)).toBe(20);
+    });
+
+    it('returns Math.round(mean) of last 10 scores when more than 10 games', () => {
+      const history: GameRecord[] = [];
+      for (let i = 1; i <= 12; i++) {
+        history.push({ score: i * 5, completedAt: i * 100 });
+      }
+      const player = {
+        name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 12,
+        gameHistory: history,
+      };
+      // Last 10 scores: 15,20,25,30,35,40,45,50,55,60 → sum=375 → 375/10=37.5 → 38
+      expect(getRecentAverage(player)).toBe(38);
+    });
+
+    it('respects custom count parameter', () => {
+      const history: GameRecord[] = [
+        { score: 10, completedAt: 100 },
+        { score: 20, completedAt: 200 },
+        { score: 30, completedAt: 300 },
+        { score: 40, completedAt: 400 },
+        { score: 50, completedAt: 500 },
+      ];
+      const player = {
+        name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 5,
+        gameHistory: history,
+      };
+      // Last 3: 30,40,50 → mean = 40
+      expect(getRecentAverage(player, 3)).toBe(40);
+    });
+
+    it('rounds to nearest integer', () => {
+      const player = {
+        name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 3,
+        gameHistory: [
+          { score: 10, completedAt: 100 },
+          { score: 11, completedAt: 200 },
+          { score: 12, completedAt: 300 },
+        ],
+      };
+      // mean = 33 / 3 = 11
+      expect(getRecentAverage(player)).toBe(11);
+    });
+  });
+
+  describe('getRecentHighScores', () => {
+    it('returns empty array when gameHistory is absent', () => {
+      const player = { name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 0 };
+      expect(getRecentHighScores(player)).toEqual([]);
+    });
+
+    it('returns empty array when gameHistory is empty', () => {
+      const player = { name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 0, gameHistory: [] };
+      expect(getRecentHighScores(player)).toEqual([]);
+    });
+
+    it('returns last 5 records sorted by score descending', () => {
+      const history: GameRecord[] = [
+        { score: 10, completedAt: 100 },
+        { score: 50, completedAt: 200 },
+        { score: 30, completedAt: 300 },
+        { score: 40, completedAt: 400 },
+        { score: 20, completedAt: 500 },
+      ];
+      const player = {
+        name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 5,
+        gameHistory: history,
+      };
+      const result = getRecentHighScores(player);
+      expect(result.map(r => r.score)).toEqual([50, 40, 30, 20, 10]);
+    });
+
+    it('breaks ties by most recent completedAt first', () => {
+      const history: GameRecord[] = [
+        { score: 30, completedAt: 100 },
+        { score: 30, completedAt: 300 },
+        { score: 30, completedAt: 200 },
+      ];
+      const player = {
+        name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 3,
+        gameHistory: history,
+      };
+      const result = getRecentHighScores(player);
+      expect(result.map(r => r.completedAt)).toEqual([300, 200, 100]);
+    });
+
+    it('returns fewer when less than 5 games', () => {
+      const history: GameRecord[] = [
+        { score: 10, completedAt: 100 },
+        { score: 20, completedAt: 200 },
+      ];
+      const player = {
+        name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 2,
+        gameHistory: history,
+      };
+      const result = getRecentHighScores(player);
+      expect(result).toHaveLength(2);
+      expect(result.map(r => r.score)).toEqual([20, 10]);
+    });
+
+    it('takes only from the last N chronological entries', () => {
+      const history: GameRecord[] = [
+        { score: 99, completedAt: 100 }, // older, should be excluded with count=3
+        { score: 10, completedAt: 200 },
+        { score: 30, completedAt: 300 },
+        { score: 20, completedAt: 400 },
+      ];
+      const player = {
+        name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 4,
+        gameHistory: history,
+      };
+      const result = getRecentHighScores(player, 3);
+      expect(result.map(r => r.score)).toEqual([30, 20, 10]);
+    });
+  });
+
+  describe('getGameHistory', () => {
+    it('returns empty array when gameHistory is absent', () => {
+      const player = { name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 0 };
+      expect(getGameHistory(player)).toEqual([]);
+    });
+
+    it('returns empty array when gameHistory is empty', () => {
+      const player = { name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 0, gameHistory: [] };
+      expect(getGameHistory(player)).toEqual([]);
+    });
+
+    it('returns a defensive copy in chronological order', () => {
+      const history: GameRecord[] = [
+        { score: 10, completedAt: 100 },
+        { score: 20, completedAt: 200 },
+        { score: 30, completedAt: 300 },
+      ];
+      const player = { name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 3, gameHistory: history };
+      const result = getGameHistory(player);
+
+      // Same content
+      expect(result).toEqual(history);
+      // But a different array reference (defensive copy)
+      expect(result).not.toBe(history);
+    });
+
+    it('does not mutate the original when result is modified', () => {
+      const history: GameRecord[] = [
+        { score: 10, completedAt: 100 },
+        { score: 20, completedAt: 200 },
+      ];
+      const player = { name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 2, gameHistory: history };
+      const result = getGameHistory(player);
+      result.push({ score: 99, completedAt: 999 });
+      expect(player.gameHistory).toHaveLength(2);
     });
   });
 });

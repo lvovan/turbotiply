@@ -11,6 +11,7 @@ const mockPlayer: Player = {
   createdAt: Date.now(),
   totalScore: 0,
   gamesPlayed: 0,
+  gameHistory: [],
 };
 
 describe('PlayerCard', () => {
@@ -56,23 +57,33 @@ describe('PlayerCard', () => {
     expect(screen.getByText('—')).toBeInTheDocument();
   });
 
-  it('shows average score when games have been played', () => {
-    const playerWithScore: Player = {
+  it('shows average score based on recent game history', () => {
+    const playerWithHistory: Player = {
       ...mockPlayer,
       totalScore: 150,
       gamesPlayed: 3,
+      gameHistory: [
+        { score: 40, completedAt: 100 },
+        { score: 50, completedAt: 200 },
+        { score: 60, completedAt: 300 },
+      ],
     };
-    render(<PlayerCard player={playerWithScore} onSelect={vi.fn()} onDelete={vi.fn()} />);
+    render(<PlayerCard player={playerWithHistory} onSelect={vi.fn()} onDelete={vi.fn()} />);
     expect(screen.getByText('Avg: 50')).toBeInTheDocument();
   });
 
   it('rounds average score to nearest integer', () => {
-    const playerWithScore: Player = {
+    const playerWithHistory: Player = {
       ...mockPlayer,
       totalScore: 100,
       gamesPlayed: 3,
+      gameHistory: [
+        { score: 33, completedAt: 100 },
+        { score: 33, completedAt: 200 },
+        { score: 34, completedAt: 300 },
+      ],
     };
-    render(<PlayerCard player={playerWithScore} onSelect={vi.fn()} onDelete={vi.fn()} />);
+    render(<PlayerCard player={playerWithHistory} onSelect={vi.fn()} onDelete={vi.fn()} />);
     expect(screen.getByText('Avg: 33')).toBeInTheDocument();
   });
 });

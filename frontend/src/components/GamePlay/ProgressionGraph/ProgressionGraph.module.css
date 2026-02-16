@@ -1,0 +1,20 @@
+.graph {
+  display: block;
+  width: 100%;
+  max-height: 100px;
+  max-width: 360px;
+  margin: 8px auto;
+  color: #888;
+}
+
+@media (max-width: 320px) {
+  .graph {
+    max-height: 80px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .graph {
+    color: #aaa;
+  }
+}
