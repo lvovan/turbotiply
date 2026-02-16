@@ -28,7 +28,7 @@ export default function WelcomePage() {
 
   // T046: Graceful degradation when localStorage is unavailable
   if (!storageAvailable) {
-    const handleTemporaryPlay = (data: Pick<Player, 'name' | 'avatarId' | 'colorId'>) => {
+    const handleTemporaryPlay = (data: Pick<Player, 'name' | 'avatarId'>) => {
       startSession(data);
       navigate('/play');
     };
@@ -47,7 +47,7 @@ export default function WelcomePage() {
     );
   }
 
-  const handleNewPlayer = (data: Pick<Player, 'name' | 'avatarId' | 'colorId'>) => {
+  const handleNewPlayer = (data: Pick<Player, 'name' | 'avatarId'>) => {
     const { evictedNames } = savePlayer(data);
     if (evictedNames.length > 0) {
       setEvictionMessage(
@@ -59,7 +59,7 @@ export default function WelcomePage() {
   };
 
   const handleSelectPlayer = (player: Player) => {
-    startSession({ name: player.name, avatarId: player.avatarId, colorId: player.colorId });
+    startSession({ name: player.name, avatarId: player.avatarId });
     navigate('/play');
   };
 

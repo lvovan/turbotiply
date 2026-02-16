@@ -52,7 +52,6 @@ describe('Session Lifecycle', () => {
     const session: Session = {
       playerName: 'Mia',
       avatarId: 'cat',
-      colorId: 'blue',
       startedAt: 1000,
     };
     sessionStorage.setItem('turbotiply_session', JSON.stringify(session));
@@ -68,7 +67,6 @@ describe('Session Lifecycle', () => {
     const session: Session = {
       playerName: 'Mia',
       avatarId: 'cat',
-      colorId: 'blue',
       startedAt: 1000,
     };
     sessionStorage.setItem('turbotiply_session', JSON.stringify(session));

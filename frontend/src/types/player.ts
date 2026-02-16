@@ -4,8 +4,6 @@ export interface Player {
   name: string;
   /** Identifier referencing a predefined avatar (e.g., "cat", "rocket"). */
   avatarId: string;
-  /** Identifier referencing a predefined color (e.g., "blue", "purple"). */
-  colorId: string;
   /** Timestamp of the most recent session start or activity (Date.now() epoch ms). */
   lastActive: number;
   /** Timestamp of profile creation, immutable after creation (Date.now() epoch ms). */
@@ -22,8 +20,6 @@ export interface Session {
   playerName: string;
   /** Avatar identifier copied from Player at session start. */
   avatarId: string;
-  /** Color identifier copied from Player at session start. */
-  colorId: string;
   /** When the session was started (Date.now() epoch ms). */
   startedAt: number;
 }

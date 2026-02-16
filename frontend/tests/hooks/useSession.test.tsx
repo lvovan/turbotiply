@@ -13,7 +13,7 @@ function TestConsumer() {
       <span data-testid="player-name">{session?.playerName ?? 'none'}</span>
       <button
         data-testid="start-btn"
-        onClick={() => startSession({ name: 'Mia', avatarId: 'cat', colorId: 'blue' })}
+        onClick={() => startSession({ name: 'Mia', avatarId: 'cat' })}
       >
         Start
       </button>
@@ -42,7 +42,6 @@ describe('useSession', () => {
     const existingSession: Session = {
       playerName: 'Mia',
       avatarId: 'cat',
-      colorId: 'blue',
       startedAt: 1000,
     };
     sessionStorage.setItem('turbotiply_session', JSON.stringify(existingSession));

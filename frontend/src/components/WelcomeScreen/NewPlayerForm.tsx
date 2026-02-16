@@ -1,9 +1,7 @@
 import { useState, useRef, useEffect, type FormEvent } from 'react';
 import type { Player } from '../../types/player';
 import { DEFAULT_AVATAR_ID } from '../../constants/avatars';
-import { DEFAULT_COLOR_ID } from '../../constants/colors';
 import AvatarPicker from '../AvatarPicker/AvatarPicker';
-import ColorPicker from '../ColorPicker/ColorPicker';
 import styles from './NewPlayerForm.module.css';
 
 /** Maximum name length. */
@@ -11,7 +9,7 @@ const MAX_NAME_LENGTH = 20;
 
 interface NewPlayerFormProps {
   /** Called when the form is submitted with valid player data. */
-  onSubmit: (data: Pick<Player, 'name' | 'avatarId' | 'colorId'>) => void;
+  onSubmit: (data: Pick<Player, 'name' | 'avatarId'>) => void;
   /** Check if a player name already exists (case-insensitive). */
   playerExists: (name: string) => boolean;
 }
@@ -24,7 +22,6 @@ interface NewPlayerFormProps {
 export default function NewPlayerForm({ onSubmit, playerExists }: NewPlayerFormProps) {
   const [name, setName] = useState('');
   const [avatarId, setAvatarId] = useState(DEFAULT_AVATAR_ID);
-  const [colorId, setColorId] = useState(DEFAULT_COLOR_ID);
   const [showOverwriteConfirm, setShowOverwriteConfirm] = useState(false);
   const confirmDialogRef = useRef<HTMLDivElement>(null);
 
@@ -64,7 +61,6 @@ export default function NewPlayerForm({ onSubmit, playerExists }: NewPlayerFormP
     onSubmit({
       name: trimmedName,
       avatarId,
-      colorId,
     });
   };
 
@@ -73,7 +69,6 @@ export default function NewPlayerForm({ onSubmit, playerExists }: NewPlayerFormP
     onSubmit({
       name: trimmedName,
       avatarId,
-      colorId,
     });
   };
 
@@ -103,11 +98,6 @@ export default function NewPlayerForm({ onSubmit, playerExists }: NewPlayerFormP
         <div className={styles.fieldGroup}>
           <span className={styles.label}>Choose your avatar</span>
           <AvatarPicker selectedId={avatarId} onSelect={setAvatarId} />
-        </div>
-
-        <div className={styles.fieldGroup}>
-          <span className={styles.label}>Choose your color</span>
-          <ColorPicker selectedId={colorId} onSelect={setColorId} />
         </div>
 
         <button type="submit" className={styles.submitButton} disabled={!isValid}>

@@ -7,7 +7,6 @@ import type { Player } from '../../src/types/player';
 const mockPlayer: Player = {
   name: 'Mia',
   avatarId: 'cat',
-  colorId: 'blue',
   lastActive: Date.now(),
   createdAt: Date.now(),
   totalScore: 0,
@@ -75,13 +74,5 @@ describe('PlayerCard', () => {
     };
     render(<PlayerCard player={playerWithScore} onSelect={vi.fn()} onDelete={vi.fn()} />);
     expect(screen.getByText('Avg: 33')).toBeInTheDocument();
-  });
-
-  it('renders a color dot', () => {
-    const { container } = render(
-      <PlayerCard player={mockPlayer} onSelect={vi.fn()} onDelete={vi.fn()} />,
-    );
-    const dot = container.querySelector('[class*="colorDot"]');
-    expect(dot).toBeInTheDocument();
   });
 });

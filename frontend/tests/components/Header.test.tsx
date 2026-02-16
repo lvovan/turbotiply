@@ -31,7 +31,6 @@ function renderHeader(session: Session | null = null) {
 const mockSession: Session = {
   playerName: 'Mia',
   avatarId: 'cat',
-  colorId: 'blue',
   startedAt: Date.now(),
 };
 

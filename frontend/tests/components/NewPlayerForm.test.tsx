@@ -13,12 +13,11 @@ describe('NewPlayerForm', () => {
     vi.clearAllMocks();
   });
 
-  it('renders name input, avatar picker, color picker, and submit button', () => {
+  it('renders name input, avatar picker, and submit button', () => {
     render(<NewPlayerForm {...defaultProps} />);
 
     expect(screen.getByRole('textbox', { name: /your name/i })).toBeInTheDocument();
     expect(screen.getByRole('radiogroup', { name: /choose your avatar/i })).toBeInTheDocument();
-    expect(screen.getByRole('radiogroup', { name: /choose your color/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /let's go/i })).toBeInTheDocument();
   });
 
@@ -60,15 +59,15 @@ describe('NewPlayerForm', () => {
     expect((nameInput as HTMLInputElement).value).toHaveLength(20);
   });
 
-  it('has default avatar and color pre-selected', () => {
+  it('has default avatar pre-selected', () => {
     render(<NewPlayerForm {...defaultProps} />);
 
-    // First avatar (rocket) and first color (red) should be selected by default
+    // First avatar (rocket) should be selected by default
     const avatarRadios = screen.getAllByRole('radio');
     const checkedRadios = avatarRadios.filter(
       (r) => (r as HTMLInputElement).getAttribute('aria-checked') === 'true',
     );
-    expect(checkedRadios.length).toBeGreaterThanOrEqual(2); // one avatar + one color
+    expect(checkedRadios.length).toBeGreaterThanOrEqual(1); // one avatar
   });
 
   it('calls onSubmit with player data when form is submitted', async () => {
@@ -86,7 +85,6 @@ describe('NewPlayerForm', () => {
       expect.objectContaining({
         name: 'Mia',
         avatarId: expect.any(String),
-        colorId: expect.any(String),
       }),
     );
   });

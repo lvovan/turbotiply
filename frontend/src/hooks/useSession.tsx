@@ -14,7 +14,7 @@ export interface UseSessionReturn {
   /** Whether a session is currently active. */
   isActive: boolean;
   /** Start a session for the given player. */
-  startSession: (player: Pick<Player, 'name' | 'avatarId' | 'colorId'>) => void;
+  startSession: (player: Pick<Player, 'name' | 'avatarId'>) => void;
   /** End the current session. */
   endSession: () => void;
 }
@@ -25,7 +25,7 @@ const SessionContext = createContext<UseSessionReturn | null>(null);
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(() => getActiveSession());
 
-  const startSession = useCallback((player: Pick<Player, 'name' | 'avatarId' | 'colorId'>) => {
+  const startSession = useCallback((player: Pick<Player, 'name' | 'avatarId'>) => {
     const newSession = sessionStartSession(player);
     setSession(newSession);
   }, []);

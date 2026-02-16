@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '../../hooks/useSession.tsx';
 import { getAvatarEmoji } from '../../constants/avatarEmojis';
-import { COLORS } from '../../constants/colors';
 import styles from './Header.module.css';
 
 /**
@@ -17,20 +16,18 @@ export default function Header() {
     return null;
   }
 
-  const color = COLORS.find((c) => c.id === session.colorId);
-
   const handleSwitchPlayer = () => {
     endSession();
     navigate('/');
   };
 
   return (
-    <header className={styles.header} style={{ borderBottomColor: color?.hex }}>
+    <header className={styles.header}>
       <div className={styles.playerInfo}>
         <span className={styles.avatar} aria-hidden="true">
           {getAvatarEmoji(session.avatarId)}
         </span>
-        <span className={styles.greeting} style={{ color: color?.hex }}>
+        <span className={styles.greeting}>
           Hi, {session.playerName}!
         </span>
       </div>

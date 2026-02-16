@@ -4,7 +4,7 @@ import type { Player, PlayerStore } from '../types/player';
 export const STORAGE_KEY = 'turbotiply_players';
 
 /** Current schema version. */
-const CURRENT_VERSION = 2;
+const CURRENT_VERSION = 3;
 
 /** Maximum number of players stored. */
 const MAX_PLAYERS = 50;
@@ -15,12 +15,6 @@ export const AVATAR_REMAP: Record<string, string> = {
   planet: 'rocket',
   flower: 'star',
   crown: 'star',
-};
-
-/** Mapping from removed color IDs to their replacement IDs. */
-export const COLOR_REMAP: Record<string, string> = {
-  orange: 'red',
-  green: 'teal',
 };
 
 /** Error thrown when localStorage is not available or writable. */
@@ -70,15 +64,20 @@ function readStore(): PlayerStore {
       writeStore(parsed);
     }
 
-    // Remap removed avatars and colors
+    // Migrate v2 → v3: remove colorId from all players
+    if (parsed.version === 2) {
+      for (const player of parsed.players) {
+        delete (player as Record<string, unknown>)['colorId'];
+      }
+      parsed.version = 3;
+      writeStore(parsed);
+    }
+
+    // Remap removed avatars
     let dirty = false;
     for (const player of parsed.players) {
       if (player.avatarId in AVATAR_REMAP) {
         player.avatarId = AVATAR_REMAP[player.avatarId];
-        dirty = true;
-      }
-      if (player.colorId in COLOR_REMAP) {
-        player.colorId = COLOR_REMAP[player.colorId];
         dirty = true;
       }
     }
@@ -141,7 +140,7 @@ export interface SavePlayerResult {
  * - Enforces 50-player cap (evicts oldest inactive).
  * - Throws StorageUnavailableError if localStorage is not accessible.
  */
-export function savePlayer(data: Pick<Player, 'name' | 'avatarId' | 'colorId'>): SavePlayerResult {
+export function savePlayer(data: Pick<Player, 'name' | 'avatarId'>): SavePlayerResult {
   const store = readStore();
   const trimmedName = data.name.trim();
   const now = Date.now();
@@ -158,7 +157,6 @@ export function savePlayer(data: Pick<Player, 'name' | 'avatarId' | 'colorId'>):
     player = {
       name: trimmedName,
       avatarId: data.avatarId,
-      colorId: data.colorId,
       lastActive: now,
       createdAt: existing.createdAt,
       totalScore: existing.totalScore ?? 0,
@@ -170,7 +168,6 @@ export function savePlayer(data: Pick<Player, 'name' | 'avatarId' | 'colorId'>):
     player = {
       name: trimmedName,
       avatarId: data.avatarId,
-      colorId: data.colorId,
       lastActive: now,
       createdAt: now,
       totalScore: 0,

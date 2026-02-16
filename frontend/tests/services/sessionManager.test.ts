@@ -20,11 +20,10 @@ describe('sessionManager', () => {
       vi.spyOn(Date, 'now').mockReturnValue(now);
       vi.spyOn(playerStorage, 'touchPlayer').mockImplementation(() => {});
 
-      const session = startSession({ name: 'Mia', avatarId: 'cat', colorId: 'blue' });
+      const session = startSession({ name: 'Mia', avatarId: 'cat' });
 
       expect(session.playerName).toBe('Mia');
       expect(session.avatarId).toBe('cat');
-      expect(session.colorId).toBe('blue');
       expect(session.startedAt).toBe(now);
 
       const stored = JSON.parse(sessionStorage.getItem(SESSION_KEY)!);
@@ -36,7 +35,7 @@ describe('sessionManager', () => {
     it('updates the player lastActive timestamp via touchPlayer', () => {
       const touchSpy = vi.spyOn(playerStorage, 'touchPlayer').mockImplementation(() => {});
 
-      startSession({ name: 'Mia', avatarId: 'cat', colorId: 'blue' });
+      startSession({ name: 'Mia', avatarId: 'cat' });
 
       expect(touchSpy).toHaveBeenCalledWith('Mia');
 
@@ -47,7 +46,7 @@ describe('sessionManager', () => {
   describe('endSession', () => {
     it('clears the session from sessionStorage', () => {
       vi.spyOn(playerStorage, 'touchPlayer').mockImplementation(() => {});
-      startSession({ name: 'Mia', avatarId: 'cat', colorId: 'blue' });
+      startSession({ name: 'Mia', avatarId: 'cat' });
       vi.restoreAllMocks();
 
       expect(hasActiveSession()).toBe(true);
@@ -75,7 +74,7 @@ describe('sessionManager', () => {
 
     it('returns the active session', () => {
       vi.spyOn(playerStorage, 'touchPlayer').mockImplementation(() => {});
-      startSession({ name: 'Mia', avatarId: 'cat', colorId: 'blue' });
+      startSession({ name: 'Mia', avatarId: 'cat' });
       vi.restoreAllMocks();
 
       const session = getActiveSession();
@@ -91,7 +90,7 @@ describe('sessionManager', () => {
 
     it('returns true when session is active', () => {
       vi.spyOn(playerStorage, 'touchPlayer').mockImplementation(() => {});
-      startSession({ name: 'Mia', avatarId: 'cat', colorId: 'blue' });
+      startSession({ name: 'Mia', avatarId: 'cat' });
       vi.restoreAllMocks();
 
       expect(hasActiveSession()).toBe(true);
@@ -99,7 +98,7 @@ describe('sessionManager', () => {
 
     it('returns false after endSession', () => {
       vi.spyOn(playerStorage, 'touchPlayer').mockImplementation(() => {});
-      startSession({ name: 'Mia', avatarId: 'cat', colorId: 'blue' });
+      startSession({ name: 'Mia', avatarId: 'cat' });
       vi.restoreAllMocks();
 
       endSession();

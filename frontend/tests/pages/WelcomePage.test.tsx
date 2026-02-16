@@ -62,9 +62,9 @@ describe('WelcomePage (returning player flow)', () => {
 
   it('shows player list when players exist', () => {
     vi.spyOn(Date, 'now').mockReturnValue(100);
-    playerStorage.savePlayer({ name: 'Alice', avatarId: 'cat', colorId: 'blue' });
+    playerStorage.savePlayer({ name: 'Alice', avatarId: 'cat' });
     vi.spyOn(Date, 'now').mockReturnValue(200);
-    playerStorage.savePlayer({ name: 'Bob', avatarId: 'dog', colorId: 'red' });
+    playerStorage.savePlayer({ name: 'Bob', avatarId: 'dog' });
     vi.restoreAllMocks();
 
     renderWelcomePage();
@@ -75,7 +75,7 @@ describe('WelcomePage (returning player flow)', () => {
   });
 
   it('navigates to /play when a player is selected', async () => {
-    playerStorage.savePlayer({ name: 'Mia', avatarId: 'cat', colorId: 'blue' });
+    playerStorage.savePlayer({ name: 'Mia', avatarId: 'cat' });
     const user = userEvent.setup();
     renderWelcomePage();
 
@@ -85,7 +85,7 @@ describe('WelcomePage (returning player flow)', () => {
   });
 
   it('shows NewPlayerForm when "New player" is clicked', async () => {
-    playerStorage.savePlayer({ name: 'Mia', avatarId: 'cat', colorId: 'blue' });
+    playerStorage.savePlayer({ name: 'Mia', avatarId: 'cat' });
     const user = userEvent.setup();
     renderWelcomePage();
 

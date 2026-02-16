@@ -5,8 +5,8 @@ import PlayerList from '../../src/components/WelcomeScreen/PlayerList';
 import type { Player } from '../../src/types/player';
 
 const mockPlayers: Player[] = [
-  { name: 'Alice', avatarId: 'cat', colorId: 'blue', lastActive: 200, createdAt: 100, totalScore: 0, gamesPlayed: 0 },
-  { name: 'Bob', avatarId: 'robot', colorId: 'red', lastActive: 100, createdAt: 50, totalScore: 0, gamesPlayed: 0 },
+  { name: 'Alice', avatarId: 'cat', lastActive: 200, createdAt: 100, totalScore: 0, gamesPlayed: 0 },
+  { name: 'Bob', avatarId: 'robot', lastActive: 100, createdAt: 50, totalScore: 0, gamesPlayed: 0 },
 ];
 
 describe('PlayerList', () => {

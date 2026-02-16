@@ -17,7 +17,7 @@ export interface UsePlayersReturn {
   /** Whether localStorage is available. */
   storageAvailable: boolean;
   /** Add a new player or overwrite existing. Returns player + evicted names. */
-  savePlayer: (data: Pick<Player, 'name' | 'avatarId' | 'colorId'>) => SavePlayerResult;
+  savePlayer: (data: Pick<Player, 'name' | 'avatarId'>) => SavePlayerResult;
   /** Remove a player by name. */
   deletePlayer: (name: string) => void;
   /** Check if a name is already taken (case-insensitive). */
@@ -40,7 +40,7 @@ export function usePlayers(): UsePlayersReturn {
   }, []);
 
   const savePlayer = useCallback(
-    (data: Pick<Player, 'name' | 'avatarId' | 'colorId'>): SavePlayerResult => {
+    (data: Pick<Player, 'name' | 'avatarId'>): SavePlayerResult => {
       const result = storageSavePlayer(data);
       refreshPlayers();
       return result;

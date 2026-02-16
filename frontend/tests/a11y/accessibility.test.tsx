@@ -7,7 +7,6 @@ import WelcomePage from '../../src/pages/WelcomePage';
 import * as playerStorage from '../../src/services/playerStorage';
 import NewPlayerForm from '../../src/components/WelcomeScreen/NewPlayerForm';
 import AvatarPicker from '../../src/components/AvatarPicker/AvatarPicker';
-import ColorPicker from '../../src/components/ColorPicker/ColorPicker';
 import PlayerList from '../../src/components/WelcomeScreen/PlayerList';
 import ClearAllConfirmation from '../../src/components/ClearAllConfirmation/ClearAllConfirmation';
 import FormulaDisplay from '../../src/components/GamePlay/FormulaDisplay/FormulaDisplay';
@@ -37,7 +36,7 @@ describe('Accessibility (axe)', () => {
   });
 
   it('WelcomePage (returning player flow) has no a11y violations', async () => {
-    playerStorage.savePlayer({ name: 'Alice', avatarId: 'cat', colorId: 'blue' });
+    playerStorage.savePlayer({ name: 'Alice', avatarId: 'cat' });
     const { container } = renderWithProviders(<WelcomePage />);
     const results = await axe(container);
     expect(results).toHaveNoViolations();
@@ -59,18 +58,10 @@ describe('Accessibility (axe)', () => {
     expect(results).toHaveNoViolations();
   });
 
-  it('ColorPicker has no a11y violations', async () => {
-    const { container } = render(
-      <ColorPicker selectedId="blue" onSelect={() => {}} />,
-    );
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
   it('PlayerList has no a11y violations', async () => {
     const players = [
-      { name: 'Alice', avatarId: 'cat', colorId: 'blue', lastActive: 200, createdAt: 100, totalScore: 0, gamesPlayed: 0 },
-      { name: 'Bob', avatarId: 'robot', colorId: 'red', lastActive: 100, createdAt: 50, totalScore: 0, gamesPlayed: 0 },
+      { name: 'Alice', avatarId: 'cat', lastActive: 200, createdAt: 100, totalScore: 0, gamesPlayed: 0 },
+      { name: 'Bob', avatarId: 'robot', lastActive: 100, createdAt: 50, totalScore: 0, gamesPlayed: 0 },
     ];
     const { container } = render(
       <PlayerList

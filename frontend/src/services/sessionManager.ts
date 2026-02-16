@@ -10,11 +10,10 @@ export const SESSION_KEY = 'turbotiply_session';
  * - Updates the player's lastActive timestamp in localStorage.
  * - Returns the created Session object.
  */
-export function startSession(player: Pick<Player, 'name' | 'avatarId' | 'colorId'>): Session {
+export function startSession(player: Pick<Player, 'name' | 'avatarId'>): Session {
   const session: Session = {
     playerName: player.name,
     avatarId: player.avatarId,
-    colorId: player.colorId,
     startedAt: Date.now(),
   };
   sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));

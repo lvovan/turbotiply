@@ -42,7 +42,6 @@ function setUpActiveSession() {
   const session = {
     playerName: 'IntegrationPlayer',
     avatarId: 'rocket',
-    colorId: 'red',
     startedAt: Date.now(),
   };
   sessionStorage.setItem('turbotiply_session', JSON.stringify(session));

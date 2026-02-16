@@ -11,9 +11,9 @@ describe('usePlayers', () => {
 
   it('reads player list from localStorage on mount', () => {
     vi.spyOn(Date, 'now').mockReturnValue(100);
-    playerStorage.savePlayer({ name: 'Alice', avatarId: 'cat', colorId: 'blue' });
+    playerStorage.savePlayer({ name: 'Alice', avatarId: 'cat' });
     vi.spyOn(Date, 'now').mockReturnValue(200);
-    playerStorage.savePlayer({ name: 'Bob', avatarId: 'robot', colorId: 'red' });
+    playerStorage.savePlayer({ name: 'Bob', avatarId: 'robot' });
 
     const { result } = renderHook(() => usePlayers());
 
@@ -33,7 +33,7 @@ describe('usePlayers', () => {
     const { result } = renderHook(() => usePlayers());
 
     act(() => {
-      result.current.savePlayer({ name: 'Mia', avatarId: 'cat', colorId: 'blue' });
+      result.current.savePlayer({ name: 'Mia', avatarId: 'cat' });
     });
 
     expect(result.current.players).toHaveLength(1);
@@ -41,7 +41,7 @@ describe('usePlayers', () => {
   });
 
   it('deletePlayer removes a player and refreshes the list', () => {
-    playerStorage.savePlayer({ name: 'Mia', avatarId: 'cat', colorId: 'blue' });
+    playerStorage.savePlayer({ name: 'Mia', avatarId: 'cat' });
 
     const { result } = renderHook(() => usePlayers());
     expect(result.current.players).toHaveLength(1);
@@ -54,7 +54,7 @@ describe('usePlayers', () => {
   });
 
   it('playerExists checks for existing player (case-insensitive)', () => {
-    playerStorage.savePlayer({ name: 'Mia', avatarId: 'cat', colorId: 'blue' });
+    playerStorage.savePlayer({ name: 'Mia', avatarId: 'cat' });
 
     const { result } = renderHook(() => usePlayers());
 
@@ -64,9 +64,9 @@ describe('usePlayers', () => {
   });
 
   it('sorts players alphabetically (case-insensitive)', () => {
-    playerStorage.savePlayer({ name: 'Charlie', avatarId: 'cat', colorId: 'blue' });
-    playerStorage.savePlayer({ name: 'alice', avatarId: 'robot', colorId: 'red' });
-    playerStorage.savePlayer({ name: 'Bob', avatarId: 'star', colorId: 'teal' });
+    playerStorage.savePlayer({ name: 'Charlie', avatarId: 'cat' });
+    playerStorage.savePlayer({ name: 'alice', avatarId: 'robot' });
+    playerStorage.savePlayer({ name: 'Bob', avatarId: 'star' });
 
     const { result } = renderHook(() => usePlayers());
 
@@ -74,7 +74,7 @@ describe('usePlayers', () => {
   });
 
   it('clearAllPlayers calls clearAllStorage and reloads', () => {
-    playerStorage.savePlayer({ name: 'Mia', avatarId: 'cat', colorId: 'blue' });
+    playerStorage.savePlayer({ name: 'Mia', avatarId: 'cat' });
 
     const reloadMock = vi.fn();
     Object.defineProperty(window, 'location', {

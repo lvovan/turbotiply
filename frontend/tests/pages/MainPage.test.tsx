@@ -42,7 +42,6 @@ function setUpActiveSession() {
   const session = {
     playerName: 'TestPlayer',
     avatarId: 'cat',
-    colorId: 'blue',
     startedAt: Date.now(),
   };
   sessionStorage.setItem('turbotiply_session', JSON.stringify(session));

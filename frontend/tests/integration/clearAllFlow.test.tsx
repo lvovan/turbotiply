@@ -35,8 +35,8 @@ describe('Clear All Flow Integration', () => {
   });
 
   it('shows "Clear all profiles" button when players exist', () => {
-    playerStorage.savePlayer({ name: 'Alice', avatarId: 'cat', colorId: 'blue' });
-    playerStorage.savePlayer({ name: 'Bob', avatarId: 'robot', colorId: 'red' });
+    playerStorage.savePlayer({ name: 'Alice', avatarId: 'cat' });
+    playerStorage.savePlayer({ name: 'Bob', avatarId: 'robot' });
 
     renderWelcome();
     expect(screen.getByRole('button', { name: /clear all profiles/i })).toBeInTheDocument();
@@ -48,7 +48,7 @@ describe('Clear All Flow Integration', () => {
   });
 
   it('opens confirmation dialog when clear-all is clicked', async () => {
-    playerStorage.savePlayer({ name: 'Alice', avatarId: 'cat', colorId: 'blue' });
+    playerStorage.savePlayer({ name: 'Alice', avatarId: 'cat' });
     const user = userEvent.setup();
     renderWelcome();
 
@@ -58,7 +58,7 @@ describe('Clear All Flow Integration', () => {
   });
 
   it('dismisses dialog without data loss on cancel', async () => {
-    playerStorage.savePlayer({ name: 'Alice', avatarId: 'cat', colorId: 'blue' });
+    playerStorage.savePlayer({ name: 'Alice', avatarId: 'cat' });
     const user = userEvent.setup();
     renderWelcome();
 
@@ -74,8 +74,8 @@ describe('Clear All Flow Integration', () => {
   });
 
   it('clears storage when confirmed', async () => {
-    playerStorage.savePlayer({ name: 'Alice', avatarId: 'cat', colorId: 'blue' });
-    playerStorage.savePlayer({ name: 'Bob', avatarId: 'robot', colorId: 'red' });
+    playerStorage.savePlayer({ name: 'Alice', avatarId: 'cat' });
+    playerStorage.savePlayer({ name: 'Bob', avatarId: 'robot' });
 
     // Mock window.location.reload to prevent JSDOM errors
     const reloadMock = vi.fn();
@@ -99,7 +99,7 @@ describe('Clear All Flow Integration', () => {
   });
 
   it('dismisses dialog on Escape key', async () => {
-    playerStorage.savePlayer({ name: 'Alice', avatarId: 'cat', colorId: 'blue' });
+    playerStorage.savePlayer({ name: 'Alice', avatarId: 'cat' });
     const user = userEvent.setup();
     renderWelcome();
 
