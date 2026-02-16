@@ -1,0 +1,11 @@
+.readyHeading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.instructions {
+  font-size: 1rem;
+  margin: 0 0 8px;
+  color: #555;
+}

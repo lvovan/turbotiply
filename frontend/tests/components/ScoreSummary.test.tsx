@@ -3,6 +3,7 @@ import { render, screen } from '../test-utils';
 import userEvent from '@testing-library/user-event';
 import ScoreSummary from '../../src/components/GamePlay/ScoreSummary/ScoreSummary';
 import type { Round } from '../../src/types/game';
+import type { GameRecord } from '../../src/types/player';
 
 function createMockRounds(): Round[] {
   return [
@@ -240,6 +241,56 @@ describe('ScoreSummary', () => {
       );
       expect(screen.getByText('Game Over!')).toBeInTheDocument();
       expect(screen.getByText('Total Score')).toBeInTheDocument();
+    });
+  });
+
+  describe('Sparkline (ProgressionGraph)', () => {
+    function createHistory(count: number): GameRecord[] {
+      return Array.from({ length: count }, (_, i) => ({
+        score: 10 + i * 2,
+        completedAt: Date.now() - (count - i) * 60_000,
+      }));
+    }
+
+    it('renders sparkline when history has ≥2 entries', () => {
+      const rounds = createMockRounds();
+      render(
+        <ScoreSummary
+          rounds={rounds}
+          score={6}
+          onPlayAgain={vi.fn()}
+          onBackToMenu={vi.fn()}
+          history={createHistory(3)}
+        />,
+      );
+      expect(screen.getByRole('img', { name: /score progression/i })).toBeInTheDocument();
+    });
+
+    it('does not render sparkline when history is undefined', () => {
+      const rounds = createMockRounds();
+      render(
+        <ScoreSummary
+          rounds={rounds}
+          score={6}
+          onPlayAgain={vi.fn()}
+          onBackToMenu={vi.fn()}
+        />,
+      );
+      expect(screen.queryByRole('img', { name: /score progression/i })).not.toBeInTheDocument();
+    });
+
+    it('does not render sparkline when history has fewer than 2 entries', () => {
+      const rounds = createMockRounds();
+      render(
+        <ScoreSummary
+          rounds={rounds}
+          score={6}
+          onPlayAgain={vi.fn()}
+          onBackToMenu={vi.fn()}
+          history={createHistory(1)}
+        />,
+      );
+      expect(screen.queryByRole('img', { name: /score progression/i })).not.toBeInTheDocument();
     });
   });
 });

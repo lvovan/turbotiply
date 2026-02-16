@@ -27,6 +27,8 @@ Auto-generated from all feature plans. Last updated: 2026-02-14
 - localStorage (`turbotiply_lang` key for language preference) (014-multilingual-support)
 - TypeScript ~5.9.3, React 19.2.0 + react, react-dom, react-router-dom (custom i18n — no library) (015-portuguese-language)
 - localStorage (`turbotiply_lang` key — existing, unchanged) (015-portuguese-language)
+- TypeScript ~5.9.3, React 19.2, JSX + react-router-dom 7.13, Vite 7.3, CSS Modules (016-minor-ui-polish)
+- N/A (no storage changes) (016-minor-ui-polish)
 
 - TypeScript 5.x (frontend), Python 3.11+ (backend — serves static files only for this feature) + React 18+, Vite (bundler), React Router (navigation), FastAPI (backend — static file serving only) (main)
 
@@ -47,9 +49,9 @@ cd src; pytest; ruff check .
 TypeScript 5.x (frontend): Follow standard conventions
 
 ## Recent Changes
+- 016-minor-ui-polish: Added TypeScript ~5.9.3, React 19.2, JSX + react-router-dom 7.13, Vite 7.3, CSS Modules
 - 015-portuguese-language: Added TypeScript ~5.9.3, React 19.2.0 + react, react-dom, react-router-dom (custom i18n — no library)
 - 014-multilingual-support: Added TypeScript ~5.9.3, React 19.2.0 + react, react-dom, react-router-dom (no i18n library — custom solution)
-- 013-score-sparkline-grid: Added TypeScript ~5.9, React 19.2 + React, React DOM (no charting libraries — hand-rolled SVG)
 
 
 <!-- MANUAL ADDITIONS START -->

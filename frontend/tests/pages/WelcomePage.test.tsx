@@ -39,6 +39,11 @@ describe('WelcomePage (new player flow)', () => {
     expect(screen.getByRole('button', { name: /let's go/i })).toBeInTheDocument();
   });
 
+  it('displays copyright text at the bottom', () => {
+    renderWelcomePage();
+    expect(screen.getByText('© 2025, Luc Vo Van - Built with AI')).toBeInTheDocument();
+  });
+
   it('navigates to /play after creating a new player', async () => {
     const user = userEvent.setup();
     renderWelcomePage();
@@ -119,6 +124,13 @@ describe('WelcomePage (storage unavailable)', () => {
 
     expect(mockNavigate).toHaveBeenCalledWith('/play');
 
+    vi.restoreAllMocks();
+  });
+
+  it('displays copyright text when storage is unavailable', () => {
+    vi.spyOn(playerStorage, 'isStorageAvailable').mockReturnValue(false);
+    renderWelcomePage();
+    expect(screen.getByText('© 2025, Luc Vo Van - Built with AI')).toBeInTheDocument();
     vi.restoreAllMocks();
   });
 });

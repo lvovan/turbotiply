@@ -16,6 +16,7 @@ import RecentHighScores from '../components/GamePlay/RecentHighScores/RecentHigh
 import ProgressionGraph from '../components/GamePlay/ProgressionGraph/ProgressionGraph';
 import ModeSelector from '../components/GamePlay/ModeSelector/ModeSelector';
 import { useTranslation } from '../i18n';
+import styles from './MainPage.module.css';
 
 /**
  * Main gameplay page. Orchestrates the full game lifecycle:
@@ -94,7 +95,7 @@ export default function MainPage() {
   const currentPlayer = getPlayers().find(
     (p) => p.name.toLowerCase() === session.playerName.toLowerCase(),
   );
-  const recentScores = currentPlayer ? getRecentHighScores(currentPlayer, 5) : [];
+  const recentScores = currentPlayer ? getRecentHighScores(currentPlayer, 3) : [];
   const gameHistory = currentPlayer ? getGameHistory(currentPlayer) : [];
   const hasNoGames = !currentPlayer || currentPlayer.gamesPlayed === 0;
 
@@ -110,8 +111,8 @@ export default function MainPage() {
       <main style={{ padding: '24px 16px', textAlign: 'center' }}>
         {gameState.status === 'not-started' && (
           <div>
-            <h1>{t('game.readyToPlay')}</h1>
-            <p>{t('game.instructions')}</p>
+            <h1 className={styles.readyHeading}>{t('game.readyToPlay')}</h1>
+            <p className={styles.instructions}>{t('game.instructions')}</p>
             <RecentHighScores scores={recentScores} isEmpty={hasNoGames} />
             {gameHistory.length >= 2 && <ProgressionGraph history={gameHistory} />}
             <ModeSelector
@@ -169,6 +170,12 @@ export default function MainPage() {
             onPlayAgain={handlePlayAgain}
             onBackToMenu={handleBackToMenu}
             gameMode={gameMode}
+            history={[...gameHistory, {
+              score: gameState.score,
+              completedAt: Date.now(),
+              rounds: extractRoundResults(gameState.rounds),
+              gameMode,
+            }]}
           />
         )}
       </main>

@@ -1,7 +1,8 @@
 import type { Round } from '../../../types/game';
-import type { GameMode } from '../../../types/player';
+import type { GameMode, GameRecord } from '../../../types/player';
 import { getCorrectAnswer } from '../../../services/gameEngine';
 import { useTranslation } from '../../../i18n';
+import ProgressionGraph from '../ProgressionGraph/ProgressionGraph';
 import styles from './ScoreSummary.module.css';
 
 interface ScoreSummaryProps {
@@ -10,6 +11,7 @@ interface ScoreSummaryProps {
   onPlayAgain: () => void;
   onBackToMenu: () => void;
   gameMode?: GameMode;
+  history?: GameRecord[];
 }
 
 /**
@@ -19,7 +21,7 @@ interface ScoreSummaryProps {
  * In improve mode, shows "You got X/N right!" and lists incorrect pairs.
  * Includes "Play again" button and "Back to menu" button (per FR-016, FR-020).
  */
-export default function ScoreSummary({ rounds, score, onPlayAgain, onBackToMenu, gameMode = 'play' }: ScoreSummaryProps) {
+export default function ScoreSummary({ rounds, score, onPlayAgain, onBackToMenu, gameMode = 'play', history }: ScoreSummaryProps) {
   const { t } = useTranslation();
   const formatTime = (ms: number | null): string => {
     if (ms === null) return '—';
@@ -63,6 +65,8 @@ export default function ScoreSummary({ rounds, score, onPlayAgain, onBackToMenu,
           </div>
         </>
       )}
+
+      {history && <ProgressionGraph history={history} />}
 
       <div className={styles.tableWrapper}>
         <table className={styles.table}>
