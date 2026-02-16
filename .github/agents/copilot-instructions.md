@@ -21,6 +21,8 @@ Auto-generated from all feature plans. Last updated: 2026-02-14
 - N/A (no persistence changes) (010-round-result-panel)
 - TypeScript ~5.9, React 19 + React 19, React Router, Vite 7 (012-improve-game-mode)
 - localStorage (`turbotiply_players` key), sessionStorage (tab-scoped sessions) (012-improve-game-mode)
+- TypeScript ~5.9, React 19.2 + React, React DOM (no charting libraries — hand-rolled SVG) (013-score-sparkline-grid)
+- N/A (reads existing `GameRecord[]` from player's game history via `getGameHistory()`) (013-score-sparkline-grid)
 
 - TypeScript 5.x (frontend), Python 3.11+ (backend — serves static files only for this feature) + React 18+, Vite (bundler), React Router (navigation), FastAPI (backend — static file serving only) (main)
 
@@ -41,9 +43,9 @@ cd src; pytest; ruff check .
 TypeScript 5.x (frontend): Follow standard conventions
 
 ## Recent Changes
+- 013-score-sparkline-grid: Added TypeScript ~5.9, React 19.2 + React, React DOM (no charting libraries — hand-rolled SVG)
 - 012-improve-game-mode: Added TypeScript ~5.9, React 19 + React 19, React Router, Vite 7
 - 010-round-result-panel: Added TypeScript 5.x / React 18 + React, Vite, CSS Modules
-- 009-responsive-layout-focus: Added TypeScript 5.9.3, React 19.2.0 + React, React Router DOM 7.13, Vite 7.3.1
 
 
 <!-- MANUAL ADDITIONS START -->
