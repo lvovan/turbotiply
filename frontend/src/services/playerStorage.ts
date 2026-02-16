@@ -1,4 +1,4 @@
-import type { Player, PlayerStore, GameRecord } from '../types/player';
+import type { Player, PlayerStore, GameRecord, RoundResult, GameMode } from '../types/player';
 
 export type { GameRecord } from '../types/player';
 
@@ -6,7 +6,7 @@ export type { GameRecord } from '../types/player';
 export const STORAGE_KEY = 'turbotiply_players';
 
 /** Current schema version. */
-const CURRENT_VERSION = 4;
+const CURRENT_VERSION = 5;
 
 /** Maximum number of players stored. */
 const MAX_PLAYERS = 50;
@@ -88,6 +88,12 @@ function readStore(): PlayerStore {
         }
       }
       parsed.version = 4;
+      writeStore(parsed);
+    }
+
+    // Migrate v4 → v5: version bump only (new fields are optional)
+    if (parsed.version === 4) {
+      parsed.version = 5;
       writeStore(parsed);
     }
 
@@ -249,6 +255,43 @@ export function clearAllStorage(): void {
 }
 
 /**
+ * Save a full game record for a player after game completion.
+ * Creates a GameRecord with round data and game mode.
+ * Only updates totalScore/gamesPlayed for 'play' mode.
+ */
+export function saveGameRecord(
+  name: string,
+  score: number,
+  rounds: RoundResult[],
+  gameMode: GameMode,
+): void {
+  const store = readStore();
+  const lowerName = name.toLowerCase();
+  const player = store.players.find((p) => p.name.toLowerCase() === lowerName);
+  if (player) {
+    if (!player.gameHistory) {
+      player.gameHistory = [];
+    }
+    player.gameHistory.push({
+      score,
+      completedAt: Date.now(),
+      rounds,
+      gameMode,
+    });
+    // Enforce 100-record cap
+    if (player.gameHistory.length > 100) {
+      player.gameHistory = player.gameHistory.slice(-100);
+    }
+    // Only update aggregate scores for Play mode
+    if (gameMode === 'play') {
+      player.totalScore = (player.totalScore ?? 0) + score;
+      player.gamesPlayed = (player.gamesPlayed ?? 0) + 1;
+    }
+    writeStore(store);
+  }
+}
+
+/**
  * Update a player's cumulative score data after a game completes.
  * Finds player by name (case-insensitive), adds gameScore to totalScore,
  * increments gamesPlayed by 1, and writes back.
@@ -275,13 +318,16 @@ export function updatePlayerScore(name: string, gameScore: number): void {
 }
 
 /**
- * Computes the arithmetic mean of a player's most recent game scores.
+ * Computes the arithmetic mean of a player's most recent play-mode game scores.
+ * Excludes improve-mode games.
  * @param player — Player object
  * @param count — Number of recent games to average (default: 10)
  * @returns Math.round(mean) or null if no history
  */
 export function getRecentAverage(player: Player, count: number = 10): number | null {
-  const history = player.gameHistory ?? [];
+  const history = (player.gameHistory ?? []).filter(
+    (r) => (r.gameMode ?? 'play') === 'play',
+  );
   if (history.length === 0) return null;
   const slice = history.slice(-count);
   const sum = slice.reduce((acc, r) => acc + r.score, 0);
@@ -289,14 +335,17 @@ export function getRecentAverage(player: Player, count: number = 10): number | n
 }
 
 /**
- * Returns the player's most recent game scores sorted by score descending.
+ * Returns the player's most recent play-mode game scores sorted by score descending.
+ * Excludes improve-mode games.
  * Ties broken by most recent completedAt first.
  * @param player — Player object
  * @param count — Number of recent games to retrieve (default: 5)
  * @returns Sorted array of GameRecord
  */
 export function getRecentHighScores(player: Player, count: number = 5): GameRecord[] {
-  const history = player.gameHistory ?? [];
+  const history = (player.gameHistory ?? []).filter(
+    (r) => (r.gameMode ?? 'play') === 'play',
+  );
   if (history.length === 0) return [];
   const slice = history.slice(-count);
   return [...slice].sort((a, b) => {
@@ -306,10 +355,13 @@ export function getRecentHighScores(player: Player, count: number = 5): GameReco
 }
 
 /**
- * Returns the player's full game history in chronological order (defensive copy).
+ * Returns the player's play-mode game history in chronological order (defensive copy).
+ * Excludes improve-mode games.
  * @param player — Player object
- * @returns Copy of gameHistory array
+ * @returns Copy of filtered gameHistory array
  */
 export function getGameHistory(player: Player): GameRecord[] {
-  return [...(player.gameHistory ?? [])];
+  return (player.gameHistory ?? []).filter(
+    (r) => (r.gameMode ?? 'play') === 'play',
+  );
 }

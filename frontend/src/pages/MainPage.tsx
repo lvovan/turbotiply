@@ -3,7 +3,9 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { useSession } from '../hooks/useSession.tsx';
 import { useGame } from '../hooks/useGame';
 import { useRoundTimer } from '../hooks/useRoundTimer';
-import { updatePlayerScore, getPlayers, getRecentHighScores, getGameHistory } from '../services/playerStorage';
+import { saveGameRecord, getPlayers, getRecentHighScores, getGameHistory } from '../services/playerStorage';
+import { extractRoundResults } from '../services/gameEngine';
+import { getChallengingPairsForPlayer, extractTrickyNumbers } from '../services/challengeAnalyzer';
 import { FEEDBACK_DURATION_MS } from '../constants/scoring';
 import Header from '../components/Header/Header';
 import FormulaDisplay from '../components/GamePlay/FormulaDisplay/FormulaDisplay';
@@ -12,6 +14,7 @@ import GameStatus from '../components/GamePlay/GameStatus/GameStatus';
 import ScoreSummary from '../components/GamePlay/ScoreSummary/ScoreSummary';
 import RecentHighScores from '../components/GamePlay/RecentHighScores/RecentHighScores';
 import ProgressionGraph from '../components/GamePlay/ProgressionGraph/ProgressionGraph';
+import ModeSelector from '../components/GamePlay/ModeSelector/ModeSelector';
 
 /**
  * Main gameplay page. Orchestrates the full game lifecycle:
@@ -20,7 +23,7 @@ import ProgressionGraph from '../components/GamePlay/ProgressionGraph/Progressio
 export default function MainPage() {
   const navigate = useNavigate();
   const { session, isActive } = useSession();
-  const { gameState, currentRound, correctAnswer, startGame, submitAnswer, nextRound, resetGame } =
+  const { gameState, currentRound, correctAnswer, startGame, submitAnswer, nextRound, resetGame, gameMode } =
     useGame();
   const { displayRef, barRef, start, stop, reset } = useRoundTimer();
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -30,17 +33,23 @@ export default function MainPage() {
   useEffect(() => {
     if (gameState.status === 'completed' && session && !scorePersistedRef.current) {
       scorePersistedRef.current = true;
-      updatePlayerScore(session.playerName, gameState.score);
+      const roundResults = extractRoundResults(gameState.rounds);
+      saveGameRecord(session.playerName, gameState.score, roundResults, gameMode);
     }
     if (gameState.status === 'not-started') {
       scorePersistedRef.current = false;
     }
-  }, [gameState.status, gameState.score, session]);
+  }, [gameState.status, gameState.score, gameState.rounds, gameMode, session]);
 
   const handleStartGame = useCallback(() => {
-    startGame();
+    startGame('play');
     start();
   }, [startGame, start]);
+
+  const handleStartImprove = useCallback(() => {
+    startGame('improve', session?.playerName);
+    start();
+  }, [startGame, start, session]);
 
   const handleSubmit = useCallback(
     (answer: number) => {
@@ -87,6 +96,12 @@ export default function MainPage() {
   const gameHistory = currentPlayer ? getGameHistory(currentPlayer) : [];
   const hasNoGames = !currentPlayer || currentPlayer.gamesPlayed === 0;
 
+  // Challenge analysis for Improve mode
+  const challengingPairs = session ? getChallengingPairsForPlayer(session.playerName) : [];
+  const showImprove = challengingPairs.length > 0;
+  const trickyNumbers = extractTrickyNumbers(challengingPairs);
+  const showEncouragement = !hasNoGames && !showImprove;
+
   return (
     <div>
       <Header />
@@ -97,7 +112,13 @@ export default function MainPage() {
             <p>Answer 10 multiplication questions as fast as you can!</p>
             <RecentHighScores scores={recentScores} isEmpty={hasNoGames} />
             {gameHistory.length >= 2 && <ProgressionGraph history={gameHistory} />}
-            <button onClick={handleStartGame}>Start Game</button>
+            <ModeSelector
+              onStartPlay={handleStartGame}
+              onStartImprove={handleStartImprove}
+              trickyNumbers={trickyNumbers}
+              showImprove={showImprove}
+              showEncouragement={showEncouragement}
+            />
           </div>
         )}
 
@@ -118,6 +139,7 @@ export default function MainPage() {
               isCorrect={currentRound.isCorrect ?? null}
               correctAnswer={correctAnswer}
               completedRound={gameState.currentRoundIndex + 1}
+              gameMode={gameMode}
             />
 
             <div data-testid="formula-area" style={{ minHeight: 88 }}>
@@ -144,6 +166,7 @@ export default function MainPage() {
             score={gameState.score}
             onPlayAgain={handlePlayAgain}
             onBackToMenu={handleBackToMenu}
+            gameMode={gameMode}
           />
         )}
       </main>

@@ -79,8 +79,8 @@ describe('Gameplay Flow Integration', () => {
     renderMainPage();
 
     // === START GAME ===
-    expect(screen.getByRole('button', { name: /start game/i })).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    expect(screen.getByRole('button', { name: /^play/i })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     // === PLAY 10 ROUNDS ===
     // Rounds 1-8 correct, rounds 9-10 incorrect
@@ -174,11 +174,11 @@ describe('Gameplay Flow Integration', () => {
     await user.click(screen.getByRole('button', { name: /play again/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /start game/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^play/i })).toBeInTheDocument();
     });
 
     // === START A NEW GAME ===
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     // Should be back in round 1
     expect(screen.getByText(/round 1 of 10/i)).toBeInTheDocument();
@@ -189,7 +189,7 @@ describe('Gameplay Flow Integration', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     // Play all 10 rounds correctly
     const correctAnswers = testFormulas.map((f) => getCorrectAnswer(f));

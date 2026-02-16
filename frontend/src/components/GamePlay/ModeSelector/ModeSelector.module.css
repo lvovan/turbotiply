@@ -1,0 +1,99 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.playButton,
+.improveButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  min-height: 44px;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  text-align: center;
+}
+
+.playButton {
+  background: #6c63ff;
+  color: #fff;
+}
+
+.playButton:hover {
+  background: #5a52d5;
+}
+
+.playButton:active {
+  transform: scale(0.98);
+}
+
+.improveButton {
+  background: #ff9800;
+  color: #fff;
+}
+
+.improveButton:hover {
+  background: #e68a00;
+}
+
+.improveButton:active {
+  transform: scale(0.98);
+}
+
+.buttonLabel {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.descriptor {
+  font-size: 0.85rem;
+  font-weight: 400;
+  opacity: 0.9;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+.encouragement {
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
+  margin: 0;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .container {
+    gap: 12px;
+  }
+
+  .playButton,
+  .improveButton {
+    padding: 12px 16px;
+  }
+
+  .buttonLabel {
+    font-size: 1.1rem;
+  }
+
+  .descriptor {
+    font-size: 0.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .playButton,
+  .improveButton {
+    transition: none;
+  }
+}

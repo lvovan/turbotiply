@@ -66,7 +66,7 @@ function renderMainPage() {
 
 async function playFullGame(user: ReturnType<typeof userEvent.setup>, formulas: Formula[]) {
   // Click start
-  const startButton = screen.getByRole('button', { name: /start game/i });
+  const startButton = screen.getByRole('button', { name: /^play/i });
   await user.click(startButton);
 
   // Answer all 10 rounds correctly

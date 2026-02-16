@@ -364,4 +364,79 @@ describe('GameStatus', () => {
       expect(root.className).toMatch(/feedbackIncorrect/);
     });
   });
+
+  describe('Practice indicator (Improve mode)', () => {
+    it('shows "Practice" text instead of score when gameMode is improve', () => {
+      render(
+        <GameStatus
+          {...defaultProps({
+            roundNumber: 3,
+            score: 15,
+            gameMode: 'improve',
+          })}
+        />,
+      );
+      expect(screen.getByText('Practice')).toBeInTheDocument();
+      expect(screen.queryByText('Score:')).not.toBeInTheDocument();
+    });
+
+    it('shows score when gameMode is play', () => {
+      render(
+        <GameStatus
+          {...defaultProps({
+            roundNumber: 3,
+            score: 15,
+            gameMode: 'play',
+          })}
+        />,
+      );
+      expect(screen.getByText('Score:')).toBeInTheDocument();
+      expect(screen.queryByText('Practice')).not.toBeInTheDocument();
+    });
+
+    it('defaults to showing score when gameMode is not provided', () => {
+      render(<GameStatus {...defaultProps({ score: 10 })} />);
+      expect(screen.getByText('Score:')).toBeInTheDocument();
+    });
+
+    it('still shows round counter in improve mode', () => {
+      render(
+        <GameStatus
+          {...defaultProps({
+            roundNumber: 5,
+            totalRounds: 10,
+            gameMode: 'improve',
+          })}
+        />,
+      );
+      expect(screen.getByText(/Round 5 of 10/)).toBeInTheDocument();
+    });
+
+    it('shows timer in improve mode', () => {
+      render(
+        <GameStatus
+          {...defaultProps({
+            gameMode: 'improve',
+          })}
+        />,
+      );
+      expect(screen.getByTestId('timer')).toBeInTheDocument();
+    });
+
+    it('feedback phase works normally in improve mode', () => {
+      render(
+        <GameStatus
+          {...defaultProps({
+            currentPhase: 'feedback',
+            isCorrect: true,
+            correctAnswer: 42,
+            completedRound: 3,
+            gameMode: 'improve',
+          })}
+        />,
+      );
+      expect(screen.getByText('✓')).toBeInTheDocument();
+      expect(screen.getByText('Correct!')).toBeInTheDocument();
+    });
+  });
 });

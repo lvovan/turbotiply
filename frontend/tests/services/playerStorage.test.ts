@@ -14,9 +14,10 @@ import {
   getRecentAverage,
   getRecentHighScores,
   getGameHistory,
+  saveGameRecord,
 } from '../../src/services/playerStorage';
 import type { PlayerStore } from '../../src/types/player';
-import type { GameRecord } from '../../src/types/player';
+import type { GameRecord, RoundResult } from '../../src/types/player';
 
 describe('playerStorage', () => {
   beforeEach(() => {
@@ -250,9 +251,9 @@ describe('playerStorage', () => {
       expect(players[0].totalScore).toBe(0);
       expect(players[0].gamesPlayed).toBe(0);
 
-      // Verify store was updated to v4 (migrated through v2, v3, then v4)
+      // Verify store was updated to v5 (migrated through v2, v3, v4, then v5)
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!) as PlayerStore;
-      expect(stored.version).toBe(4);
+      expect(stored.version).toBe(5);
     });
   });
 
@@ -292,7 +293,7 @@ describe('playerStorage', () => {
       getPlayers();
 
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!) as PlayerStore;
-      expect(stored.version).toBe(4);
+      expect(stored.version).toBe(5);
       expect((stored.players[0] as Record<string, unknown>)['colorId']).toBeUndefined();
     });
 
@@ -524,7 +525,7 @@ describe('playerStorage', () => {
       getPlayers(); // triggers migration
 
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!) as PlayerStore;
-      expect(stored.version).toBe(4);
+      expect(stored.version).toBe(5);
       expect(stored.players[0].gameHistory).toBeDefined();
       expect(stored.players[0].gameHistory).toHaveLength(1);
     });
@@ -768,6 +769,209 @@ describe('playerStorage', () => {
       const result = getGameHistory(player);
       result.push({ score: 99, completedAt: 999 });
       expect(player.gameHistory).toHaveLength(2);
+    });
+  });
+
+  describe('v4 → v5 migration', () => {
+    it('bumps version from 4 to 5 without modifying data', () => {
+      const v4Store = {
+        version: 4,
+        players: [
+          {
+            name: 'Alice', avatarId: 'cat', lastActive: 5000, createdAt: 1000,
+            totalScore: 100, gamesPlayed: 4,
+            gameHistory: [{ score: 25, completedAt: 5000 }],
+          },
+        ],
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(v4Store));
+
+      const players = getPlayers();
+      expect(players[0].totalScore).toBe(100);
+      expect(players[0].gamesPlayed).toBe(4);
+      expect(players[0].gameHistory).toHaveLength(1);
+
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!) as PlayerStore;
+      expect(stored.version).toBe(5);
+    });
+
+    it('old records without rounds/gameMode load without errors', () => {
+      const v4Store = {
+        version: 4,
+        players: [
+          {
+            name: 'Bob', avatarId: 'robot', lastActive: 3000, createdAt: 2000,
+            totalScore: 50, gamesPlayed: 2,
+            gameHistory: [
+              { score: 20, completedAt: 2500 },
+              { score: 30, completedAt: 3000 },
+            ],
+          },
+        ],
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(v4Store));
+
+      const players = getPlayers();
+      const bob = players[0];
+      expect(bob.gameHistory).toHaveLength(2);
+      // Old records have no rounds or gameMode
+      expect(bob.gameHistory![0].rounds).toBeUndefined();
+      expect(bob.gameHistory![0].gameMode).toBeUndefined();
+    });
+
+    it('full migration chain v1 through v5 works', () => {
+      const v1Store = {
+        version: 1,
+        players: [
+          { name: 'Eve', avatarId: 'cat', colorId: 'blue', lastActive: 100, createdAt: 50 },
+        ],
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(v1Store));
+
+      const players = getPlayers();
+      expect(players[0].totalScore).toBe(0);
+      expect(players[0].gamesPlayed).toBe(0);
+
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!) as PlayerStore;
+      expect(stored.version).toBe(5);
+    });
+  });
+
+  describe('saveGameRecord', () => {
+    function makeRounds(count: number = 10): RoundResult[] {
+      return Array.from({ length: count }, (_, i) => ({
+        factorA: 2 + (i % 11),
+        factorB: 3 + (i % 10),
+        isCorrect: i % 3 !== 0,
+        elapsedMs: 1000 + i * 200,
+      }));
+    }
+
+    it('persists round data and gameMode in GameRecord', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(1000);
+      savePlayer({ name: 'Mia', avatarId: 'cat' });
+
+      vi.spyOn(Date, 'now').mockReturnValue(2000);
+      const rounds = makeRounds();
+      saveGameRecord('Mia', 30, rounds, 'play');
+
+      const players = getPlayers();
+      const record = players[0].gameHistory![0];
+      expect(record.score).toBe(30);
+      expect(record.completedAt).toBe(2000);
+      expect(record.gameMode).toBe('play');
+      expect(record.rounds).toHaveLength(10);
+      expect(record.rounds![0].factorA).toBe(2);
+
+      vi.restoreAllMocks();
+    });
+
+    it('updates totalScore and gamesPlayed for play mode', () => {
+      savePlayer({ name: 'Mia', avatarId: 'cat' });
+      saveGameRecord('Mia', 30, makeRounds(), 'play');
+      saveGameRecord('Mia', 20, makeRounds(), 'play');
+
+      const players = getPlayers();
+      expect(players[0].totalScore).toBe(50);
+      expect(players[0].gamesPlayed).toBe(2);
+    });
+
+    it('does NOT update totalScore/gamesPlayed for improve mode', () => {
+      savePlayer({ name: 'Mia', avatarId: 'cat' });
+      saveGameRecord('Mia', 30, makeRounds(), 'play');
+      saveGameRecord('Mia', 25, makeRounds(), 'improve');
+
+      const players = getPlayers();
+      expect(players[0].totalScore).toBe(30);
+      expect(players[0].gamesPlayed).toBe(1);
+      // But the improve record IS saved
+      expect(players[0].gameHistory).toHaveLength(2);
+    });
+
+    it('enforces 100-record cap', () => {
+      savePlayer({ name: 'Mia', avatarId: 'cat' });
+      for (let i = 0; i < 101; i++) {
+        saveGameRecord('Mia', i, makeRounds(), 'play');
+      }
+
+      const players = getPlayers();
+      expect(players[0].gameHistory).toHaveLength(100);
+      expect(players[0].gameHistory![0].score).toBe(1); // oldest (0) was trimmed
+      expect(players[0].gameHistory![99].score).toBe(100);
+    });
+
+    it('finds player case-insensitively', () => {
+      savePlayer({ name: 'Mia', avatarId: 'cat' });
+      saveGameRecord('mia', 15, makeRounds(), 'play');
+
+      const players = getPlayers();
+      expect(players[0].gameHistory).toHaveLength(1);
+    });
+
+    it('is a no-op if player does not exist', () => {
+      saveGameRecord('Ghost', 15, makeRounds(), 'play');
+      expect(getPlayers()).toHaveLength(0);
+    });
+  });
+
+  describe('improve-mode filtering', () => {
+    function makeRounds(): RoundResult[] {
+      return Array.from({ length: 10 }, (_, i) => ({
+        factorA: 2, factorB: 3, isCorrect: true, elapsedMs: 1000,
+      }));
+    }
+
+    it('getRecentHighScores excludes improve records', () => {
+      savePlayer({ name: 'A', avatarId: 'cat' });
+      saveGameRecord('A', 30, makeRounds(), 'play');
+      saveGameRecord('A', 40, makeRounds(), 'improve');
+      saveGameRecord('A', 20, makeRounds(), 'play');
+
+      const players = getPlayers();
+      const scores = getRecentHighScores(players[0]);
+      expect(scores).toHaveLength(2);
+      expect(scores.map(s => s.score)).toEqual([30, 20]);
+    });
+
+    it('getGameHistory excludes improve records', () => {
+      savePlayer({ name: 'A', avatarId: 'cat' });
+      saveGameRecord('A', 30, makeRounds(), 'play');
+      saveGameRecord('A', 40, makeRounds(), 'improve');
+      saveGameRecord('A', 20, makeRounds(), 'play');
+
+      const players = getPlayers();
+      const history = getGameHistory(players[0]);
+      expect(history).toHaveLength(2);
+      expect(history[0].score).toBe(30);
+      expect(history[1].score).toBe(20);
+    });
+
+    it('getRecentAverage excludes improve records', () => {
+      savePlayer({ name: 'A', avatarId: 'cat' });
+      saveGameRecord('A', 30, makeRounds(), 'play');
+      saveGameRecord('A', 99, makeRounds(), 'improve');
+      saveGameRecord('A', 20, makeRounds(), 'play');
+
+      const players = getPlayers();
+      // Only play scores: 30 and 20 → mean = 25
+      expect(getRecentAverage(players[0])).toBe(25);
+    });
+
+    it('treats records without gameMode as play (pre-v5 compat)', () => {
+      savePlayer({ name: 'A', avatarId: 'cat' });
+      // Manually add a record without gameMode (simulating pre-v5)
+      const store = JSON.parse(localStorage.getItem(STORAGE_KEY)!) as PlayerStore;
+      store.players[0].gameHistory = [
+        { score: 15, completedAt: 1000 },
+        { score: 25, completedAt: 2000 },
+      ];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+
+      const players = getPlayers();
+      const scores = getRecentHighScores(players[0]);
+      expect(scores).toHaveLength(2);
+      expect(getRecentAverage(players[0])).toBe(20);
+      expect(getGameHistory(players[0])).toHaveLength(2);
     });
   });
 });

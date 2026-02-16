@@ -40,6 +40,7 @@ describe('initialGameState', () => {
       currentRoundIndex: 0,
       currentPhase: 'input',
       score: 0,
+      gameMode: 'play',
     });
   });
 });

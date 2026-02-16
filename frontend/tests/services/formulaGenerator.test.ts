@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { generateFormulas, getAllUnorderedPairs } from '../../src/services/formulaGenerator';
+import { generateFormulas, generateImproveFormulas, getAllUnorderedPairs } from '../../src/services/formulaGenerator';
+import type { ChallengingPair } from '../../src/types/game';
 
 describe('getAllUnorderedPairs', () => {
   it('returns exactly 66 unique unordered pairs', () => {
@@ -163,5 +164,119 @@ describe('generateFormulas — statistical validation (US4)', () => {
         expect(f.product).toBe(f.factorA * f.factorB);
       });
     }
+  });
+});
+
+describe('generateImproveFormulas', () => {
+  function makePair(a: number, b: number, ratio = 2.0): ChallengingPair {
+    return { factorA: a, factorB: b, difficultyRatio: ratio };
+  }
+
+  it('returns exactly 10 formulas', () => {
+    const pairs = [makePair(7, 8), makePair(6, 9)];
+    const formulas = generateImproveFormulas(pairs);
+    expect(formulas).toHaveLength(10);
+  });
+
+  it('includes all challenging pairs when fewer than 10', () => {
+    const pairs = [makePair(7, 8, 3.0), makePair(6, 9, 2.5)];
+    const formulas = generateImproveFormulas(pairs);
+
+    // Both challenging pairs should appear in the formulas
+    const formulaPairs = formulas.map((f) => {
+      const sorted = [f.factorA, f.factorB].sort((a, b) => a - b);
+      return `${sorted[0]},${sorted[1]}`;
+    });
+    expect(formulaPairs).toContain('7,8');
+    expect(formulaPairs).toContain('6,9');
+  });
+
+  it('fills remaining slots with random pairs when fewer than 10 challenging pairs', () => {
+    const pairs = [makePair(7, 8)];
+    const formulas = generateImproveFormulas(pairs);
+    expect(formulas).toHaveLength(10);
+
+    // 7×8 should be included
+    const formulaPairs = formulas.map((f) => {
+      const sorted = [f.factorA, f.factorB].sort((a, b) => a - b);
+      return `${sorted[0]},${sorted[1]}`;
+    });
+    expect(formulaPairs).toContain('7,8');
+  });
+
+  it('caps at 10 challenging pairs when more than 10 provided', () => {
+    // Create 15 challenging pairs
+    const pairs: ChallengingPair[] = [];
+    for (let i = 2; i <= 12 && pairs.length < 15; i++) {
+      for (let j = i; j <= 12 && pairs.length < 15; j++) {
+        pairs.push(makePair(i, j, 15 - pairs.length));
+      }
+    }
+    const formulas = generateImproveFormulas(pairs);
+    expect(formulas).toHaveLength(10);
+  });
+
+  it('has no duplicate unordered pairs', () => {
+    const pairs = [makePair(7, 8), makePair(6, 9), makePair(3, 4)];
+    const formulas = generateImproveFormulas(pairs);
+    const keys = formulas.map((f) => {
+      const sorted = [f.factorA, f.factorB].sort((a, b) => a - b);
+      return `${sorted[0]},${sorted[1]}`;
+    });
+    expect(new Set(keys).size).toBe(10);
+  });
+
+  it('random fill pairs do not duplicate challenging pairs', () => {
+    const pairs = [makePair(7, 8), makePair(6, 9)];
+    const formulas = generateImproveFormulas(pairs);
+    const keys = formulas.map((f) => {
+      const sorted = [f.factorA, f.factorB].sort((a, b) => a - b);
+      return `${sorted[0]},${sorted[1]}`;
+    });
+    // All 10 should be unique
+    expect(new Set(keys).size).toBe(10);
+  });
+
+  it('assigns valid hiddenPosition to all formulas', () => {
+    const pairs = [makePair(7, 8), makePair(6, 9)];
+    const formulas = generateImproveFormulas(pairs);
+    formulas.forEach((f) => {
+      expect(['A', 'B', 'C']).toContain(f.hiddenPosition);
+    });
+  });
+
+  it('computes product correctly for all formulas', () => {
+    const pairs = [makePair(7, 8), makePair(6, 9)];
+    const formulas = generateImproveFormulas(pairs);
+    formulas.forEach((f) => {
+      expect(f.product).toBe(f.factorA * f.factorB);
+    });
+  });
+
+  it('all factors are in [2, 12] range', () => {
+    const pairs = [makePair(7, 8), makePair(6, 9)];
+    const formulas = generateImproveFormulas(pairs);
+    formulas.forEach((f) => {
+      expect(f.factorA).toBeGreaterThanOrEqual(2);
+      expect(f.factorA).toBeLessThanOrEqual(12);
+      expect(f.factorB).toBeGreaterThanOrEqual(2);
+      expect(f.factorB).toBeLessThanOrEqual(12);
+    });
+  });
+
+  it('shuffles formulas (challenging pairs not always first)', () => {
+    // Run multiple times; at least once the first formula should not be a challenging pair
+    const pairs = [makePair(11, 12)];
+    let foundNonChallengingFirst = false;
+    for (let i = 0; i < 50; i++) {
+      const formulas = generateImproveFormulas(pairs);
+      const first = formulas[0];
+      const sorted = [first.factorA, first.factorB].sort((a, b) => a - b);
+      if (sorted[0] !== 11 || sorted[1] !== 12) {
+        foundNonChallengingFirst = true;
+        break;
+      }
+    }
+    expect(foundNonChallengingFirst).toBe(true);
   });
 });

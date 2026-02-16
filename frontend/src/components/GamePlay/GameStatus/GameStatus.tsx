@@ -1,6 +1,7 @@
 import type { RefObject } from 'react';
 import styles from './GameStatus.module.css';
 import CountdownBar from '../CountdownBar/CountdownBar';
+import type { GameMode } from '../../../types/player';
 
 interface GameStatusProps {
   roundNumber: number;
@@ -13,12 +14,14 @@ interface GameStatusProps {
   isCorrect: boolean | null;
   correctAnswer: number | null;
   completedRound: number;
+  gameMode?: GameMode;
 }
 
 /**
  * Displays round counter, running score, and timer during gameplay.
  * During feedback phase, swaps to show result message with completion count.
  * Shows "Replay" indicator when in replay phase (per FR-019).
+ * Shows "Practice" instead of score when in improve mode.
  * Renders a countdown progress bar below the status row.
  */
 export default function GameStatus({
@@ -32,6 +35,7 @@ export default function GameStatus({
   isCorrect,
   correctAnswer,
   completedRound,
+  gameMode = 'play',
 }: GameStatusProps) {
   const isFeedback = currentPhase === 'feedback';
 
@@ -74,8 +78,14 @@ export default function GameStatus({
             )}
           </div>
           <div className={styles.score}>
-            <span className={styles.scoreLabel}>Score:</span>{' '}
-            <span className={styles.scoreValue}>{score}</span>
+            {gameMode === 'improve' ? (
+              <span className={styles.practiceBadge}>Practice</span>
+            ) : (
+              <>
+                <span className={styles.scoreLabel}>Score:</span>{' '}
+                <span className={styles.scoreValue}>{score}</span>
+              </>
+            )}
           </div>
           <div className={styles.timer}>
             <span
