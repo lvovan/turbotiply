@@ -1,9 +1,26 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AnswerInput from '../../src/components/GamePlay/AnswerInput/AnswerInput';
 
+function mockMaxTouchPoints(value: number) {
+  Object.defineProperty(navigator, 'maxTouchPoints', {
+    value,
+    writable: true,
+    configurable: true,
+  });
+}
+
 describe('AnswerInput', () => {
+  const originalMaxTouchPoints = navigator.maxTouchPoints;
+
+  afterEach(() => {
+    Object.defineProperty(navigator, 'maxTouchPoints', {
+      value: originalMaxTouchPoints,
+      writable: true,
+      configurable: true,
+    });
+  });
   it('renders numeric input and submit button', () => {
     render(<AnswerInput onSubmit={vi.fn()} acceptingInput={true} />);
 
@@ -106,5 +123,38 @@ describe('AnswerInput', () => {
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
     expect(input).toHaveFocus();
+  });
+
+  // --- Conditional rendering based on touch detection ---
+
+  describe('conditional rendering', () => {
+    it('renders text input and Submit button when no touchscreen detected', () => {
+      mockMaxTouchPoints(0);
+      render(<AnswerInput onSubmit={vi.fn()} acceptingInput={true} />);
+
+      expect(screen.getByRole('textbox')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'submit answer' })).not.toBeInTheDocument();
+    });
+
+    it('renders TouchNumpad when touchscreen is detected', () => {
+      mockMaxTouchPoints(5);
+      render(<AnswerInput onSubmit={vi.fn()} acceptingInput={true} />);
+
+      expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'submit answer' })).toBeInTheDocument();
+      // Verify digit buttons are present
+      expect(screen.getByRole('button', { name: 'digit 1' })).toBeInTheDocument();
+    });
+
+    it('existing keyboard submit flow works unchanged on non-touch devices', async () => {
+      mockMaxTouchPoints(0);
+      const user = userEvent.setup();
+      const onSubmit = vi.fn();
+      render(<AnswerInput onSubmit={onSubmit} acceptingInput={true} />);
+
+      await user.type(screen.getByRole('textbox'), '42{Enter}');
+      expect(onSubmit).toHaveBeenCalledWith(42);
+    });
   });
 });

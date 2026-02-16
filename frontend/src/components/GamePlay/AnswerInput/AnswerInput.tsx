@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from 'react';
 import styles from './AnswerInput.module.css';
+import { useTouchDetection } from '../../../hooks/useTouchDetection';
+import TouchNumpad from './TouchNumpad';
 
 interface AnswerInputProps {
   onSubmit: (answer: number) => void;
@@ -30,6 +32,17 @@ interface AnswerInputProps {
  * (new round begins).
  */
 export default function AnswerInput({ onSubmit, acceptingInput }: AnswerInputProps) {
+  const isTouchDevice = useTouchDetection();
+
+  if (isTouchDevice) {
+    return <TouchNumpad onSubmit={onSubmit} acceptingInput={acceptingInput} />;
+  }
+
+  return <AnswerInputDesktop onSubmit={onSubmit} acceptingInput={acceptingInput} />;
+}
+
+/** Standard text input + Submit button for non-touch (desktop) devices. */
+function AnswerInputDesktop({ onSubmit, acceptingInput }: AnswerInputProps) {
   const [value, setValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
