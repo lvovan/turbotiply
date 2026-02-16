@@ -29,11 +29,6 @@
   box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
 }
 
-.input:disabled {
-  background: #f5f5f5;
-  color: #999;
-}
-
 .submitButton {
   min-width: 44px;
   min-height: 44px;

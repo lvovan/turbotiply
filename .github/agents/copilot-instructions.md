@@ -37,9 +37,9 @@ cd src; pytest; ruff check .
 TypeScript 5.x (frontend): Follow standard conventions
 
 ## Recent Changes
+- 009-responsive-layout-focus: Added TypeScript 5.9.3, React 19.2.0 + React, React Router DOM 7.13, Vite 7.3.1
 - 008-round-ux-rework: Added TypeScript 5.9.3, React 19.2.0 + React, React Router DOM 7.13, Vite 7.3.1
 - 007-numeric-keypad-input: Added TypeScript ~5.9.3, React 19.2, bundled via Vite 7.3 + React, React DOM, CSS Modules
-- 006-score-display: Added TypeScript ~5.9, React 19, Vite 7 + react-router-dom 7, vitest 4, @testing-library/react 16, vitest-axe
 
 
 <!-- MANUAL ADDITIONS START -->

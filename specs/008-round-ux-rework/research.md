@@ -74,3 +74,85 @@ All four colors exceed 3:1 non-text contrast ratio (WCAG 1.4.11 for graphical ob
 **Alternatives considered**:
 - **New hook `useCountdownTimer` alongside `useRoundTimer`**: Would duplicate rAF lifecycle management. The two hooks would need to share `startTime` to stay in sync, adding coupling complexity. Rejected.
 - **Generic timer hook with strategy pattern**: Over-abstracted for a single consumer. YAGNI (Constitution Principle II). Rejected.
+
+## 7. Input Interactivity During Feedback Phase — `readOnly` vs `disabled` vs Submit Guard
+
+**Decision**: Guard the `onSubmit` handler (ignore submissions during feedback) rather than using `readOnly` or `disabled`. The input stays fully interactive with keyboard visible throughout.
+
+**Rationale**: The goal is to prevent answer submission during the 1.2s feedback phase while keeping the virtual keyboard visible across round transitions on touch devices. Guarding `onSubmit` achieves this with zero browser-specific risk, since the input is never made non-interactive and focus is never disrupted.
+
+### Findings by Browser
+
+#### 1. iOS Safari (iOS 15+)
+
+**`readOnly` behavior on a focused input:**
+- Per the HTML spec and MDN, `readOnly` inputs **remain focusable** — they stay in the tab order and continue to receive focus events. ([MDN readonly](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/readonly): "read-only controls can still function and are still focusable.")
+- Focusing a `readOnly` input does **not** trigger the virtual keyboard. (Confirmed by StackOverflow workarounds that deliberately focus a `readOnly` fake input to hold focus without showing the keyboard — see [SO#55652503](https://stackoverflow.com/a/55652503) comment: "If you want to prevent showing keyboard on the fakeInput focus, add readonly='true' to it.")
+- **Setting `readOnly=true` on an already-focused, keyboard-visible input**: WebKit ties keyboard visibility to the editability of the focused element. When the focused element becomes non-editable, the keyboard is dismissed. The element retains DOM focus.
+- **Removing `readOnly` while the element still has focus**: Because the element never lost focus, and it becomes editable again, the keyboard **reappears without a new user gesture**. This is the key advantage over `disabled`.
+- **Caveat**: This "keyboard reappears" behavior is observed but not specified in any standard. It relies on WebKit's internal re-evaluation of editability for the currently focused element. There are no WebKit bugs or documentation that formally guarantee this behavior across iOS versions.
+
+**`disabled` behavior on a focused input:**
+- `disabled` inputs **cannot receive focus** at all. ([MDN disabled](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/disabled): "disabled controls can not receive focus.")
+- Setting `disabled=true` on a focused input causes the element to **lose focus**, and iOS Safari **dismisses the keyboard**.
+- Calling `focus()` afterward from a non-user-gesture (e.g., a `useEffect` or `setTimeout`) **does not bring the keyboard back**. iOS Safari has strict user-activation requirements: the keyboard only appears when `focus()` is called synchronously within a user-initiated event handler (click/touch). ([SO#12204571](https://stackoverflow.com/q/12204571): extensively documented behavior since iOS 5, still present in iOS 17+.)
+
+#### 2. Chrome Android (v90+)
+
+**`readOnly` behavior:**
+- Same fundamental spec behavior: `readOnly` inputs remain focusable.
+- Setting `readOnly=true` on a focused input: the keyboard is dismissed (element is no longer editable), but focus is retained.
+- Removing `readOnly`: keyboard reappears because focus was maintained. Chrome Android is generally more permissive than iOS Safari about re-showing keyboards.
+
+**`disabled` behavior:**
+- Focus is lost. Chrome Android is more lenient than iOS about programmatic `focus()` from non-user-gestures — it sometimes brings the keyboard back — but behavior is **not reliable** and varies by Chrome version and device vendor skin (Samsung Internet, etc.).
+
+#### 3. Firefox Android
+
+**`readOnly` behavior:**
+- Same as above — `readOnly` keeps focus, keyboard dismissed while non-editable, keyboard reappears when `readOnly` removed.
+
+**`disabled` behavior:**
+- Firefox Android is the most permissive: programmatic `focus()` from non-user-gestures generally works and does bring the keyboard back. However, relying on this Firefox-specific behavior is not portable.
+
+#### 4. `readOnly` vs `disabled` — Summary Table
+
+| Attribute    | Focusable? | Keyboard on focus? | Keyboard dismissed when set on focused input? | Keyboard returns when removed (element still focused)? | `focus()` from non-user-gesture shows keyboard? |
+|-------------|-----------|-------------------|----------------------------------------------|-------------------------------------------------------|------------------------------------------------|
+| `readOnly`  | Yes       | No                | Yes (editability check)                       | Yes (high confidence, all browsers)                    | No (keyboard needs editability + focus)         |
+| `disabled`  | No        | No                | Yes (focus lost entirely)                     | N/A — element lost focus, needs `focus()` call         | iOS: No. Android: Unreliable. Firefox: Usually. |
+
+#### 5. Known Quirks & Workarounds
+
+- **iOS Safari user-activation gate**: The core problem. iOS Safari only allows the keyboard to appear from `focus()` when called synchronously inside a user-gesture event handler (click, touchend). `setTimeout`, `Promise.then`, `useEffect`, and `requestAnimationFrame` all break the user-activation chain. The established workaround is the "fake input" pattern: focus a hidden input synchronously in the user gesture, then transfer focus asynchronously to the real input — because *transferring* focus between editable elements preserves the keyboard. ([SO#55652503](https://stackoverflow.com/a/55652503), [SO#45703019](https://stackoverflow.com/a/45703019), confirmed working through iOS 17.)
+- **`readOnly` + `inputMode="numeric"`**: On some Android keyboard implementations (GBoard), a `readOnly` input with `inputMode="numeric"` may briefly flash the keyboard before dismissing it when gaining focus. This is a cosmetic issue, not a functional one.
+- **React re-render timing**: React batches state updates. If `readOnly` and value changes happen in the same render, the browser sees the final state only. If they happen across renders (e.g., `readOnly=false` in one render, `value=""` and `focus()` in a `useEffect`), the keyboard behavior depends on the exact paint timing between renders. This adds fragility.
+
+#### 6. Alternative: Guard `onSubmit` Only (No `readOnly` or `disabled`)
+
+**Approach**: During the 1.2s feedback phase, keep the input fully interactive (not `readOnly`, not `disabled`). The submit handler checks a "feedback in progress" flag and silently ignores submissions. When the next round starts, clear the input value.
+
+**Pros**:
+- **Zero keyboard risk**: The input is never made non-interactive, so the keyboard is never dismissed. No browser-specific behavior to worry about. This is the only approach that guarantees keyboard persistence on all browsers.
+- **Simplest implementation**: One boolean guard in the submit handler. No attribute toggling, no `useEffect` re-focus logic, no CSS for `:read-only` states.
+- **No React timing concerns**: No risk of stale attribute state between renders.
+- **No accessibility edge cases**: Screen readers don't need to announce state changes on the input.
+
+**Cons**:
+- **User can type during feedback**: The keyboard is live and keystrokes produce visible characters in the input. This is a minor UX blemish — the user sees their typing during the 1.2s feedback phase, but it's cleared when the next round starts.
+- **Less "polished" feel**: A disabled/readonly input signals "wait" to the user. A live input during feedback might feel slightly less intentional.
+- **Accidental early submission**: If the user types quickly enough during feedback and hits Enter/Submit, the submission is silently ignored. This is correct behavior but the user gets no feedback that their tap was ignored. (Mitigated by the submit button also being disabled or hidden during feedback.)
+
+**Mitigation for the "typing during feedback" con**: Clear the input value at the *start* of the feedback phase (not just at the start of the next round). This way, any characters typed during feedback are visible but brief, and they get cleared when the next round begins anyway. Alternatively, apply a CSS visual treatment (e.g., `opacity: 0.5`) to the input during feedback to signal non-interactivity without actually changing the DOM interactivity.
+
+### Final Recommendation
+
+Guard `onSubmit` is the safest approach for guaranteed keyboard persistence. The `readOnly` approach has a reasonable chance of working across browsers but introduces observationally-verified-but-unspecified behavior and React timing edge cases. The `disabled` approach is the riskiest — it causes keyboard dismissal on iOS Safari and cannot reliably recover.
+
+If a stronger "non-interactive" visual signal is desired during feedback, combine the submit guard with `readOnly` as a progressive enhancement: use `readOnly` for the visual/semantic signal, but don't depend on it for keyboard persistence. If any browser unexpectedly dismisses the keyboard when `readOnly` is set, the submit guard still prevents double-submissions, and the keyboard reappearance when `readOnly` is removed (focus retained) serves as a fallback.
+
+**Sources**:
+- [MDN: HTML attribute `readonly`](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/readonly)
+- [MDN: HTML attribute `disabled`](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/disabled)
+- [StackOverflow: Mobile Safari focus() only works with click](https://stackoverflow.com/questions/12204571/mobile-safari-javascript-focus-method-on-inputfield-only-works-with-click) — extensive documentation of iOS user-activation requirements and workarounds
+- [StackOverflow: Fake input pattern for iOS keyboard persistence](https://stackoverflow.com/a/55652503) — confirms `readOnly` on fake input prevents keyboard, and focus transfer preserves keyboard

@@ -99,7 +99,7 @@ describe('Accessibility — Gameplay (axe)', () => {
   });
 
   it('AnswerInput has no a11y violations', async () => {
-    const { container } = render(<AnswerInput onSubmit={() => {}} disabled={false} />);
+    const { container } = render(<AnswerInput onSubmit={() => {}} acceptingInput={true} />);
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
