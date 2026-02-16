@@ -1,3 +1,4 @@
+import { useTranslation } from '../../../i18n';
 import styles from './ModeSelector.module.css';
 
 interface ModeSelectorProps {
@@ -21,6 +22,7 @@ export default function ModeSelector({
   showImprove,
   showEncouragement,
 }: ModeSelectorProps) {
+  const { t } = useTranslation();
   const MAX_DISPLAY = 8;
   const sortedNumbers = [...trickyNumbers].sort((a, b) => a - b);
   const displayNumbers = sortedNumbers.slice(0, MAX_DISPLAY);
@@ -28,32 +30,32 @@ export default function ModeSelector({
   const numbersText = displayNumbers.join(', ') + (hasMore ? ', …' : '');
 
   return (
-    <div className={styles.container} role="group" aria-label="Game mode selection">
+    <div className={styles.container} role="group" aria-label={t('mode.groupLabel')}>
       <button
         className={styles.playButton}
         onClick={onStartPlay}
-        aria-label="Play — Go for a high score!"
+        aria-label={t('mode.playAriaLabel')}
       >
-        <span className={styles.buttonLabel}>Play</span>
-        <span className={styles.descriptor}>Go for a high score!</span>
+        <span className={styles.buttonLabel}>{t('mode.play')}</span>
+        <span className={styles.descriptor}>{t('mode.playDescription')}</span>
       </button>
 
       {showImprove && trickyNumbers.length > 0 && (
         <button
           className={styles.improveButton}
           onClick={onStartImprove}
-          aria-label={`Improve — Level up your tricky numbers: ${numbersText}`}
+          aria-label={t('mode.improveAriaLabel', { numbers: numbersText })}
         >
-          <span className={styles.buttonLabel}>Improve</span>
+          <span className={styles.buttonLabel}>{t('mode.improve')}</span>
           <span className={styles.descriptor}>
-            Level up your tricky numbers: {numbersText}
+            {t('mode.improveDescription', { numbers: numbersText })}
           </span>
         </button>
       )}
 
       {showEncouragement && !showImprove && (
         <p className={styles.encouragement}>
-          No tricky numbers right now — keep playing to unlock Improve mode!
+          {t('mode.encouragement')}
         </p>
       )}
     </div>

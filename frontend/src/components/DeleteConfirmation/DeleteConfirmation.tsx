@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from '../../i18n';
 import styles from './DeleteConfirmation.module.css';
 
 interface DeleteConfirmationProps {
@@ -17,6 +18,7 @@ export default function DeleteConfirmation({
   onCancel,
 }: DeleteConfirmationProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -38,19 +40,19 @@ export default function DeleteConfirmation({
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label={`Remove ${playerName}`}
+        aria-label={t('dialog.removeLabel', { playerName })}
         className={styles.dialog}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
-        <p className={styles.title}>Remove {playerName}?</p>
-        <p className={styles.message}>Their scores will be lost.</p>
+        <p className={styles.title}>{t('dialog.removeTitle', { playerName })}</p>
+        <p className={styles.message}>{t('dialog.removeMessage')}</p>
         <div className={styles.actions}>
           <button className={styles.cancelButton} onClick={onCancel}>
-            Cancel
+            {t('dialog.cancel')}
           </button>
           <button className={styles.removeButton} onClick={onConfirm}>
-            Remove
+            {t('dialog.remove')}
           </button>
         </div>
       </div>

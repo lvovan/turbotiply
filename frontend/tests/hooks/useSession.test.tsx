@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act } from '../test-utils';
 import { SessionProvider, useSession } from '../../src/hooks/useSession.tsx';
 import * as playerStorage from '../../src/services/playerStorage';
 import type { Session } from '../../src/types/player';

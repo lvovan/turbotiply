@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from '../../i18n';
 import styles from './ClearAllConfirmation.module.css';
 
 interface ClearAllConfirmationProps {
@@ -16,6 +17,7 @@ export default function ClearAllConfirmation({
   onCancel,
 }: ClearAllConfirmationProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -37,21 +39,21 @@ export default function ClearAllConfirmation({
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Clear all profiles"
+        aria-label={t('dialog.clearAllLabel')}
         className={styles.dialog}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
-        <p className={styles.title}>Clear all profiles?</p>
+        <p className={styles.title}>{t('dialog.clearAllTitle')}</p>
         <p className={styles.message}>
-          This will delete all players and scores. Are you sure? This can't be undone!
+          {t('dialog.clearAllMessage')}
         </p>
         <div className={styles.actions}>
           <button className={styles.cancelButton} onClick={onCancel}>
-            Cancel
+            {t('dialog.cancel')}
           </button>
           <button className={styles.clearButton} onClick={onConfirm}>
-            Clear all
+            {t('dialog.clearAll')}
           </button>
         </div>
       </div>

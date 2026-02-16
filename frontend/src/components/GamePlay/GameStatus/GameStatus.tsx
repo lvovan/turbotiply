@@ -1,6 +1,7 @@
 import type { RefObject } from 'react';
 import styles from './GameStatus.module.css';
 import CountdownBar from '../CountdownBar/CountdownBar';
+import { useTranslation } from '../../../i18n';
 import type { GameMode } from '../../../types/player';
 
 interface GameStatusProps {
@@ -38,6 +39,7 @@ export default function GameStatus({
   gameMode = 'play',
 }: GameStatusProps) {
   const isFeedback = currentPhase === 'feedback';
+  const { t } = useTranslation();
 
   const rootClassName = [
     styles.status,
@@ -48,7 +50,7 @@ export default function GameStatus({
     .join(' ');
 
   return (
-    <div className={rootClassName} aria-label="Game status">
+    <div className={rootClassName} aria-label={t('a11y.gameStatus')}>
       {isFeedback ? (
         <div className={styles.feedbackContent} role="status" aria-live="assertive">
           <div className={styles.feedbackMain}>
@@ -56,33 +58,35 @@ export default function GameStatus({
               {isCorrect ? '✓' : '✗'}
             </span>
             <span className={styles.feedbackText}>
-              {isCorrect ? 'Correct!' : 'Not quite!'}
+              {isCorrect ? t('game.correct') : t('game.incorrect')}
             </span>
             {!isCorrect && correctAnswer !== null && (
               <span className={styles.feedbackAnswer}>
-                The answer was {correctAnswer}
+                {t('game.incorrectAnswer', { answer: String(correctAnswer) })}
               </span>
             )}
           </div>
           <span className={styles.completionCount}>
-            {isReplay ? 'Replay' : 'Round'} {completedRound} of {totalRounds} completed
+            {isReplay
+              ? t('game.replayCompleted', { current: String(completedRound), total: String(totalRounds) })
+              : t('game.roundCompleted', { current: String(completedRound), total: String(totalRounds) })}
           </span>
         </div>
       ) : (
         <>
           <div className={styles.roundInfo}>
             {isReplay ? (
-              <span className={styles.replayBadge}>Replay</span>
+              <span className={styles.replayBadge}>{t('game.replay')}</span>
             ) : (
-              <span>Round {roundNumber} of {totalRounds}</span>
+              <span>{t('game.roundOf', { current: String(roundNumber), total: String(totalRounds) })}</span>
             )}
           </div>
           <div className={styles.score}>
             {gameMode === 'improve' ? (
-              <span className={styles.practiceBadge}>Practice</span>
+              <span className={styles.practiceBadge}>{t('game.practice')}</span>
             ) : (
               <>
-                <span className={styles.scoreLabel}>Score:</span>{' '}
+                <span className={styles.scoreLabel}>{t('game.scoreLabel')}</span>{' '}
                 <span className={styles.scoreValue}>{score}</span>
               </>
             )}

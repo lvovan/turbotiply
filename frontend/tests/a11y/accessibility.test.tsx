@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { render } from '@testing-library/react';
+import { render } from '../test-utils';
 import { axe } from 'vitest-axe';
 import { MemoryRouter } from 'react-router-dom';
 import { SessionProvider } from '../../src/hooks/useSession.tsx';

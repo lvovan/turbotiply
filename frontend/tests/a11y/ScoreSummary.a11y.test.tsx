@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/react';
+import { render } from '../test-utils';
 import { axe } from 'vitest-axe';
 import ScoreSummary from '../../src/components/GamePlay/ScoreSummary/ScoreSummary';
 import type { Round } from '../../src/types/game';

@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '../../hooks/useSession.tsx';
+import { useTranslation } from '../../i18n';
 import { getAvatarEmoji } from '../../constants/avatarEmojis';
+import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
 import styles from './Header.module.css';
 
 /**
@@ -11,6 +13,7 @@ import styles from './Header.module.css';
 export default function Header() {
   const navigate = useNavigate();
   const { session, isActive, endSession } = useSession();
+  const { t } = useTranslation();
 
   if (!isActive || !session) {
     return null;
@@ -28,12 +31,15 @@ export default function Header() {
           {getAvatarEmoji(session.avatarId)}
         </span>
         <span className={styles.greeting}>
-          Hi, {session.playerName}!
+          {t('header.greeting', { playerName: session.playerName })}
         </span>
       </div>
-      <button className={styles.switchButton} onClick={handleSwitchPlayer}>
-        Switch player
-      </button>
+      <div className={styles.actions}>
+        <LanguageSwitcher />
+        <button className={styles.switchButton} onClick={handleSwitchPlayer}>
+          {t('header.switchPlayer')}
+        </button>
+      </div>
     </header>
   );
 }

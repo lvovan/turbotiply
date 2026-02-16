@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '../test-utils';
 import userEvent from '@testing-library/user-event';
 import PlayerList from '../../src/components/WelcomeScreen/PlayerList';
 import type { Player } from '../../src/types/player';

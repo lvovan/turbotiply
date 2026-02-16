@@ -1,8 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '../test-utils';
 import userEvent from '@testing-library/user-event';
 import AvatarPicker from '../../src/components/AvatarPicker/AvatarPicker';
 import { AVATARS } from '../../src/constants/avatars';
+import en from '../../src/i18n/locales/en';
 
 describe('AvatarPicker', () => {
   const defaultProps = {
@@ -66,7 +67,8 @@ describe('AvatarPicker', () => {
   it('each avatar has an aria-label with its name', () => {
     render(<AvatarPicker {...defaultProps} />);
     for (const avatar of AVATARS) {
-      expect(screen.getByRole('radio', { name: avatar.label })).toBeInTheDocument();
+      const label = en[avatar.labelKey as keyof typeof en];
+      expect(screen.getByRole('radio', { name: label })).toBeInTheDocument();
     }
   });
 });

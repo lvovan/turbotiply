@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Player } from '../../types/player';
+import { useTranslation } from '../../i18n';
 import PlayerCard from '../PlayerCard/PlayerCard';
 import DeleteConfirmation from '../DeleteConfirmation/DeleteConfirmation';
 import ClearAllConfirmation from '../ClearAllConfirmation/ClearAllConfirmation';
@@ -27,6 +28,7 @@ export default function PlayerList({
 }: PlayerListProps) {
   const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
   const [showClearAll, setShowClearAll] = useState(false);
+  const { t } = useTranslation();
 
   const handleDeleteConfirm = () => {
     if (playerToDelete) {
@@ -52,14 +54,14 @@ export default function PlayerList({
           />
         ))}
         <button className={styles.newPlayerButton} onClick={onNewPlayer}>
-          ➕ New player
+          {t('player.newPlayer')}
         </button>
         {players.length > 0 && (
           <button
             className={styles.clearAllButton}
             onClick={() => setShowClearAll(true)}
           >
-            Clear all profiles
+            {t('player.clearAll')}
           </button>
         )}
       </div>
