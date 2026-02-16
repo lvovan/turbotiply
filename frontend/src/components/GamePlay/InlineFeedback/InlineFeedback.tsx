@@ -1,21 +1,23 @@
-import styles from './RoundFeedback.module.css';
+import styles from './InlineFeedback.module.css';
 
-interface RoundFeedbackProps {
+interface InlineFeedbackProps {
+  /** Whether the player's answer was correct */
   isCorrect: boolean;
+  /** The correct answer to display when incorrect */
   correctAnswer: number;
 }
 
 /**
- * Correct/incorrect feedback overlay displayed for 1.2s after each answer.
- * Uses triple indicator: color + icon + text (per FR-018, WCAG 1.4.1).
- * Content is inside a persistent aria-live="assertive" region.
+ * Compact inline feedback banner displayed in the formula area after answer submission.
+ * Replaces FormulaDisplay during the feedback phase to prevent layout shift.
+ * Uses triple indicator: color + icon + text (WCAG 1.4.1).
  */
-export default function RoundFeedback({ isCorrect, correctAnswer }: RoundFeedbackProps) {
+export default function InlineFeedback({ isCorrect, correctAnswer }: InlineFeedbackProps) {
   return (
     <div
       className={`${styles.feedback} ${isCorrect ? styles.correct : styles.incorrect}`}
-      aria-live="assertive"
       role="status"
+      aria-live="assertive"
     >
       <span className={styles.icon} aria-hidden="true">
         {isCorrect ? '✓' : '✗'}

@@ -11,6 +11,19 @@ export const SCORING_TIERS: ScoringTier[] = [
 /** Points awarded for a correct answer slower than all tiers (>5000ms). */
 export const DEFAULT_POINTS = 0;
 
+/** Duration (ms) of the countdown bar — matches the last scoring tier boundary. */
+export const COUNTDOWN_DURATION_MS = 5000;
+
+/** CVD-safe colors for each countdown bar stage, keyed by scoring tier. */
+export const COUNTDOWN_COLORS = {
+  green: '#0e8a1e',      // 0–2s elapsed, 5 pts tier
+  lightGreen: '#5ba829',  // 2–3s elapsed, 3 pts tier
+  orange: '#d47604',      // 3–4s elapsed, 2 pts tier
+  red: '#c5221f',         // 4–5s elapsed, 1 pt / 0 pts tier
+} as const;
+
+export type CountdownColor = typeof COUNTDOWN_COLORS[keyof typeof COUNTDOWN_COLORS];
+
 /** Points deducted for an incorrect answer during primary rounds. */
 export const INCORRECT_PENALTY = -2;
 

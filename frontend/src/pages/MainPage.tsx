@@ -8,7 +8,7 @@ import { FEEDBACK_DURATION_MS } from '../constants/scoring';
 import Header from '../components/Header/Header';
 import FormulaDisplay from '../components/GamePlay/FormulaDisplay/FormulaDisplay';
 import AnswerInput from '../components/GamePlay/AnswerInput/AnswerInput';
-import RoundFeedback from '../components/GamePlay/RoundFeedback/RoundFeedback';
+import InlineFeedback from '../components/GamePlay/InlineFeedback/InlineFeedback';
 import GameStatus from '../components/GamePlay/GameStatus/GameStatus';
 import ScoreSummary from '../components/GamePlay/ScoreSummary/ScoreSummary';
 import RecentHighScores from '../components/GamePlay/RecentHighScores/RecentHighScores';
@@ -23,7 +23,7 @@ export default function MainPage() {
   const { session, isActive } = useSession();
   const { gameState, currentRound, correctAnswer, startGame, submitAnswer, nextRound, resetGame } =
     useGame();
-  const { displayRef, start, stop, reset } = useRoundTimer();
+  const { displayRef, barRef, start, stop, reset } = useRoundTimer();
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scorePersistedRef = useRef(false);
 
@@ -113,26 +113,27 @@ export default function MainPage() {
               }
               score={gameState.score}
               timerRef={displayRef}
+              barRef={barRef}
               isReplay={gameState.status === 'replay'}
             />
 
-            <FormulaDisplay formula={currentRound.formula} />
+            <div data-testid="formula-area" style={{ minHeight: 88 }}>
+              {gameState.currentPhase === 'feedback' &&
+                currentRound.isCorrect !== null &&
+                correctAnswer !== null ? (
+                  <InlineFeedback
+                    isCorrect={currentRound.isCorrect}
+                    correctAnswer={correctAnswer}
+                  />
+                ) : (
+                  <FormulaDisplay formula={currentRound.formula} />
+                )}
+            </div>
 
             <AnswerInput
               onSubmit={handleSubmit}
               disabled={gameState.currentPhase !== 'input'}
             />
-
-            <div aria-live="assertive" role="status">
-              {gameState.currentPhase === 'feedback' &&
-                currentRound.isCorrect !== null &&
-                correctAnswer !== null && (
-                  <RoundFeedback
-                    isCorrect={currentRound.isCorrect}
-                    correctAnswer={correctAnswer}
-                  />
-                )}
-            </div>
           </div>
         )}
 

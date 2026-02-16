@@ -11,12 +11,14 @@ import PlayerList from '../../src/components/WelcomeScreen/PlayerList';
 import ClearAllConfirmation from '../../src/components/ClearAllConfirmation/ClearAllConfirmation';
 import FormulaDisplay from '../../src/components/GamePlay/FormulaDisplay/FormulaDisplay';
 import AnswerInput from '../../src/components/GamePlay/AnswerInput/AnswerInput';
-import RoundFeedback from '../../src/components/GamePlay/RoundFeedback/RoundFeedback';
+import InlineFeedback from '../../src/components/GamePlay/InlineFeedback/InlineFeedback';
+import CountdownBar from '../../src/components/GamePlay/CountdownBar/CountdownBar';
 import ScoreSummary from '../../src/components/GamePlay/ScoreSummary/ScoreSummary';
 import RecentHighScores from '../../src/components/GamePlay/RecentHighScores/RecentHighScores';
 import ProgressionGraph from '../../src/components/GamePlay/ProgressionGraph/ProgressionGraph';
 import type { Round } from '../../src/types/game';
 import type { GameRecord } from '../../src/types/player';
+import { createRef } from 'react';
 
 function renderWithProviders(ui: React.ReactElement) {
   return render(
@@ -102,21 +104,26 @@ describe('Accessibility — Gameplay (axe)', () => {
     expect(results).toHaveNoViolations();
   });
 
-  it('RoundFeedback (correct) has no a11y violations', async () => {
+  it('InlineFeedback (correct) has no a11y violations', async () => {
     const { container } = render(
-      <div aria-live="assertive" role="status">
-        <RoundFeedback isCorrect={true} correctAnswer={21} />
-      </div>,
+      <InlineFeedback isCorrect={true} correctAnswer={21} />,
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
 
-  it('RoundFeedback (incorrect) has no a11y violations', async () => {
+  it('InlineFeedback (incorrect) has no a11y violations', async () => {
     const { container } = render(
-      <div aria-live="assertive" role="status">
-        <RoundFeedback isCorrect={false} correctAnswer={21} />
-      </div>,
+      <InlineFeedback isCorrect={false} correctAnswer={21} />,
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  it('CountdownBar has no a11y violations', async () => {
+    const barRef = createRef<HTMLDivElement>();
+    const { container } = render(
+      <CountdownBar barRef={barRef} />,
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();

@@ -3,8 +3,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 24px 16px;
+  gap: 4px;
+  padding: 16px;
   border-radius: 12px;
   text-align: center;
   animation: fadeIn 0.2s ease-out;
@@ -23,19 +23,18 @@
 }
 
 .icon {
-  font-size: 2.5rem;
+  font-size: 2rem;
   line-height: 1;
 }
 
 .text {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 700;
 }
 
 .answer {
-  font-size: 1rem;
+  font-size: 0.9rem;
   opacity: 0.85;
-  margin-top: 4px;
 }
 
 @keyframes fadeIn {
@@ -49,16 +48,8 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (prefers-reduced-motion: reduce) {
   .feedback {
-    padding: 16px 12px;
-  }
-
-  .icon {
-    font-size: 2rem;
-  }
-
-  .text {
-    font-size: 1.2rem;
+    animation: none;
   }
 }

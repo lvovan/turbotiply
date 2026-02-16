@@ -405,6 +405,67 @@ describe('MainPage — Replay UI (US2)', () => {
     // Replay indicator should not have appeared
     expect(screen.queryByText(/Replay/i)).not.toBeInTheDocument();
   });
+
+  it('countdown bar is present during replay rounds', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    renderMainPage();
+
+    await user.click(screen.getByRole('button', { name: /start game/i }));
+
+    const correctAnswers = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
+
+    // Answer round 1 incorrectly, rest correctly
+    for (let i = 0; i < 10; i++) {
+      if (i === 0) {
+        await playRound(user, '999', false);
+      } else if (i < 9) {
+        await playRound(user, String(correctAnswers[i]), false);
+      } else {
+        await playRound(user, String(correctAnswers[i]));
+      }
+    }
+
+    await waitFor(() => {
+      expect(screen.getByText(/Replay/i)).toBeInTheDocument();
+    });
+
+    // Countdown bar should be present during replay
+    const progressbar = document.querySelector('[role="progressbar"]');
+    expect(progressbar).toBeInTheDocument();
+  });
+
+  it('inline feedback appears after submitting replay answer', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    renderMainPage();
+
+    await user.click(screen.getByRole('button', { name: /start game/i }));
+
+    const correctAnswers = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
+
+    // Answer round 1 incorrectly, rest correctly
+    for (let i = 0; i < 10; i++) {
+      if (i === 0) {
+        await playRound(user, '999', false);
+      } else if (i < 9) {
+        await playRound(user, String(correctAnswers[i]), false);
+      } else {
+        await playRound(user, String(correctAnswers[i]));
+      }
+    }
+
+    await waitFor(() => {
+      expect(screen.getByText(/Replay/i)).toBeInTheDocument();
+    });
+
+    // Submit correct answer in replay
+    const input = screen.getByRole('textbox');
+    await user.type(input, '1');
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    // Inline feedback should appear
+    expect(screen.getByText('Correct!')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toBeInTheDocument();
+  });
 });
 
 describe('MainPage — Scoring Display (US3)', () => {
@@ -435,7 +496,7 @@ describe('MainPage — Scoring Display (US3)', () => {
 
     // After submitting, score should show points (feedback phase shows score)
     // With fake timers, elapsed is ~0ms → tier 1 → 5 points
-    expect(screen.getByText(/5/)).toBeInTheDocument();
+    expect(screen.getByText('5', { exact: true })).toBeInTheDocument();
   });
 
   it('per-round points visible in score summary', async () => {
@@ -551,5 +612,69 @@ describe('MainPage — Scoring Display (US3)', () => {
     // Timer element should be present
     const timerElement = document.querySelector('[data-testid="timer"]');
     expect(timerElement).toBeInTheDocument();
+  });
+});
+
+describe('MainPage — Inline Feedback (US2 round UX)', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+    vi.clearAllMocks();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.spyOn(formulaGenerator, 'generateFormulas').mockReturnValue(createTestFormulas());
+    setUpActiveSession();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it('formula area container exists with fixed height during gameplay', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    renderMainPage();
+
+    await user.click(screen.getByRole('button', { name: /start game/i }));
+
+    const formulaArea = document.querySelector('[data-testid="formula-area"]');
+    expect(formulaArea).toBeInTheDocument();
+  });
+
+  it('FormulaDisplay is shown during input phase', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    renderMainPage();
+
+    await user.click(screen.getByRole('button', { name: /start game/i }));
+
+    // Formula should be visible (math role)
+    expect(screen.getByRole('math')).toBeInTheDocument();
+  });
+
+  it('InlineFeedback replaces formula during feedback phase', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    renderMainPage();
+
+    await user.click(screen.getByRole('button', { name: /start game/i }));
+
+    // Submit correct answer for round 1 (1×1=1)
+    const input = screen.getByRole('textbox');
+    await user.type(input, '1');
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    // Formula should be replaced by feedback
+    expect(screen.queryByRole('math')).not.toBeInTheDocument();
+    expect(screen.getByText('Correct!')).toBeInTheDocument();
+    // Feedback should have status role (InlineFeedback)
+    expect(screen.getByRole('status')).toBeInTheDocument();
+  });
+
+  it('countdown bar is visible during gameplay', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    renderMainPage();
+
+    await user.click(screen.getByRole('button', { name: /start game/i }));
+
+    const progressbar = document.querySelector('[role="progressbar"]');
+    expect(progressbar).toBeInTheDocument();
   });
 });

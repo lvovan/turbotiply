@@ -1,23 +1,27 @@
 import type { RefObject } from 'react';
 import styles from './GameStatus.module.css';
+import CountdownBar from '../CountdownBar/CountdownBar';
 
 interface GameStatusProps {
   roundNumber: number;
   totalRounds: number;
   score: number;
   timerRef: RefObject<HTMLElement | null>;
+  barRef: RefObject<HTMLDivElement | null>;
   isReplay: boolean;
 }
 
 /**
  * Displays round counter, running score, and timer during gameplay.
  * Shows "Replay" indicator when in replay phase (per FR-019).
+ * Renders a countdown progress bar below the status row.
  */
 export default function GameStatus({
   roundNumber,
   totalRounds,
   score,
   timerRef,
+  barRef,
   isReplay,
 }: GameStatusProps) {
   return (
@@ -39,9 +43,10 @@ export default function GameStatus({
           className="timer"
           data-testid="timer"
         >
-          0.0s
+          5.0s
         </span>
       </div>
+      <CountdownBar barRef={barRef} />
     </div>
   );
 }
