@@ -72,7 +72,7 @@ async function playFullGame(user: ReturnType<typeof userEvent.setup>, formulas: 
   // Answer all 10 rounds correctly
   for (let i = 0; i < 10; i++) {
     const answer = getCorrectAnswer(formulas[i]);
-    const input = screen.getByRole('spinbutton');
+    const input = screen.getByRole('textbox');
     await user.clear(input);
     await user.type(input, String(answer));
     await user.click(screen.getByRole('button', { name: /submit/i }));
@@ -85,7 +85,7 @@ async function playFullGame(user: ReturnType<typeof userEvent.setup>, formulas: 
     // Wait for next round or completed state
     if (i < 9) {
       await waitFor(() => {
-        expect(screen.getByRole('spinbutton')).toBeInTheDocument();
+        expect(screen.getByRole('textbox')).toBeInTheDocument();
       });
     }
   }

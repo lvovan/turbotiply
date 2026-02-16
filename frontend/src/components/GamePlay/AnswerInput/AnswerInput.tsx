@@ -35,7 +35,7 @@ export default function AnswerInput({ onSubmit, disabled }: AnswerInputProps) {
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <input
-        type="number"
+        type="text"
         className={styles.input}
         value={value}
         onChange={(e) => handleChange(e.target.value)}
@@ -44,7 +44,8 @@ export default function AnswerInput({ onSubmit, disabled }: AnswerInputProps) {
         aria-label="Your answer"
         autoFocus
         inputMode="numeric"
-        min={0}
+        pattern="[0-9]*"
+        enterKeyHint="go"
       />
       <button
         type="submit"

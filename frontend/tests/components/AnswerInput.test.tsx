@@ -7,7 +7,7 @@ describe('AnswerInput', () => {
   it('renders numeric input and submit button', () => {
     render(<AnswerInput onSubmit={vi.fn()} disabled={false} />);
 
-    expect(screen.getByRole('spinbutton')).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument();
   });
 
@@ -21,7 +21,7 @@ describe('AnswerInput', () => {
     const user = userEvent.setup();
     render(<AnswerInput onSubmit={vi.fn()} disabled={false} />);
 
-    await user.type(screen.getByRole('spinbutton'), '5');
+    await user.type(screen.getByRole('textbox'), '5');
     expect(screen.getByRole('button', { name: /submit/i })).toBeEnabled();
   });
 
@@ -30,7 +30,7 @@ describe('AnswerInput', () => {
     const onSubmit = vi.fn();
     render(<AnswerInput onSubmit={onSubmit} disabled={false} />);
 
-    await user.type(screen.getByRole('spinbutton'), '42');
+    await user.type(screen.getByRole('textbox'), '42');
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
     expect(onSubmit).toHaveBeenCalledWith(42);
@@ -41,7 +41,7 @@ describe('AnswerInput', () => {
     const onSubmit = vi.fn();
     render(<AnswerInput onSubmit={onSubmit} disabled={false} />);
 
-    await user.type(screen.getByRole('spinbutton'), '07');
+    await user.type(screen.getByRole('textbox'), '07');
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
     expect(onSubmit).toHaveBeenCalledWith(7);
@@ -50,7 +50,7 @@ describe('AnswerInput', () => {
   it('input is disabled when disabled prop is true', () => {
     render(<AnswerInput onSubmit={vi.fn()} disabled={true} />);
 
-    expect(screen.getByRole('spinbutton')).toBeDisabled();
+    expect(screen.getByRole('textbox')).toBeDisabled();
     expect(screen.getByRole('button', { name: /submit/i })).toBeDisabled();
   });
 
@@ -58,11 +58,11 @@ describe('AnswerInput', () => {
     const user = userEvent.setup();
     render(<AnswerInput onSubmit={vi.fn()} disabled={false} />);
 
-    const input = screen.getByRole('spinbutton');
+    const input = screen.getByRole('textbox');
     await user.type(input, '5');
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
-    expect(input).toHaveValue(null);
+    expect(input).toHaveValue('');
   });
 
   it('submits on Enter key press', async () => {
@@ -70,7 +70,7 @@ describe('AnswerInput', () => {
     const onSubmit = vi.fn();
     render(<AnswerInput onSubmit={onSubmit} disabled={false} />);
 
-    await user.type(screen.getByRole('spinbutton'), '12{Enter}');
+    await user.type(screen.getByRole('textbox'), '12{Enter}');
 
     expect(onSubmit).toHaveBeenCalledWith(12);
   });

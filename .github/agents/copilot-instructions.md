@@ -13,6 +13,8 @@ Auto-generated from all feature plans. Last updated: 2026-02-14
 - TypeScript 5.x + React 19, Vite 6 (005-min-factor-two)
 - Browser localStorage (unchanged by this feature) (005-min-factor-two)
 - Browser localStorage (`turbotiply_players` key, schema v3 → v4) and sessionStorage (`turbotiply_session` key) (006-score-display)
+- TypeScript ~5.9.3, React 19.2, bundled via Vite 7.3 + React, React DOM, CSS Modules (007-numeric-keypad-input)
+- N/A (no data model changes) (007-numeric-keypad-input)
 
 - TypeScript 5.x (frontend), Python 3.11+ (backend — serves static files only for this feature) + React 18+, Vite (bundler), React Router (navigation), FastAPI (backend — static file serving only) (main)
 
@@ -33,9 +35,9 @@ cd src; pytest; ruff check .
 TypeScript 5.x (frontend): Follow standard conventions
 
 ## Recent Changes
+- 007-numeric-keypad-input: Added TypeScript ~5.9.3, React 19.2, bundled via Vite 7.3 + React, React DOM, CSS Modules
 - 006-score-display: Added TypeScript ~5.9, React 19, Vite 7 + react-router-dom 7, vitest 4, @testing-library/react 16, vitest-axe
 - 005-min-factor-two: Added TypeScript 5.x + React 19, Vite 6
-- 004-remove-profile-colors: Added TypeScript 5.x (React 18+) + React, Vite
 
 
 <!-- MANUAL ADDITIONS START -->

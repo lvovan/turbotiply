@@ -102,7 +102,7 @@ describe('MainPage', () => {
     await user.click(screen.getByRole('button', { name: /start game/i }));
 
     // Round 1: 1 × 1 = ?, answer is 1
-    const input = screen.getByRole('spinbutton');
+    const input = screen.getByRole('textbox');
     await user.type(input, '1');
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
@@ -119,7 +119,7 @@ describe('MainPage', () => {
     // Play all 10 rounds with correct answers
     const answers = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
     for (let i = 0; i < 10; i++) {
-      const input = screen.getByRole('spinbutton');
+      const input = screen.getByRole('textbox');
       await user.type(input, String(answers[i]));
       await user.click(screen.getByRole('button', { name: /submit/i }));
 
@@ -131,7 +131,7 @@ describe('MainPage', () => {
       // If not last round, wait for next round to appear
       if (i < 9) {
         await waitFor(() => {
-          expect(screen.getByRole('spinbutton')).toBeInTheDocument();
+          expect(screen.getByRole('textbox')).toBeInTheDocument();
         });
       }
     }
@@ -155,7 +155,7 @@ describe('MainPage', () => {
     // Play all 10 rounds correctly
     const answers = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
     for (let i = 0; i < 10; i++) {
-      const input = screen.getByRole('spinbutton');
+      const input = screen.getByRole('textbox');
       await user.type(input, String(answers[i]));
       await user.click(screen.getByRole('button', { name: /submit/i }));
 
@@ -165,7 +165,7 @@ describe('MainPage', () => {
 
       if (i < 9) {
         await waitFor(() => {
-          expect(screen.getByRole('spinbutton')).toBeInTheDocument();
+          expect(screen.getByRole('textbox')).toBeInTheDocument();
         });
       }
     }
@@ -192,7 +192,7 @@ describe('MainPage', () => {
     // Play all 10 rounds correctly
     const answers = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
     for (let i = 0; i < 10; i++) {
-      const input = screen.getByRole('spinbutton');
+      const input = screen.getByRole('textbox');
       await user.type(input, String(answers[i]));
       await user.click(screen.getByRole('button', { name: /submit/i }));
 
@@ -202,7 +202,7 @@ describe('MainPage', () => {
 
       if (i < 9) {
         await waitFor(() => {
-          expect(screen.getByRole('spinbutton')).toBeInTheDocument();
+          expect(screen.getByRole('textbox')).toBeInTheDocument();
         });
       }
     }
@@ -234,7 +234,7 @@ async function playRound(
   answer: string,
   isLastRound = false,
 ) {
-  const input = screen.getByRole('spinbutton');
+  const input = screen.getByRole('textbox');
   await user.type(input, answer);
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
@@ -244,7 +244,7 @@ async function playRound(
 
   if (!isLastRound) {
     await waitFor(() => {
-      expect(screen.getByRole('spinbutton')).toBeInTheDocument();
+      expect(screen.getByRole('textbox')).toBeInTheDocument();
     });
   }
 }
@@ -321,7 +321,7 @@ describe('MainPage — Replay UI (US2)', () => {
     });
 
     // Now answer the replayed round correctly (3×3=9)
-    const input = screen.getByRole('spinbutton');
+    const input = screen.getByRole('textbox');
     await user.type(input, '9');
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
@@ -360,7 +360,7 @@ describe('MainPage — Replay UI (US2)', () => {
     });
 
     // Answer incorrectly again — should re-queue
-    const input = screen.getByRole('spinbutton');
+    const input = screen.getByRole('textbox');
     await user.type(input, '888');
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
@@ -374,7 +374,7 @@ describe('MainPage — Replay UI (US2)', () => {
     });
 
     // Now answer correctly to end the game
-    const input2 = screen.getByRole('spinbutton');
+    const input2 = screen.getByRole('textbox');
     await user.type(input2, '1');
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
@@ -429,7 +429,7 @@ describe('MainPage — Scoring Display (US3)', () => {
     await user.click(screen.getByRole('button', { name: /start game/i }));
 
     // Answer round 1 correctly (1×1=1)
-    const input = screen.getByRole('spinbutton');
+    const input = screen.getByRole('textbox');
     await user.type(input, '1');
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
@@ -477,7 +477,7 @@ describe('MainPage — Scoring Display (US3)', () => {
     });
 
     for (let i = 0; i < 10; i++) {
-      const input = screen.getByRole('spinbutton');
+      const input = screen.getByRole('textbox');
       await user.type(input, String(correctAnswers[i]));
       await user.click(screen.getByRole('button', { name: /submit/i }));
 
@@ -487,7 +487,7 @@ describe('MainPage — Scoring Display (US3)', () => {
 
       if (i < 9) {
         await waitFor(() => {
-          expect(screen.getByRole('spinbutton')).toBeInTheDocument();
+          expect(screen.getByRole('textbox')).toBeInTheDocument();
         });
       }
     }
@@ -524,7 +524,7 @@ describe('MainPage — Scoring Display (US3)', () => {
       expect(screen.getByText(/Replay/i)).toBeInTheDocument();
     });
 
-    const input = screen.getByRole('spinbutton');
+    const input = screen.getByRole('textbox');
     await user.type(input, '1');
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
