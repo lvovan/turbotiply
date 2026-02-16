@@ -231,6 +231,168 @@ describe('Improve Mode — Score Isolation', () => {
   }, 20000);
 });
 
+describe('Improve Mode — Multi-Game Tricky Numbers', () => {
+  let formulas: Formula[];
+
+  beforeEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+    mockNavigate.mockClear();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+
+    formulas = createTestFormulas();
+    vi.spyOn(formulaGenerator, 'generateFormulas').mockReturnValue(formulas);
+    vi.spyOn(formulaGenerator, 'generateImproveFormulas').mockReturnValue(formulas);
+
+    vi.setSystemTime(new Date('2025-01-15T10:00:00Z'));
+    savePlayer({ name: 'MultiGamePlayer', avatarId: 'rocket' });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it('aggregates tricky pairs across multiple game records for Practice mode', async () => {
+    // Game 1: mistake on (7,8)
+    const rounds1: RoundResult[] = [
+      { factorA: 7, factorB: 8, isCorrect: false, elapsedMs: 8000 },
+      { factorA: 2, factorB: 3, isCorrect: true, elapsedMs: 1000 },
+      { factorA: 3, factorB: 4, isCorrect: true, elapsedMs: 1200 },
+      { factorA: 4, factorB: 5, isCorrect: true, elapsedMs: 900 },
+      { factorA: 5, factorB: 6, isCorrect: true, elapsedMs: 1100 },
+      { factorA: 2, factorB: 5, isCorrect: true, elapsedMs: 800 },
+      { factorA: 3, factorB: 6, isCorrect: true, elapsedMs: 1000 },
+      { factorA: 4, factorB: 7, isCorrect: true, elapsedMs: 950 },
+      { factorA: 2, factorB: 8, isCorrect: true, elapsedMs: 1050 },
+      { factorA: 6, factorB: 7, isCorrect: true, elapsedMs: 1100 },
+    ];
+    saveGameRecord('MultiGamePlayer', 25, rounds1, 'play');
+
+    // Game 2: mistake on (7,8) again and (6,9)
+    const rounds2: RoundResult[] = [
+      { factorA: 7, factorB: 8, isCorrect: false, elapsedMs: 7000 },
+      { factorA: 6, factorB: 9, isCorrect: false, elapsedMs: 6000 },
+      { factorA: 2, factorB: 3, isCorrect: true, elapsedMs: 1000 },
+      { factorA: 3, factorB: 4, isCorrect: true, elapsedMs: 1200 },
+      { factorA: 4, factorB: 5, isCorrect: true, elapsedMs: 900 },
+      { factorA: 5, factorB: 6, isCorrect: true, elapsedMs: 1100 },
+      { factorA: 2, factorB: 5, isCorrect: true, elapsedMs: 800 },
+      { factorA: 3, factorB: 6, isCorrect: true, elapsedMs: 1000 },
+      { factorA: 4, factorB: 7, isCorrect: true, elapsedMs: 950 },
+      { factorA: 2, factorB: 8, isCorrect: true, elapsedMs: 1050 },
+    ];
+    saveGameRecord('MultiGamePlayer', 20, rounds2, 'play');
+
+    setUpActiveSession('MultiGamePlayer');
+    renderMainPage();
+
+    // The Improve button should be visible (player has challenging pairs across games)
+    expect(screen.getByRole('button', { name: /improve/i })).toBeInTheDocument();
+
+    // Verify generateImproveFormulas was called when Improve is clicked
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await user.click(screen.getByRole('button', { name: /improve/i }));
+
+    // generateImproveFormulas should have been called (spy tracks calls)
+    expect(formulaGenerator.generateImproveFormulas).toHaveBeenCalled();
+  }, 15000);
+});
+
+describe('Improve Mode — No Countdown Bar', () => {
+  let formulas: Formula[];
+
+  beforeEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+    mockNavigate.mockClear();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+
+    formulas = createTestFormulas();
+    vi.spyOn(formulaGenerator, 'generateFormulas').mockReturnValue(formulas);
+    vi.spyOn(formulaGenerator, 'generateImproveFormulas').mockReturnValue(formulas);
+
+    vi.setSystemTime(new Date('2025-01-15T10:00:00Z'));
+    savePlayer({ name: 'CountdownTestPlayer', avatarId: 'rocket' });
+    createGameWithChallengingPairs('CountdownTestPlayer');
+    setUpActiveSession('CountdownTestPlayer');
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it('does not show countdown bar during Improve mode gameplay', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+
+    renderMainPage();
+
+    // Start Improve mode
+    await user.click(screen.getByRole('button', { name: /improve/i }));
+
+    // Verify no progressbar during gameplay
+    const progressbar = document.querySelector('[role="progressbar"]');
+    expect(progressbar).not.toBeInTheDocument();
+
+    // Verify timer text is not shown
+    expect(screen.queryByTestId('timer')).not.toBeInTheDocument();
+
+    // Verify answer submission still works and game records elapsedMs
+    const answer = getCorrectAnswer(formulas[0]);
+    const input = screen.getByRole('textbox');
+    await user.clear(input);
+    await user.type(input, String(answer));
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    act(() => {
+      vi.advanceTimersByTime(FEEDBACK_DURATION_MS + 50);
+    });
+
+    // Check that the game continued (next round input appears)
+    await waitFor(() => {
+      expect(screen.getByRole('textbox')).toBeInTheDocument();
+    });
+  }, 15000);
+
+  it('still records elapsedMs even when countdown bar is hidden', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+
+    renderMainPage();
+    await user.click(screen.getByRole('button', { name: /improve/i }));
+
+    // Play through all 10 rounds
+    for (let i = 0; i < 10; i++) {
+      const answer = getCorrectAnswer(formulas[i]);
+      const input = screen.getByRole('textbox');
+      await user.clear(input);
+      await user.type(input, String(answer));
+      await user.click(screen.getByRole('button', { name: /submit/i }));
+      act(() => {
+        vi.advanceTimersByTime(FEEDBACK_DURATION_MS + 50);
+      });
+      if (i < 9) {
+        await waitFor(() => {
+          expect(screen.getByRole('textbox')).toBeInTheDocument();
+        });
+      }
+    }
+
+    await waitFor(() => {
+      expect(screen.getByText(/you got/i)).toBeInTheDocument();
+    });
+
+    // Verify elapsedMs was recorded in saved round data
+    const player = getPlayers().find((p) => p.name === 'CountdownTestPlayer')!;
+    const improveRecords = (player.gameHistory ?? []).filter((r) => r.gameMode === 'improve');
+    expect(improveRecords.length).toBe(1);
+    const rounds = improveRecords[0].rounds!;
+    for (const round of rounds) {
+      expect(round.elapsedMs).toBeGreaterThan(0);
+    }
+  }, 20000);
+});
+
 describe('Improve Mode — Full Flow Integration', () => {
   let formulas: Formula[];
 

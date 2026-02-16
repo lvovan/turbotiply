@@ -6,40 +6,63 @@ import { getPlayers } from './playerStorage';
 const MAX_TRICKY_NUMBERS = 8;
 
 /**
- * Analyze a completed game's primary rounds to identify challenging multiplication pairs.
+ * Analyze rounds (potentially from multiple games) to identify challenging multiplication pairs.
  *
- * A pair qualifies as challenging if the player answered incorrectly on the initial attempt.
- * Response time relative to the game average is used only for ranking (difficultyRatio),
- * so that even a single wrong answer after 1 game unlocks Practice mode.
+ * Groups rounds by unordered pair, aggregates mistake counts and response times.
+ * When mistakes exist: returns only pairs with mistakes, sorted by mistakeCount desc, avgMs desc.
+ * When all correct: returns all pairs sorted by avgMs desc (slowest = trickiest).
  *
- * @param rounds Array of exactly 10 RoundResult objects from a completed game.
- * @returns Challenging pairs sorted by difficultyRatio descending. May be empty.
+ * @param allRounds Flattened array of RoundResult objects from one or more games.
+ * @returns Challenging pairs sorted by ranking criteria. May be empty.
  */
-export function identifyChallengingPairs(rounds: RoundResult[]): ChallengingPair[] {
-  if (rounds.length === 0) return [];
+export function identifyChallengingPairs(allRounds: RoundResult[]): ChallengingPair[] {
+  if (allRounds.length === 0) return [];
 
-  // Compute game average response time (used for ranking only)
-  const totalMs = rounds.reduce((sum, r) => sum + r.elapsedMs, 0);
-  const averageMs = totalMs / rounds.length;
+  // Group by unordered pair key "(min,max)"
+  const pairMap = new Map<string, { factorA: number; factorB: number; mistakeCount: number; totalMs: number; occurrences: number }>();
 
-  // Collect all incorrect rounds as challenging pairs
-  const challengingPairs: ChallengingPair[] = [];
+  for (const round of allRounds) {
+    const a = Math.min(round.factorA, round.factorB);
+    const b = Math.max(round.factorA, round.factorB);
+    const key = `${a},${b}`;
 
-  for (const round of rounds) {
-    if (!round.isCorrect) {
-      // Normalize to unordered pair (factorA ≤ factorB)
-      const a = Math.min(round.factorA, round.factorB);
-      const b = Math.max(round.factorA, round.factorB);
-      const difficultyRatio = averageMs > 0 ? round.elapsedMs / averageMs : 1;
-
-      challengingPairs.push({ factorA: a, factorB: b, difficultyRatio });
+    let stats = pairMap.get(key);
+    if (!stats) {
+      stats = { factorA: a, factorB: b, mistakeCount: 0, totalMs: 0, occurrences: 0 };
+      pairMap.set(key, stats);
     }
+
+    if (!round.isCorrect) {
+      stats.mistakeCount++;
+    }
+    stats.totalMs += round.elapsedMs;
+    stats.occurrences++;
   }
 
-  // Rank by difficulty (descending) — slower wrong answers rank higher
-  challengingPairs.sort((x, y) => y.difficultyRatio - x.difficultyRatio);
+  // Build result with avgMs computed
+  const allPairs: ChallengingPair[] = [];
+  for (const stats of pairMap.values()) {
+    allPairs.push({
+      factorA: stats.factorA,
+      factorB: stats.factorB,
+      mistakeCount: stats.mistakeCount,
+      avgMs: stats.totalMs / stats.occurrences,
+    });
+  }
 
-  return challengingPairs;
+  // Check if any pair has mistakes
+  const hasMistakes = allPairs.some((p) => p.mistakeCount > 0);
+
+  if (hasMistakes) {
+    // Filter to only pairs with mistakes, sort by mistakeCount desc, avgMs desc
+    const mistakePairs = allPairs.filter((p) => p.mistakeCount > 0);
+    mistakePairs.sort((a, b) => b.mistakeCount - a.mistakeCount || b.avgMs - a.avgMs);
+    return mistakePairs;
+  }
+
+  // Fallback: all correct — sort by avgMs desc (slowest = trickiest)
+  allPairs.sort((a, b) => b.avgMs - a.avgMs);
+  return allPairs;
 }
 
 /**
@@ -62,12 +85,18 @@ export function extractTrickyNumbers(pairs: ChallengingPair[]): number[] {
     .slice(0, MAX_TRICKY_NUMBERS);
 }
 
+/** Maximum number of recent games to analyze for challenging pairs. */
+const MAX_GAME_WINDOW = 10;
+
 /**
- * Convenience function: load a player's most recent game with per-round data
- * and run challenge analysis on it.
+ * Convenience function: load a player's most recent games with per-round data
+ * and run challenge analysis across all of them.
+ *
+ * Collects up to 10 most recent games that have round data, flattens all rounds,
+ * and passes them to identifyChallengingPairs for aggregation.
  *
  * @param playerName Case-insensitive player name.
- * @returns Challenging pairs from the most recent analyzable game, or empty array.
+ * @returns Challenging pairs aggregated from up to 10 recent games, or empty array.
  */
 export function getChallengingPairsForPlayer(playerName: string): ChallengingPair[] {
   const players = getPlayers();
@@ -78,13 +107,19 @@ export function getChallengingPairsForPlayer(playerName: string): ChallengingPai
     return [];
   }
 
-  // Find the most recent GameRecord with a non-empty rounds array
-  for (let i = player.gameHistory.length - 1; i >= 0; i--) {
-    const record = player.gameHistory[i];
-    if (record.rounds && record.rounds.length > 0) {
-      return identifyChallengingPairs(record.rounds);
-    }
+  // Filter to records with round data, take last MAX_GAME_WINDOW
+  const gamesWithRounds = player.gameHistory.filter(
+    (record) => record.rounds && record.rounds.length > 0,
+  );
+
+  if (gamesWithRounds.length === 0) {
+    return [];
   }
 
-  return [];
+  const recentGames = gamesWithRounds.slice(-MAX_GAME_WINDOW);
+
+  // Flatten all rounds from recent games
+  const allRounds: RoundResult[] = recentGames.flatMap((record) => record.rounds!);
+
+  return identifyChallengingPairs(allRounds);
 }

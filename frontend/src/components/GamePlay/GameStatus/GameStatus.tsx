@@ -91,16 +91,20 @@ export default function GameStatus({
               </>
             )}
           </div>
-          <div className={styles.timer}>
-            <span
-              ref={timerRef as RefObject<HTMLSpanElement>}
-              className="timer"
-              data-testid="timer"
-            >
-              5.0s
-            </span>
-          </div>
-          <CountdownBar barRef={barRef} />
+          {gameMode !== 'improve' && (
+            <>
+              <div className={styles.timer}>
+                <span
+                  ref={timerRef as RefObject<HTMLSpanElement>}
+                  className="timer"
+                  data-testid="timer"
+                >
+                  5.0s
+                </span>
+              </div>
+              <CountdownBar barRef={barRef} />
+            </>
+          )}
         </>
       )}
     </div>

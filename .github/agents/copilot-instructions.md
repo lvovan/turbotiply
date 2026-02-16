@@ -29,6 +29,8 @@ Auto-generated from all feature plans. Last updated: 2026-02-14
 - localStorage (`turbotiply_lang` key — existing, unchanged) (015-portuguese-language)
 - TypeScript ~5.9.3, React 19.2, JSX + react-router-dom 7.13, Vite 7.3, CSS Modules (016-minor-ui-polish)
 - N/A (no storage changes) (016-minor-ui-polish)
+- TypeScript 5.9 / React 19.2 / Vite 7.3 + react, react-dom, react-router-dom 7.13 (017-practice-mode-update)
+- Browser localStorage (no backend) (017-practice-mode-update)
 
 - TypeScript 5.x (frontend), Python 3.11+ (backend — serves static files only for this feature) + React 18+, Vite (bundler), React Router (navigation), FastAPI (backend — static file serving only) (main)
 
@@ -49,9 +51,9 @@ cd src; pytest; ruff check .
 TypeScript 5.x (frontend): Follow standard conventions
 
 ## Recent Changes
+- 017-practice-mode-update: Added TypeScript 5.9 / React 19.2 / Vite 7.3 + react, react-dom, react-router-dom 7.13
 - 016-minor-ui-polish: Added TypeScript ~5.9.3, React 19.2, JSX + react-router-dom 7.13, Vite 7.3, CSS Modules
 - 015-portuguese-language: Added TypeScript ~5.9.3, React 19.2.0 + react, react-dom, react-router-dom (custom i18n — no library)
-- 014-multilingual-support: Added TypeScript ~5.9.3, React 19.2.0 + react, react-dom, react-router-dom (no i18n library — custom solution)
 
 
 <!-- MANUAL ADDITIONS START -->

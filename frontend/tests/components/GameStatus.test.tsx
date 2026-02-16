@@ -412,7 +412,7 @@ describe('GameStatus', () => {
       expect(screen.getByText(/Round 5 of 10/)).toBeInTheDocument();
     });
 
-    it('shows timer in improve mode', () => {
+    it('hides timer in improve mode', () => {
       render(
         <GameStatus
           {...defaultProps({
@@ -420,7 +420,42 @@ describe('GameStatus', () => {
           })}
         />,
       );
+      expect(screen.queryByTestId('timer')).not.toBeInTheDocument();
+    });
+
+    it('hides countdown bar in improve mode', () => {
+      const { container } = render(
+        <GameStatus
+          {...defaultProps({
+            gameMode: 'improve',
+          })}
+        />,
+      );
+      const progressbar = container.querySelector('[role="progressbar"]');
+      expect(progressbar).not.toBeInTheDocument();
+    });
+
+    it('shows timer in play mode', () => {
+      render(
+        <GameStatus
+          {...defaultProps({
+            gameMode: 'play',
+          })}
+        />,
+      );
       expect(screen.getByTestId('timer')).toBeInTheDocument();
+    });
+
+    it('shows countdown bar in play mode', () => {
+      const { container } = render(
+        <GameStatus
+          {...defaultProps({
+            gameMode: 'play',
+          })}
+        />,
+      );
+      const progressbar = container.querySelector('[role="progressbar"]');
+      expect(progressbar).toBeInTheDocument();
     });
 
     it('feedback phase works normally in improve mode', () => {

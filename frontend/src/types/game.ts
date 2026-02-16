@@ -32,12 +32,14 @@ export interface Round {
 
 /** A challenging multiplication pair identified by the analysis algorithm. Not persisted. */
 export interface ChallengingPair {
-  /** Smaller factor (normalized: a ≤ b). */
+  /** Smaller factor (normalized: a ≤ b), range 2–12. */
   factorA: number;
-  /** Larger factor (normalized: a ≤ b). */
+  /** Larger factor (normalized: a ≤ b), range 2–12. */
   factorB: number;
-  /** elapsedMs / averageMs — how far above the game average. */
-  difficultyRatio: number;
+  /** Total incorrect answers across analyzed games (≥ 0). */
+  mistakeCount: number;
+  /** Mean response time in ms across all occurrences (> 0). */
+  avgMs: number;
 }
 
 /** The full game state. */
