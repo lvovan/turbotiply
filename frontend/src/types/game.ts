@@ -3,9 +3,9 @@ export type HiddenPosition = 'A' | 'B' | 'C';
 
 /** A multiplication formula with one value hidden. */
 export interface Formula {
-  /** First factor (1–12). */
+  /** First factor (2–12). */
   factorA: number;
-  /** Second factor (1–12). */
+  /** Second factor (2–12). */
   factorB: number;
   /** Product (factorA × factorB). */
   product: number;
