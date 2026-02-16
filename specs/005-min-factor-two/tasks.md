@@ -27,15 +27,15 @@
 
 ### Tests for User Story 1 (red phase — write first, must fail)
 
-- [ ] T001 [P] [US1] Update pair count assertion from 78 to 66 in `getAllUnorderedPairs` tests in frontend/tests/services/formulaGenerator.test.ts
-- [ ] T002 [P] [US1] Update factor range lower bound assertions from `toBeGreaterThanOrEqual(1)` to `toBeGreaterThanOrEqual(2)` in all `getAllUnorderedPairs` and `generateFormulas` tests in frontend/tests/services/formulaGenerator.test.ts
-- [ ] T003 [P] [US1] Update test description strings from `[1, 12]` to `[2, 12]` in frontend/tests/services/formulaGenerator.test.ts
+- [X] T001 [P] [US1] Update pair count assertion from 78 to 66 in `getAllUnorderedPairs` tests in frontend/tests/services/formulaGenerator.test.ts
+- [X] T002 [P] [US1] Update factor range lower bound assertions from `toBeGreaterThanOrEqual(1)` to `toBeGreaterThanOrEqual(2)` in all `getAllUnorderedPairs` and `generateFormulas` tests in frontend/tests/services/formulaGenerator.test.ts
+- [X] T003 [P] [US1] Update test description strings from `[1, 12]` to `[2, 12]` in frontend/tests/services/formulaGenerator.test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T004 [US1] Change loop start from `let a = 1` to `let a = 2` in `getAllUnorderedPairs()` in frontend/src/services/formulaGenerator.ts
-- [ ] T005 [P] [US1] Update JSDoc comments in `getAllUnorderedPairs()` and `generateFormulas()` — change pair count 78→66 and range 1→2 in frontend/src/services/formulaGenerator.ts
-- [ ] T006 [P] [US1] Update JSDoc comments on `factorA` and `factorB` fields from `(1–12)` to `(2–12)` in frontend/src/types/game.ts
+- [X] T004 [US1] Change loop start from `let a = 1` to `let a = 2` in `getAllUnorderedPairs()` in frontend/src/services/formulaGenerator.ts
+- [X] T005 [P] [US1] Update JSDoc comments in `getAllUnorderedPairs()` and `generateFormulas()` — change pair count 78→66 and range 1→2 in frontend/src/services/formulaGenerator.ts
+- [X] T006 [P] [US1] Update JSDoc comments on `factorA` and `factorB` fields from `(1–12)` to `(2–12)` in frontend/src/types/game.ts
 
 **Checkpoint**: Run `npx vitest run tests/services/formulaGenerator.test.ts` — all tests pass (green phase). User Story 1 is complete and independently testable.
 
@@ -51,7 +51,7 @@
 
 ### Verification for User Story 2
 
-- [ ] T007 [US2] Verify existing statistical tests pass — no-duplicate-pairs-in-100-games, hidden-position-uniformity, and display-order-variety tests in frontend/tests/services/formulaGenerator.test.ts
+- [X] T007 [US2] Verify existing statistical tests pass — no-duplicate-pairs-in-100-games, hidden-position-uniformity, and display-order-variety tests in frontend/tests/services/formulaGenerator.test.ts
 
 **Checkpoint**: All statistical validation tests pass with the 66-pair pool. US2 is confirmed complete.
 
@@ -61,8 +61,8 @@
 
 **Purpose**: Final validation across all user stories
 
-- [ ] T008 Run full test suite (`npx vitest run`) to confirm no regressions across all test files
-- [ ] T009 Run quickstart.md validation steps to confirm end-to-end correctness
+- [X] T008 Run full test suite (`npx vitest run`) to confirm no regressions across all test files
+- [X] T009 Run quickstart.md validation steps to confirm end-to-end correctness
 
 ---
 

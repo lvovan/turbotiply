@@ -3,12 +3,12 @@ import type { Formula, HiddenPosition } from '../types/game';
 const HIDDEN_POSITIONS: HiddenPosition[] = ['A', 'B', 'C'];
 
 /**
- * Returns all 78 unique unordered pairs {a, b} where 1 ≤ a ≤ b ≤ 12.
+ * Returns all 66 unique unordered pairs {a, b} where 2 ≤ a ≤ b ≤ 12.
  * Exported for testing.
  */
 export function getAllUnorderedPairs(): [number, number][] {
   const pairs: [number, number][] = [];
-  for (let a = 1; a <= 12; a++) {
+  for (let a = 2; a <= 12; a++) {
     for (let b = a; b <= 12; b++) {
       pairs.push([a, b]);
     }
@@ -31,7 +31,7 @@ function fisherYatesShuffle<T>(array: T[], randomFn: () => number): T[] {
  * Generates 10 unique multiplication formulas for a single game.
  *
  * Algorithm:
- * 1. Build all 78 unique unordered pairs {A, B} where 1 ≤ A ≤ B ≤ 12.
+ * 1. Build all 66 unique unordered pairs {A, B} where 2 ≤ A ≤ B ≤ 12.
  * 2. Fisher-Yates shuffle using randomFn.
  * 3. Take the first 10 pairs.
  * 4. For each pair, randomly assign hiddenPosition (A, B, or C) with ⅓ probability.

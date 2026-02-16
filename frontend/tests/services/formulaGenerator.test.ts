@@ -2,17 +2,17 @@ import { describe, it, expect } from 'vitest';
 import { generateFormulas, getAllUnorderedPairs } from '../../src/services/formulaGenerator';
 
 describe('getAllUnorderedPairs', () => {
-  it('returns exactly 78 unique unordered pairs', () => {
+  it('returns exactly 66 unique unordered pairs', () => {
     const pairs = getAllUnorderedPairs();
-    expect(pairs).toHaveLength(78);
+    expect(pairs).toHaveLength(66);
   });
 
-  it('all pairs have a <= b and both in [1, 12]', () => {
+  it('all pairs have a <= b and both in [2, 12]', () => {
     const pairs = getAllUnorderedPairs();
     pairs.forEach(([a, b]) => {
-      expect(a).toBeGreaterThanOrEqual(1);
+      expect(a).toBeGreaterThanOrEqual(2);
       expect(a).toBeLessThanOrEqual(12);
-      expect(b).toBeGreaterThanOrEqual(1);
+      expect(b).toBeGreaterThanOrEqual(2);
       expect(b).toBeLessThanOrEqual(12);
       expect(a).toBeLessThanOrEqual(b);
     });
@@ -21,7 +21,7 @@ describe('getAllUnorderedPairs', () => {
   it('contains no duplicate pairs', () => {
     const pairs = getAllUnorderedPairs();
     const keys = pairs.map(([a, b]) => `${a},${b}`);
-    expect(new Set(keys).size).toBe(78);
+    expect(new Set(keys).size).toBe(66);
   });
 });
 
@@ -40,12 +40,12 @@ describe('generateFormulas', () => {
     expect(formulas).toHaveLength(10);
   });
 
-  it('all factors are in [1, 12] range', () => {
+  it('all factors are in [2, 12] range', () => {
     const formulas = generateFormulas(createSeededRandom(42));
     formulas.forEach((f) => {
-      expect(f.factorA).toBeGreaterThanOrEqual(1);
+      expect(f.factorA).toBeGreaterThanOrEqual(2);
       expect(f.factorA).toBeLessThanOrEqual(12);
-      expect(f.factorB).toBeGreaterThanOrEqual(1);
+      expect(f.factorB).toBeGreaterThanOrEqual(2);
       expect(f.factorB).toBeLessThanOrEqual(12);
     });
   });
@@ -96,7 +96,7 @@ describe('generateFormulas', () => {
     const formulas = generateFormulas();
     expect(formulas).toHaveLength(10);
     formulas.forEach((f) => {
-      expect(f.factorA).toBeGreaterThanOrEqual(1);
+      expect(f.factorA).toBeGreaterThanOrEqual(2);
       expect(f.factorA).toBeLessThanOrEqual(12);
       expect(f.product).toBe(f.factorA * f.factorB);
     });
@@ -152,13 +152,13 @@ describe('generateFormulas — statistical validation (US4)', () => {
     expect(seenDescending).toBe(true);
   });
 
-  it('all factors are within [1, 12] range across 100 games', () => {
+  it('all factors are within [2, 12] range across 100 games', () => {
     for (let g = 0; g < 100; g++) {
       const formulas = generateFormulas();
       formulas.forEach((f) => {
-        expect(f.factorA).toBeGreaterThanOrEqual(1);
+        expect(f.factorA).toBeGreaterThanOrEqual(2);
         expect(f.factorA).toBeLessThanOrEqual(12);
-        expect(f.factorB).toBeGreaterThanOrEqual(1);
+        expect(f.factorB).toBeGreaterThanOrEqual(2);
         expect(f.factorB).toBeLessThanOrEqual(12);
         expect(f.product).toBe(f.factorA * f.factorB);
       });
