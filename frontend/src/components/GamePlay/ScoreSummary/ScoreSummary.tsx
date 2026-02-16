@@ -1,4 +1,5 @@
 import type { Round } from '../../../types/game';
+import type { GameMode } from '../../../types/player';
 import { getCorrectAnswer } from '../../../services/gameEngine';
 import styles from './ScoreSummary.module.css';
 
@@ -7,15 +8,17 @@ interface ScoreSummaryProps {
   score: number;
   onPlayAgain: () => void;
   onBackToMenu: () => void;
+  gameMode?: GameMode;
 }
 
 /**
  * End-of-game results screen.
  * Displays round-by-round breakdown table with formula, answer,
  * correct/incorrect status, response time, and points.
+ * In improve mode, shows "You got X/N right!" and lists incorrect pairs.
  * Includes "Play again" button and "Back to menu" button (per FR-016, FR-020).
  */
-export default function ScoreSummary({ rounds, score, onPlayAgain, onBackToMenu }: ScoreSummaryProps) {
+export default function ScoreSummary({ rounds, score, onPlayAgain, onBackToMenu, gameMode = 'play' }: ScoreSummaryProps) {
   const formatTime = (ms: number | null): string => {
     if (ms === null) return '—';
     return `${(ms / 1000).toFixed(1)}s`;
@@ -32,13 +35,32 @@ export default function ScoreSummary({ rounds, score, onPlayAgain, onBackToMenu 
     return `${factorA} × ${factorB} = ${product}`;
   };
 
+  const isImprove = gameMode === 'improve';
+  const correctCount = rounds.filter((r) => r.isCorrect).length;
+  const incorrectPairs = rounds
+    .filter((r) => !r.isCorrect)
+    .map((r) => `${r.formula.factorA} × ${r.formula.factorB}`);
+
   return (
     <div className={styles.summary}>
-      <h2 className={styles.heading}>Game Over!</h2>
-      <div className={styles.totalScore}>
-        <span className={styles.totalLabel}>Total Score</span>
-        <span className={styles.totalValue}>{score}</span>
-      </div>
+      {isImprove ? (
+        <>
+          <h2 className={styles.heading}>You got {correctCount}/{rounds.length} right!</h2>
+          {incorrectPairs.length > 0 && (
+            <p className={styles.practiceHint}>
+              Keep practising: {incorrectPairs.join(', ')}
+            </p>
+          )}
+        </>
+      ) : (
+        <>
+          <h2 className={styles.heading}>Game Over!</h2>
+          <div className={styles.totalScore}>
+            <span className={styles.totalLabel}>Total Score</span>
+            <span className={styles.totalValue}>{score}</span>
+          </div>
+        </>
+      )}
 
       <div className={styles.tableWrapper}>
         <table className={styles.table}>

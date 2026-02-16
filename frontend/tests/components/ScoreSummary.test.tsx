@@ -132,4 +132,114 @@ describe('ScoreSummary', () => {
     // Should show formatted time like "1.5s"
     expect(screen.getByText(/1\.5s/)).toBeInTheDocument();
   });
+
+  describe('Improve mode variant', () => {
+    it('shows "You got X/10 right!" instead of score when gameMode is improve', () => {
+      const rounds = createMockRounds();
+      const correctCount = rounds.filter((r) => r.isCorrect).length;
+      render(
+        <ScoreSummary
+          rounds={rounds}
+          score={6}
+          onPlayAgain={vi.fn()}
+          onBackToMenu={vi.fn()}
+          gameMode="improve"
+        />,
+      );
+      expect(screen.getByText(`You got ${correctCount}/3 right!`)).toBeInTheDocument();
+      expect(screen.queryByText('Total Score')).not.toBeInTheDocument();
+      expect(screen.queryByText('Game Over!')).not.toBeInTheDocument();
+    });
+
+    it('lists incorrect pairs with "Keep practising:" message', () => {
+      const rounds = createMockRounds();
+      render(
+        <ScoreSummary
+          rounds={rounds}
+          score={6}
+          onPlayAgain={vi.fn()}
+          onBackToMenu={vi.fn()}
+          gameMode="improve"
+        />,
+      );
+      // Round 3 (6×8=48) was incorrect
+      expect(screen.getByText(/keep practising/i)).toBeInTheDocument();
+      // The "Keep practising:" line should contain the incorrect pair
+      const hint = screen.getByText(/keep practising/i);
+      expect(hint.textContent).toContain('6 × 8');
+    });
+
+    it('does not show "Keep practising" when all answers are correct', () => {
+      const allCorrectRounds: Round[] = [
+        {
+          formula: { factorA: 3, factorB: 7, product: 21, hiddenPosition: 'C' },
+          playerAnswer: 21,
+          isCorrect: true,
+          elapsedMs: 1500,
+          points: 5,
+        },
+        {
+          formula: { factorA: 4, factorB: 5, product: 20, hiddenPosition: 'A' },
+          playerAnswer: 4,
+          isCorrect: true,
+          elapsedMs: 2500,
+          points: 3,
+        },
+      ];
+      render(
+        <ScoreSummary
+          rounds={allCorrectRounds}
+          score={8}
+          onPlayAgain={vi.fn()}
+          onBackToMenu={vi.fn()}
+          gameMode="improve"
+        />,
+      );
+      expect(screen.queryByText(/keep practising/i)).not.toBeInTheDocument();
+    });
+
+    it('does not show score number in improve mode', () => {
+      const rounds = createMockRounds();
+      render(
+        <ScoreSummary
+          rounds={rounds}
+          score={6}
+          onPlayAgain={vi.fn()}
+          onBackToMenu={vi.fn()}
+          gameMode="improve"
+        />,
+      );
+      expect(screen.queryByText('Total Score')).not.toBeInTheDocument();
+    });
+
+    it('shows Play Again and Back to Menu buttons in improve mode', () => {
+      const rounds = createMockRounds();
+      render(
+        <ScoreSummary
+          rounds={rounds}
+          score={6}
+          onPlayAgain={vi.fn()}
+          onBackToMenu={vi.fn()}
+          gameMode="improve"
+        />,
+      );
+      expect(screen.getByRole('button', { name: /play again/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /back to menu/i })).toBeInTheDocument();
+    });
+
+    it('shows score and Game Over heading in play mode', () => {
+      const rounds = createMockRounds();
+      render(
+        <ScoreSummary
+          rounds={rounds}
+          score={6}
+          onPlayAgain={vi.fn()}
+          onBackToMenu={vi.fn()}
+          gameMode="play"
+        />,
+      );
+      expect(screen.getByText('Game Over!')).toBeInTheDocument();
+      expect(screen.getByText('Total Score')).toBeInTheDocument();
+    });
+  });
 });

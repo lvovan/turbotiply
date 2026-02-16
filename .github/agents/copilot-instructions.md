@@ -19,7 +19,8 @@ Auto-generated from all feature plans. Last updated: 2026-02-14
 - Browser localStorage (no changes needed for this feature) (008-round-ux-rework)
 - TypeScript 5.x / React 18 + React, Vite, CSS Modules (010-round-result-panel)
 - N/A (no persistence changes) (010-round-result-panel)
-- TypeScript ~5.9 / React 19 + React, Vite, CSS Modules (011-touch-answer-keypad)
+- TypeScript ~5.9, React 19 + React 19, React Router, Vite 7 (012-improve-game-mode)
+- localStorage (`turbotiply_players` key), sessionStorage (tab-scoped sessions) (012-improve-game-mode)
 
 - TypeScript 5.x (frontend), Python 3.11+ (backend — serves static files only for this feature) + React 18+, Vite (bundler), React Router (navigation), FastAPI (backend — static file serving only) (main)
 
@@ -40,7 +41,7 @@ cd src; pytest; ruff check .
 TypeScript 5.x (frontend): Follow standard conventions
 
 ## Recent Changes
-- 011-touch-answer-keypad: Added TypeScript ~5.9 / React 19 + React, Vite, CSS Modules
+- 012-improve-game-mode: Added TypeScript ~5.9, React 19 + React 19, React Router, Vite 7
 - 010-round-result-panel: Added TypeScript 5.x / React 18 + React, Vite, CSS Modules
 - 009-responsive-layout-focus: Added TypeScript 5.9.3, React 19.2.0 + React, React Router DOM 7.13, Vite 7.3.1
 

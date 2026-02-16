@@ -78,14 +78,14 @@ describe('MainPage', () => {
 
   it('renders start button initially', () => {
     renderMainPage();
-    expect(screen.getByRole('button', { name: /start game/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^play/i })).toBeInTheDocument();
   });
 
   it('clicking start begins game with round 1 displayed', async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     // Should show round 1 info
     expect(screen.getByText(/round 1 of 10/i)).toBeInTheDocument();
@@ -99,7 +99,7 @@ describe('MainPage', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     // Round 1: 1 × 1 = ?, answer is 1
     const input = screen.getByRole('textbox');
@@ -114,7 +114,7 @@ describe('MainPage', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     // Play all 10 rounds with correct answers
     const answers = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
@@ -150,7 +150,7 @@ describe('MainPage', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     // Play all 10 rounds correctly
     const answers = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
@@ -179,7 +179,7 @@ describe('MainPage', () => {
 
     // Should show start button again
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /start game/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^play/i })).toBeInTheDocument();
     });
   });
 
@@ -187,7 +187,7 @@ describe('MainPage', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     // Play all 10 rounds correctly
     const answers = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
@@ -268,7 +268,7 @@ describe('MainPage — Replay UI (US2)', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     // Correct answers for hiddenPosition C
     const correctAnswers = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
@@ -300,7 +300,7 @@ describe('MainPage — Replay UI (US2)', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     const correctAnswers = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
 
@@ -339,7 +339,7 @@ describe('MainPage — Replay UI (US2)', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     const correctAnswers = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
 
@@ -391,7 +391,7 @@ describe('MainPage — Replay UI (US2)', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     const answers = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
     for (let i = 0; i < 10; i++) {
@@ -410,7 +410,7 @@ describe('MainPage — Replay UI (US2)', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     const correctAnswers = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
 
@@ -438,7 +438,7 @@ describe('MainPage — Replay UI (US2)', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     const correctAnswers = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
 
@@ -487,7 +487,7 @@ describe('MainPage — Scoring Display (US3)', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     // Answer round 1 correctly (1×1=1)
     const input = screen.getByRole('textbox');
@@ -506,7 +506,7 @@ describe('MainPage — Scoring Display (US3)', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     // Play all 10 rounds correctly
     const answers = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
@@ -527,7 +527,7 @@ describe('MainPage — Scoring Display (US3)', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     // Answer all 10 rounds incorrectly
     for (let i = 0; i < 10; i++) {
@@ -570,7 +570,7 @@ describe('MainPage — Scoring Display (US3)', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     const correctAnswers = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
 
@@ -610,7 +610,7 @@ describe('MainPage — Scoring Display (US3)', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     // Timer element should be present
     const timerElement = document.querySelector('[data-testid="timer"]');
@@ -637,7 +637,7 @@ describe('MainPage — Inline Feedback (US2 round UX)', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     const formulaArea = document.querySelector('[data-testid="formula-area"]');
     expect(formulaArea).toBeInTheDocument();
@@ -647,7 +647,7 @@ describe('MainPage — Inline Feedback (US2 round UX)', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     // Formula should be visible (math role)
     expect(screen.getByRole('math')).toBeInTheDocument();
@@ -657,7 +657,7 @@ describe('MainPage — Inline Feedback (US2 round UX)', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     // Submit correct answer for round 1 (1×1=1)
     const input = screen.getByRole('textbox');
@@ -676,7 +676,7 @@ describe('MainPage — Inline Feedback (US2 round UX)', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();
 
-    await user.click(screen.getByRole('button', { name: /start game/i }));
+    await user.click(screen.getByRole('button', { name: /^play/i }));
 
     const progressbar = document.querySelector('[role="progressbar"]');
     expect(progressbar).toBeInTheDocument();

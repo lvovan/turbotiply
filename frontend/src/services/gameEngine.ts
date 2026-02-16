@@ -1,9 +1,10 @@
 import type { Formula, GameState, Round } from '../types/game';
+import type { RoundResult } from '../types/player';
 import { calculateScore } from '../constants/scoring';
 
 /** Actions that can be dispatched to the game reducer. */
 export type GameAction =
-  | { type: 'START_GAME'; formulas: Formula[] }
+  | { type: 'START_GAME'; formulas: Formula[]; mode?: 'play' | 'improve' }
   | { type: 'SUBMIT_ANSWER'; answer: number; elapsedMs: number }
   | { type: 'NEXT_ROUND' }
   | { type: 'RESET_GAME' };
@@ -16,6 +17,7 @@ export const initialGameState: GameState = {
   currentRoundIndex: 0,
   currentPhase: 'input',
   score: 0,
+  gameMode: 'play',
 };
 
 /**
@@ -54,7 +56,7 @@ export function getCurrentRound(state: GameState): Round | null {
 export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'START_GAME':
-      return handleStartGame(state, action.formulas);
+      return handleStartGame(state, action.formulas, action.mode);
     case 'SUBMIT_ANSWER':
       return handleSubmitAnswer(state, action.answer, action.elapsedMs);
     case 'NEXT_ROUND':
@@ -66,7 +68,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
   }
 }
 
-function handleStartGame(state: GameState, formulas: Formula[]): GameState {
+function handleStartGame(state: GameState, formulas: Formula[], mode?: 'play' | 'improve'): GameState {
   if (state.status !== 'not-started') {
     return state;
   }
@@ -86,6 +88,7 @@ function handleStartGame(state: GameState, formulas: Formula[]): GameState {
     currentRoundIndex: 0,
     currentPhase: 'input',
     score: 0,
+    gameMode: mode ?? 'play',
   };
 }
 
@@ -220,4 +223,18 @@ function handleNextRoundReplay(state: GameState): GameState {
     status: 'completed',
     currentPhase: 'input',
   };
+}
+
+/**
+ * Extract RoundResult[] from the primary rounds (indices 0–9) for persistence.
+ * Captures initial-attempt data: factors, correctness, and elapsed time.
+ * Must be called at game completion before any further state changes.
+ */
+export function extractRoundResults(rounds: Round[]): RoundResult[] {
+  return rounds.slice(0, 10).map((round) => ({
+    factorA: round.formula.factorA,
+    factorB: round.formula.factorB,
+    isCorrect: round.isCorrect ?? false,
+    elapsedMs: round.elapsedMs ?? 0,
+  }));
 }

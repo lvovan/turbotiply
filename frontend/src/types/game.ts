@@ -30,6 +30,16 @@ export interface Round {
   points: number | null;
 }
 
+/** A challenging multiplication pair identified by the analysis algorithm. Not persisted. */
+export interface ChallengingPair {
+  /** Smaller factor (normalized: a ≤ b). */
+  factorA: number;
+  /** Larger factor (normalized: a ≤ b). */
+  factorB: number;
+  /** elapsedMs / averageMs — how far above the game average. */
+  difficultyRatio: number;
+}
+
 /** The full game state. */
 export interface GameState {
   /** Current game phase. */
@@ -44,6 +54,8 @@ export interface GameState {
   currentPhase: 'input' | 'feedback';
   /** Running total score. */
   score: number;
+  /** Which mode this game is being played in. */
+  gameMode: 'play' | 'improve';
 }
 
 /** A scoring tier threshold. */

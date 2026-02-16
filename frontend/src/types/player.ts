@@ -1,9 +1,28 @@
+/** The two valid game modes. */
+export type GameMode = 'play' | 'improve';
+
+/** A record of a single round's outcome within a completed game. */
+export interface RoundResult {
+  /** First multiplication factor (2–12). */
+  factorA: number;
+  /** Second multiplication factor (2–12). */
+  factorB: number;
+  /** Whether the player answered correctly on the initial (primary-phase) attempt. */
+  isCorrect: boolean;
+  /** Response time in milliseconds for the initial (primary-phase) attempt. */
+  elapsedMs: number;
+}
+
 /** An individual completed game result, stored within a player's gameHistory. */
 export interface GameRecord {
   /** Total points earned in the game session (0–50 range based on scoring tiers). */
   score: number;
   /** Epoch ms timestamp of game completion. */
   completedAt: number;
+  /** Per-round results from the primary phase. Absent for pre-v5 records. */
+  rounds?: RoundResult[];
+  /** Which mode this game was played in. Absent for pre-v5 records (implicitly 'play'). */
+  gameMode?: GameMode;
 }
 
 /** Represents a player profile stored in localStorage. */
