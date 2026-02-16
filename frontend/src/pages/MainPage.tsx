@@ -15,6 +15,7 @@ import ScoreSummary from '../components/GamePlay/ScoreSummary/ScoreSummary';
 import RecentHighScores from '../components/GamePlay/RecentHighScores/RecentHighScores';
 import ProgressionGraph from '../components/GamePlay/ProgressionGraph/ProgressionGraph';
 import ModeSelector from '../components/GamePlay/ModeSelector/ModeSelector';
+import { useTranslation } from '../i18n';
 
 /**
  * Main gameplay page. Orchestrates the full game lifecycle:
@@ -25,6 +26,7 @@ export default function MainPage() {
   const { session, isActive } = useSession();
   const { gameState, currentRound, correctAnswer, startGame, submitAnswer, nextRound, resetGame, gameMode } =
     useGame();
+  const { t } = useTranslation();
   const { displayRef, barRef, start, stop, reset } = useRoundTimer();
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scorePersistedRef = useRef(false);
@@ -108,8 +110,8 @@ export default function MainPage() {
       <main style={{ padding: '24px 16px', textAlign: 'center' }}>
         {gameState.status === 'not-started' && (
           <div>
-            <h1>Ready to play?</h1>
-            <p>Answer 10 multiplication questions as fast as you can!</p>
+            <h1>{t('game.readyToPlay')}</h1>
+            <p>{t('game.instructions')}</p>
             <RecentHighScores scores={recentScores} isEmpty={hasNoGames} />
             {gameHistory.length >= 2 && <ProgressionGraph history={gameHistory} />}
             <ModeSelector

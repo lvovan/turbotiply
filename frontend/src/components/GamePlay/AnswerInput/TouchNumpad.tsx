@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from '../../../i18n';
 import styles from './TouchNumpad.module.css';
 
 interface TouchNumpadProps {
@@ -30,6 +31,7 @@ const MAX_DIGITS = 3;
 export default function TouchNumpad({ onSubmit, acceptingInput }: TouchNumpadProps) {
   const [answer, setAnswer] = useState('');
   const submittedRef = useRef(false);
+  const { t } = useTranslation();
 
   // Reset state when a new round begins (acceptingInput transitions to true)
   useEffect(() => {
@@ -97,9 +99,9 @@ export default function TouchNumpad({ onSubmit, acceptingInput }: TouchNumpadPro
         className={styles.display}
         role="status"
         aria-live="polite"
-        aria-label="Current answer"
+        aria-label={t('a11y.currentAnswer')}
       >
-        {isEmpty ? <span className={styles.placeholder}>?</span> : answer}
+        {isEmpty ? <span className={styles.placeholder}>{t('game.answerPlaceholder')}</span> : answer}
       </div>
 
       {/* Numpad grid */}
@@ -111,7 +113,7 @@ export default function TouchNumpad({ onSubmit, acceptingInput }: TouchNumpadPro
               key={digit}
               type="button"
               className={styles.button}
-              aria-label={`digit ${digit}`}
+              aria-label={t('a11y.digit', { digit })}
               disabled={!acceptingInput}
               onClick={() => appendDigit(digit)}
             >
@@ -124,7 +126,7 @@ export default function TouchNumpad({ onSubmit, acceptingInput }: TouchNumpadPro
         <button
           type="button"
           className={styles.button}
-          aria-label="digit 0"
+          aria-label={t('a11y.digit', { digit: '0' })}
           disabled={!acceptingInput}
           onClick={() => appendDigit('0')}
         >
@@ -133,7 +135,7 @@ export default function TouchNumpad({ onSubmit, acceptingInput }: TouchNumpadPro
         <button
           type="button"
           className={`${styles.button} ${styles.backspace}`}
-          aria-label="delete last digit"
+          aria-label={t('a11y.deleteDigit')}
           disabled={!acceptingInput}
           onClick={deleteLastDigit}
         >
@@ -142,11 +144,11 @@ export default function TouchNumpad({ onSubmit, acceptingInput }: TouchNumpadPro
         <button
           type="button"
           className={`${styles.button} ${styles.go}`}
-          aria-label="submit answer"
+          aria-label={t('a11y.submitNumpad')}
           disabled={!acceptingInput || isEmpty}
           onClick={submitAnswer}
         >
-          Go
+          {t('game.go')}
         </button>
       </div>
     </div>

@@ -1,0 +1,85 @@
+.wrapper {
+  position: relative;
+}
+
+.flagButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.flagButton:hover {
+  border-color: #1565C0;
+}
+
+.flagButton:focus-visible {
+  outline: 3px solid #1565C0;
+  outline-offset: 2px;
+}
+
+.menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  margin: 4px 0 0;
+  padding: 4px 0;
+  list-style: none;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  min-width: 180px;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  min-height: 44px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.1s;
+  border: none;
+  background: none;
+  width: 100%;
+  color: #333;
+}
+
+.menuItem:hover {
+  background-color: #f0f4ff;
+}
+
+.menuItemActive {
+  font-weight: 700;
+  color: #1565C0;
+  background-color: #e3f2fd;
+}
+
+.menuItemFocused {
+  outline: 2px solid #1565C0;
+  outline-offset: -2px;
+  background-color: #f0f4ff;
+}
+
+@media (max-width: 320px) {
+  .menu {
+    right: -8px;
+    min-width: 160px;
+  }
+
+  .menuItem {
+    padding: 8px 12px;
+    font-size: 0.875rem;
+  }
+}

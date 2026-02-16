@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from 'react';
 import styles from './AnswerInput.module.css';
 import { useTouchDetection } from '../../../hooks/useTouchDetection';
+import { useTranslation } from '../../../i18n';
 import TouchNumpad from './TouchNumpad';
 
 interface AnswerInputProps {
@@ -45,6 +46,7 @@ export default function AnswerInput({ onSubmit, acceptingInput }: AnswerInputPro
 function AnswerInputDesktop({ onSubmit, acceptingInput }: AnswerInputProps) {
   const [value, setValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
 
   // Re-focus input when it becomes accepting (e.g. after feedback phase)
   useEffect(() => {
@@ -103,8 +105,8 @@ function AnswerInputDesktop({ onSubmit, acceptingInput }: AnswerInputProps) {
         value={value}
         onChange={(e) => handleChange(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="?"
-        aria-label="Your answer"
+        placeholder={t('game.answerPlaceholder')}
+        aria-label={t('a11y.yourAnswer')}
         autoFocus
         inputMode="numeric"
         pattern="[0-9]*"
@@ -114,11 +116,11 @@ function AnswerInputDesktop({ onSubmit, acceptingInput }: AnswerInputProps) {
         type="button"
         className={styles.submitButton}
         disabled={!acceptingInput || isEmpty}
-        aria-label="Submit answer"
+        aria-label={t('a11y.submitAnswer')}
         onPointerDown={(e) => e.preventDefault()}
         onClick={handleButtonClick}
       >
-        Submit
+        {t('game.submit')}
       </button>
     </div>
   );

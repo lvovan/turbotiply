@@ -2,22 +2,22 @@
 export interface AvatarDefinition {
   /** Unique identifier (e.g., "cat", "rocket"). */
   id: string;
-  /** Human-readable label for display and aria-label. */
-  label: string;
-  /** Short description for accessibility. */
-  description: string;
+  /** Translation key for the human-readable label. */
+  labelKey: string;
+  /** Translation key for the accessibility description. */
+  descriptionKey: string;
 }
 
 /** The 8 predefined avatars available for player profiles. */
 export const AVATARS: readonly AvatarDefinition[] = [
-  { id: 'rocket', label: 'Rocket', description: 'A flying rocket ship' },
-  { id: 'star', label: 'Star', description: 'A shining star' },
-  { id: 'cat', label: 'Cat', description: 'A friendly cat face' },
-  { id: 'turtle', label: 'Turtle', description: 'A smiling turtle' },
-  { id: 'robot', label: 'Robot', description: 'A cute robot' },
-  { id: 'dinosaur', label: 'Dinosaur', description: 'A friendly dinosaur' },
-  { id: 'unicorn', label: 'Unicorn', description: 'A magical unicorn' },
-  { id: 'lightning', label: 'Lightning', description: 'A lightning bolt' },
+  { id: 'rocket', labelKey: 'avatar.rocket', descriptionKey: 'avatar.rocketDesc' },
+  { id: 'star', labelKey: 'avatar.star', descriptionKey: 'avatar.starDesc' },
+  { id: 'cat', labelKey: 'avatar.cat', descriptionKey: 'avatar.catDesc' },
+  { id: 'turtle', labelKey: 'avatar.turtle', descriptionKey: 'avatar.turtleDesc' },
+  { id: 'robot', labelKey: 'avatar.robot', descriptionKey: 'avatar.robotDesc' },
+  { id: 'dinosaur', labelKey: 'avatar.dinosaur', descriptionKey: 'avatar.dinosaurDesc' },
+  { id: 'unicorn', labelKey: 'avatar.unicorn', descriptionKey: 'avatar.unicornDesc' },
+  { id: 'lightning', labelKey: 'avatar.lightning', descriptionKey: 'avatar.lightningDesc' },
 ] as const;
 
 /** Default avatar ID (first in the list). */

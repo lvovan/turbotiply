@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, type FormEvent } from 'react';
 import type { Player } from '../../types/player';
 import { DEFAULT_AVATAR_ID } from '../../constants/avatars';
+import { useTranslation } from '../../i18n';
 import AvatarPicker from '../AvatarPicker/AvatarPicker';
 import styles from './NewPlayerForm.module.css';
 
@@ -24,6 +25,7 @@ export default function NewPlayerForm({ onSubmit, playerExists }: NewPlayerFormP
   const [avatarId, setAvatarId] = useState(DEFAULT_AVATAR_ID);
   const [showOverwriteConfirm, setShowOverwriteConfirm] = useState(false);
   const confirmDialogRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   const trimmedName = name.trim();
   const isValid = trimmedName.length > 0 && trimmedName.length <= MAX_NAME_LENGTH;
@@ -81,7 +83,7 @@ export default function NewPlayerForm({ onSubmit, playerExists }: NewPlayerFormP
       <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.fieldGroup}>
           <label className={styles.label} htmlFor="player-name">
-            Your name
+            {t('player.nameLabel')}
           </label>
           <input
             id="player-name"
@@ -89,19 +91,19 @@ export default function NewPlayerForm({ onSubmit, playerExists }: NewPlayerFormP
             className={styles.nameInput}
             value={name}
             onChange={(e) => setName(e.target.value.slice(0, MAX_NAME_LENGTH))}
-            placeholder="Type your name..."
+            placeholder={t('player.namePlaceholder')}
             maxLength={MAX_NAME_LENGTH}
             autoComplete="off"
           />
         </div>
 
         <div className={styles.fieldGroup}>
-          <span className={styles.label}>Choose your avatar</span>
+          <span className={styles.label}>{t('player.chooseAvatar')}</span>
           <AvatarPicker selectedId={avatarId} onSelect={setAvatarId} />
         </div>
 
         <button type="submit" className={styles.submitButton} disabled={!isValid}>
-          Let's go! 🚀
+          {t('player.letsGo')}
         </button>
       </form>
 
@@ -111,20 +113,20 @@ export default function NewPlayerForm({ onSubmit, playerExists }: NewPlayerFormP
             ref={confirmDialogRef}
             role="dialog"
             aria-modal="true"
-            aria-label={`Replace ${trimmedName}`}
+            aria-label={t('player.replaceDialog', { playerName: trimmedName })}
             className={styles.confirmDialog}
             tabIndex={-1}
             onClick={(e) => e.stopPropagation()}
           >
             <p className={styles.confirmTitle}>
-              A player called {trimmedName} already exists. Do you want to replace them?
+              {t('player.overwriteConfirm', { playerName: trimmedName })}
             </p>
             <div className={styles.confirmActions}>
               <button className={styles.goBackButton} onClick={handleOverwriteCancel}>
-                Go back
+                {t('player.goBack')}
               </button>
               <button className={styles.replaceButton} onClick={handleOverwriteConfirm}>
-                Replace
+                {t('player.replace')}
               </button>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import type { Formula } from '../../../types/game';
+import { useTranslation } from '../../../i18n';
 import styles from './FormulaDisplay.module.css';
 
 interface FormulaDisplayProps {
@@ -13,6 +14,7 @@ interface FormulaDisplayProps {
  */
 export default function FormulaDisplay({ formula, playerAnswer }: FormulaDisplayProps) {
   const { factorA, factorB, product, hiddenPosition } = formula;
+  const { t } = useTranslation();
 
   const hiddenValue = playerAnswer !== undefined ? String(playerAnswer) : '?';
 
@@ -21,8 +23,8 @@ export default function FormulaDisplay({ formula, playerAnswer }: FormulaDisplay
   const displayC = hiddenPosition === 'C' ? hiddenValue : String(product);
 
   const ariaLabel = playerAnswer !== undefined
-    ? `Multiplication formula: ${displayA} times ${displayB} equals ${displayC}. Your answer was ${playerAnswer}.`
-    : `Multiplication formula: ${displayA} times ${displayB} equals ${displayC}. Find the missing value.`;
+    ? t('a11y.formulaWithAnswer', { a: displayA, b: displayB, c: displayC, answer: String(playerAnswer) })
+    : t('a11y.formulaWithoutAnswer', { a: displayA, b: displayB, c: displayC });
 
   return (
     <div className={styles.formula} role="math" aria-label={ariaLabel}>

@@ -1,6 +1,7 @@
 import type { Round } from '../../../types/game';
 import type { GameMode } from '../../../types/player';
 import { getCorrectAnswer } from '../../../services/gameEngine';
+import { useTranslation } from '../../../i18n';
 import styles from './ScoreSummary.module.css';
 
 interface ScoreSummaryProps {
@@ -19,6 +20,7 @@ interface ScoreSummaryProps {
  * Includes "Play again" button and "Back to menu" button (per FR-016, FR-020).
  */
 export default function ScoreSummary({ rounds, score, onPlayAgain, onBackToMenu, gameMode = 'play' }: ScoreSummaryProps) {
+  const { t } = useTranslation();
   const formatTime = (ms: number | null): string => {
     if (ms === null) return '—';
     return `${(ms / 1000).toFixed(1)}s`;
@@ -45,18 +47,18 @@ export default function ScoreSummary({ rounds, score, onPlayAgain, onBackToMenu,
     <div className={styles.summary}>
       {isImprove ? (
         <>
-          <h2 className={styles.heading}>You got {correctCount}/{rounds.length} right!</h2>
+          <h2 className={styles.heading}>{t('summary.correctCount', { count: String(correctCount), total: String(rounds.length) })}</h2>
           {incorrectPairs.length > 0 && (
             <p className={styles.practiceHint}>
-              Keep practising: {incorrectPairs.join(', ')}
+              {t('summary.practiceHint', { pairs: incorrectPairs.join(', ') })}
             </p>
           )}
         </>
       ) : (
         <>
-          <h2 className={styles.heading}>Game Over!</h2>
+          <h2 className={styles.heading}>{t('summary.gameOver')}</h2>
           <div className={styles.totalScore}>
-            <span className={styles.totalLabel}>Total Score</span>
+            <span className={styles.totalLabel}>{t('summary.totalScore')}</span>
             <span className={styles.totalValue}>{score}</span>
           </div>
         </>
@@ -66,12 +68,12 @@ export default function ScoreSummary({ rounds, score, onPlayAgain, onBackToMenu,
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>#</th>
-              <th>Formula</th>
-              <th>Answer</th>
-              <th>Result</th>
-              <th>Time</th>
-              <th>Points</th>
+              <th>{t('summary.colNumber')}</th>
+              <th>{t('summary.colFormula')}</th>
+              <th>{t('summary.colAnswer')}</th>
+              <th>{t('summary.colResult')}</th>
+              <th>{t('summary.colTime')}</th>
+              <th>{t('summary.colPoints')}</th>
             </tr>
           </thead>
           <tbody>
@@ -103,10 +105,10 @@ export default function ScoreSummary({ rounds, score, onPlayAgain, onBackToMenu,
 
       <div className={styles.actions}>
         <button className={styles.playAgainButton} onClick={onPlayAgain}>
-          Play again
+          {t('summary.playAgain')}
         </button>
         <button className={styles.backButton} onClick={onBackToMenu}>
-          Back to menu
+          {t('summary.backToMenu')}
         </button>
       </div>
     </div>

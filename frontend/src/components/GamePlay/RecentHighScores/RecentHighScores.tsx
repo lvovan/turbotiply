@@ -1,4 +1,5 @@
 import type { GameRecord } from '../../../types/player';
+import { useTranslation } from '../../../i18n';
 import styles from './RecentHighScores.module.css';
 
 interface RecentHighScoresProps {
@@ -7,7 +8,6 @@ interface RecentHighScoresProps {
 }
 
 const MEDALS = ['🥇', '🥈', '🥉'] as const;
-const ORDINALS = ['1st', '2nd', '3rd', '4th', '5th'] as const;
 
 /**
  * Displays a ranked list of the player's most recent game scores
@@ -15,27 +15,28 @@ const ORDINALS = ['1st', '2nd', '3rd', '4th', '5th'] as const;
  */
 export default function RecentHighScores({ scores, isEmpty }: RecentHighScoresProps) {
   const headingId = 'recent-high-scores-heading';
+  const { t } = useTranslation();
 
   return (
     <section aria-labelledby={headingId} className={styles.container}>
       <h2 id={headingId} className={styles.heading}>
-        Recent High Scores
+        {t('scores.title')}
       </h2>
 
       {isEmpty ? (
         <p className={styles.emptyState}>
-          Play your first game to see your scores here!
+          {t('scores.empty')}
         </p>
       ) : (
         <ol
-          aria-label="Recent high scores, ranked highest to lowest"
+          aria-label={t('scores.listLabel')}
           className={styles.list}
         >
           {scores.map((record, index) => {
             const rank = index + 1;
             const isTopScore = rank === 1;
             const medal = rank <= 3 ? MEDALS[index] : null;
-            const ordinal = ORDINALS[index] ?? `${rank}th`;
+            const ordinal = t(`ordinal.${rank}` as 'ordinal.1');
 
             return (
               <li
@@ -43,13 +44,13 @@ export default function RecentHighScores({ scores, isEmpty }: RecentHighScoresPr
                 className={`${styles.row} ${isTopScore ? styles.topScore : ''}`}
               >
                 <span className="sr-only">
-                  {ordinal} place: {record.score} points
+                  {t('scores.placeScore', { ordinal, score: String(record.score) })}
                 </span>
                 <span className={styles.rank} aria-hidden="true">
-                  {medal ?? `${rank}th`}
+                  {medal ?? ordinal}
                 </span>
                 <span className={styles.score} aria-hidden="true">
-                  {record.score} points
+                  {t('scores.scorePoints', { score: String(record.score) })}
                 </span>
               </li>
             );

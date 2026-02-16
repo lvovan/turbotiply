@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useSession } from '../hooks/useSession.tsx';
 import { usePlayers } from '../hooks/usePlayers';
+import { useTranslation } from '../i18n';
 import type { Player } from '../types/player';
 import NewPlayerForm from '../components/WelcomeScreen/NewPlayerForm';
 import PlayerList from '../components/WelcomeScreen/PlayerList';
+import LanguageSwitcher from '../components/LanguageSwitcher/LanguageSwitcher';
 import styles from './WelcomePage.module.css';
 
 /**
@@ -17,6 +19,7 @@ export default function WelcomePage() {
   const navigate = useNavigate();
   const { isActive, startSession } = useSession();
   const { players, storageAvailable, savePlayer, deletePlayer, playerExists, clearAllPlayers } = usePlayers();
+  const { t } = useTranslation();
   const [showNewPlayerForm, setShowNewPlayerForm] = useState(false);
   const [evictionMessage, setEvictionMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -35,10 +38,13 @@ export default function WelcomePage() {
 
     return (
       <div className={styles.welcomePage}>
+        <div className={styles.languageArea}>
+          <LanguageSwitcher />
+        </div>
         <h1 className={styles.title}>Turbotiply!</h1>
         <div className={styles.storageWarning} role="alert">
-          <p>⚠️ Your browser storage is not available.</p>
-          <p>You can still play, but your profile won't be saved for next time.</p>
+          <p>{t('welcome.storageWarning')}</p>
+          <p>{t('welcome.storageWarningDetail')}</p>
         </div>
         <div className={styles.content}>
           <NewPlayerForm onSubmit={handleTemporaryPlay} playerExists={() => false} />
@@ -51,7 +57,7 @@ export default function WelcomePage() {
     const { evictedNames } = savePlayer(data);
     if (evictedNames.length > 0) {
       setEvictionMessage(
-        `We made room for you! ${evictedNames.join(', ')} was removed because we can only remember 50 players.`,
+        t('welcome.evictionMessage', { names: evictedNames.join(', ') }),
       );
     }
     startSession(data);
@@ -71,7 +77,7 @@ export default function WelcomePage() {
     try {
       clearAllPlayers();
     } catch {
-      setErrorMessage('Failed to clear profiles. Please try again.');
+      setErrorMessage(t('welcome.clearError'));
     }
   };
 
@@ -80,9 +86,12 @@ export default function WelcomePage() {
 
   return (
     <div className={styles.welcomePage}>
+      <div className={styles.languageArea}>
+        <LanguageSwitcher />
+      </div>
       <h1 className={styles.title}>Turbotiply!</h1>
       <p className={styles.subtitle}>
-        {shouldShowForm ? 'Create your player to get started!' : 'Who is playing today?'}
+        {shouldShowForm ? t('welcome.subtitle') : t('welcome.subtitleReturning')}
       </p>
       {evictionMessage && (
         <div className={styles.evictionNotice} role="status">
@@ -95,7 +104,7 @@ export default function WelcomePage() {
           <button
             className={styles.dismissButton}
             onClick={() => setErrorMessage(null)}
-            aria-label="Dismiss error"
+            aria-label={t('welcome.dismissError')}
           >
             ✕
           </button>
@@ -110,7 +119,7 @@ export default function WelcomePage() {
                 className={styles.backButton}
                 onClick={() => setShowNewPlayerForm(false)}
               >
-                ← Back to player list
+                {t('welcome.backToList')}
               </button>
             )}
           </>

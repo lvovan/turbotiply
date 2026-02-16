@@ -1,6 +1,7 @@
 import type { Player } from '../../types/player';
 import { getAvatarEmoji } from '../../constants/avatarEmojis';
 import { getRecentAverage } from '../../services/playerStorage';
+import { useTranslation } from '../../i18n';
 import styles from './PlayerCard.module.css';
 
 interface PlayerCardProps {
@@ -13,14 +14,15 @@ interface PlayerCardProps {
  * Single-line player card: avatar | name | avg score | delete button.
  */
 export default function PlayerCard({ player, onSelect, onDelete }: PlayerCardProps) {
+  const { t } = useTranslation();
   const recentAvg = getRecentAverage(player, 10);
-  const avgScore = recentAvg !== null ? `Avg: ${recentAvg}` : '—';
+  const avgScore = recentAvg !== null ? t('player.avgScore', { score: String(recentAvg) }) : t('player.noScore');
 
   return (
     <div className={styles.card}>
       <button
         className={styles.selectButton}
-        aria-label={`Play as ${player.name}`}
+        aria-label={t('player.playAs', { playerName: player.name })}
         onClick={() => onSelect(player)}
       >
         <span className={styles.avatar} aria-hidden="true">
@@ -31,7 +33,7 @@ export default function PlayerCard({ player, onSelect, onDelete }: PlayerCardPro
       </button>
       <button
         className={styles.deleteButton}
-        aria-label={`Remove ${player.name}`}
+        aria-label={t('player.removePlayer', { playerName: player.name })}
         onClick={(e) => {
           e.stopPropagation();
           onDelete(player);

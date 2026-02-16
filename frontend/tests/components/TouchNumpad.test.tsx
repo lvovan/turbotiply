@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within } from '../test-utils';
 import userEvent from '@testing-library/user-event';
 import { axe } from 'vitest-axe';
 import TouchNumpad from '../../src/components/GamePlay/AnswerInput/TouchNumpad';
