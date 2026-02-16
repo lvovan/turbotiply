@@ -13,13 +13,14 @@ describe('usePlayers', () => {
     vi.spyOn(Date, 'now').mockReturnValue(100);
     playerStorage.savePlayer({ name: 'Alice', avatarId: 'cat', colorId: 'blue' });
     vi.spyOn(Date, 'now').mockReturnValue(200);
-    playerStorage.savePlayer({ name: 'Bob', avatarId: 'dog', colorId: 'red' });
+    playerStorage.savePlayer({ name: 'Bob', avatarId: 'robot', colorId: 'red' });
 
     const { result } = renderHook(() => usePlayers());
 
     expect(result.current.players).toHaveLength(2);
-    // Most recent first
-    expect(result.current.players[0].name).toBe('Bob');
+    // Alphabetically sorted
+    expect(result.current.players[0].name).toBe('Alice');
+    expect(result.current.players[1].name).toBe('Bob');
     vi.restoreAllMocks();
   });
 
@@ -60,5 +61,34 @@ describe('usePlayers', () => {
     expect(result.current.playerExists('mia')).toBe(true);
     expect(result.current.playerExists('MIA')).toBe(true);
     expect(result.current.playerExists('Ghost')).toBe(false);
+  });
+
+  it('sorts players alphabetically (case-insensitive)', () => {
+    playerStorage.savePlayer({ name: 'Charlie', avatarId: 'cat', colorId: 'blue' });
+    playerStorage.savePlayer({ name: 'alice', avatarId: 'robot', colorId: 'red' });
+    playerStorage.savePlayer({ name: 'Bob', avatarId: 'star', colorId: 'teal' });
+
+    const { result } = renderHook(() => usePlayers());
+
+    expect(result.current.players.map((p) => p.name)).toEqual(['alice', 'Bob', 'Charlie']);
+  });
+
+  it('clearAllPlayers calls clearAllStorage and reloads', () => {
+    playerStorage.savePlayer({ name: 'Mia', avatarId: 'cat', colorId: 'blue' });
+
+    const reloadMock = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: { ...window.location, reload: reloadMock },
+      writable: true,
+    });
+
+    const { result } = renderHook(() => usePlayers());
+
+    act(() => {
+      result.current.clearAllPlayers();
+    });
+
+    expect(localStorage.getItem(playerStorage.STORAGE_KEY)).toBeNull();
+    expect(reloadMock).toHaveBeenCalled();
   });
 });

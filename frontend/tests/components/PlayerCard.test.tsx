@@ -10,6 +10,8 @@ const mockPlayer: Player = {
   colorId: 'blue',
   lastActive: Date.now(),
   createdAt: Date.now(),
+  totalScore: 0,
+  gamesPlayed: 0,
 };
 
 describe('PlayerCard', () => {
@@ -48,5 +50,38 @@ describe('PlayerCard', () => {
     await user.click(deleteBtn);
 
     expect(onDelete).toHaveBeenCalledWith(mockPlayer);
+  });
+
+  it('shows "—" when no games played', () => {
+    render(<PlayerCard player={mockPlayer} onSelect={vi.fn()} onDelete={vi.fn()} />);
+    expect(screen.getByText('—')).toBeInTheDocument();
+  });
+
+  it('shows average score when games have been played', () => {
+    const playerWithScore: Player = {
+      ...mockPlayer,
+      totalScore: 150,
+      gamesPlayed: 3,
+    };
+    render(<PlayerCard player={playerWithScore} onSelect={vi.fn()} onDelete={vi.fn()} />);
+    expect(screen.getByText('Avg: 50')).toBeInTheDocument();
+  });
+
+  it('rounds average score to nearest integer', () => {
+    const playerWithScore: Player = {
+      ...mockPlayer,
+      totalScore: 100,
+      gamesPlayed: 3,
+    };
+    render(<PlayerCard player={playerWithScore} onSelect={vi.fn()} onDelete={vi.fn()} />);
+    expect(screen.getByText('Avg: 33')).toBeInTheDocument();
+  });
+
+  it('renders a color dot', () => {
+    const { container } = render(
+      <PlayerCard player={mockPlayer} onSelect={vi.fn()} onDelete={vi.fn()} />,
+    );
+    const dot = container.querySelector('[class*="colorDot"]');
+    expect(dot).toBeInTheDocument();
   });
 });

@@ -10,12 +10,10 @@ export interface ColorDefinition {
   textColor: string;
 }
 
-/** The 8 predefined colors available for player profiles (WCAG AA, CVD-safe). */
+/** The 6 predefined colors available for player profiles (WCAG AA, CVD-safe). */
 export const COLORS: readonly ColorDefinition[] = [
   { id: 'red', label: 'Red', hex: '#D32F2F', textColor: '#FFFFFF' },
-  { id: 'orange', label: 'Orange', hex: '#E65100', textColor: '#FFFFFF' },
   { id: 'gold', label: 'Gold', hex: '#F9A825', textColor: '#1A1A1A' },
-  { id: 'green', label: 'Green', hex: '#2E7D32', textColor: '#FFFFFF' },
   { id: 'teal', label: 'Teal', hex: '#00796B', textColor: '#FFFFFF' },
   { id: 'blue', label: 'Blue', hex: '#1565C0', textColor: '#FFFFFF' },
   { id: 'purple', label: 'Purple', hex: '#6A1B9A', textColor: '#FFFFFF' },

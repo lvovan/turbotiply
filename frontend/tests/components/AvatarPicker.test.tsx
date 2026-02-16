@@ -10,10 +10,10 @@ describe('AvatarPicker', () => {
     onSelect: vi.fn(),
   };
 
-  it('renders all 12 avatars', () => {
+  it('renders all 8 avatars', () => {
     render(<AvatarPicker {...defaultProps} />);
     const options = screen.getAllByRole('radio');
-    expect(options).toHaveLength(12);
+    expect(options).toHaveLength(8);
   });
 
   it('has role="radiogroup" with accessible label', () => {
@@ -33,10 +33,10 @@ describe('AvatarPicker', () => {
     const user = userEvent.setup();
     render(<AvatarPicker {...defaultProps} onSelect={onSelect} />);
 
-    const dogOption = screen.getByRole('radio', { name: /dog/i });
-    await user.click(dogOption);
+    const catOption = screen.getByRole('radio', { name: /cat/i });
+    await user.click(catOption);
 
-    expect(onSelect).toHaveBeenCalledWith('dog');
+    expect(onSelect).toHaveBeenCalledWith('cat');
   });
 
   it('supports arrow key navigation', async () => {
@@ -54,10 +54,10 @@ describe('AvatarPicker', () => {
   it('wraps around from last to first on ArrowRight', async () => {
     const onSelect = vi.fn();
     const user = userEvent.setup();
-    render(<AvatarPicker {...defaultProps} selectedId="crown" onSelect={onSelect} />);
+    render(<AvatarPicker {...defaultProps} selectedId="lightning" onSelect={onSelect} />);
 
-    const crownOption = screen.getByRole('radio', { name: /crown/i });
-    crownOption.focus();
+    const lightningOption = screen.getByRole('radio', { name: /lightning/i });
+    lightningOption.focus();
 
     await user.keyboard('{ArrowRight}');
     expect(onSelect).toHaveBeenCalledWith('rocket');

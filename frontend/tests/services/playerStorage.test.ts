@@ -8,6 +8,10 @@ import {
   isStorageAvailable,
   StorageUnavailableError,
   STORAGE_KEY,
+  clearAllStorage,
+  updatePlayerScore,
+  AVATAR_REMAP,
+  COLOR_REMAP,
 } from '../../src/services/playerStorage';
 import type { PlayerStore } from '../../src/types/player';
 
@@ -43,11 +47,11 @@ describe('playerStorage', () => {
 
     it('returns players sorted by lastActive descending', () => {
       const store: PlayerStore = {
-        version: 1,
+        version: 2,
         players: [
-          { name: 'Alice', avatarId: 'cat', colorId: 'blue', lastActive: 100, createdAt: 50 },
-          { name: 'Bob', avatarId: 'dog', colorId: 'red', lastActive: 300, createdAt: 60 },
-          { name: 'Charlie', avatarId: 'star', colorId: 'green', lastActive: 200, createdAt: 70 },
+          { name: 'Alice', avatarId: 'cat', colorId: 'blue', lastActive: 100, createdAt: 50, totalScore: 0, gamesPlayed: 0 },
+          { name: 'Bob', avatarId: 'robot', colorId: 'red', lastActive: 300, createdAt: 60, totalScore: 0, gamesPlayed: 0 },
+          { name: 'Charlie', avatarId: 'star', colorId: 'teal', lastActive: 200, createdAt: 70, totalScore: 0, gamesPlayed: 0 },
         ],
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
@@ -104,9 +108,9 @@ describe('playerStorage', () => {
       savePlayer({ name: 'Mia', avatarId: 'cat', colorId: 'blue' });
 
       vi.spyOn(Date, 'now').mockReturnValue(2000);
-      const { player: updated } = savePlayer({ name: 'mia', avatarId: 'dog', colorId: 'red' });
+      const { player: updated } = savePlayer({ name: 'mia', avatarId: 'robot', colorId: 'red' });
 
-      expect(updated.avatarId).toBe('dog');
+      expect(updated.avatarId).toBe('robot');
       expect(updated.colorId).toBe('red');
       expect(updated.lastActive).toBe(2000);
       expect(updated.createdAt).toBe(1000); // preserved
@@ -124,7 +128,7 @@ describe('playerStorage', () => {
       expect(getPlayers()).toHaveLength(50);
 
       vi.spyOn(Date, 'now').mockReturnValue(99999);
-      const { evictedNames } = savePlayer({ name: 'NewPlayer', avatarId: 'star', colorId: 'green' });
+      const { evictedNames } = savePlayer({ name: 'NewPlayer', avatarId: 'star', colorId: 'teal' });
       vi.restoreAllMocks();
 
       const players = getPlayers();
@@ -139,9 +143,9 @@ describe('playerStorage', () => {
       vi.spyOn(Date, 'now').mockReturnValue(100);
       savePlayer({ name: 'Alice', avatarId: 'cat', colorId: 'blue' });
       vi.spyOn(Date, 'now').mockReturnValue(200);
-      savePlayer({ name: 'Bob', avatarId: 'dog', colorId: 'red' });
+      savePlayer({ name: 'Bob', avatarId: 'robot', colorId: 'red' });
       vi.spyOn(Date, 'now').mockReturnValue(300);
-      savePlayer({ name: 'Charlie', avatarId: 'star', colorId: 'green' });
+      savePlayer({ name: 'Charlie', avatarId: 'star', colorId: 'teal' });
 
       vi.restoreAllMocks();
 
@@ -218,7 +222,7 @@ describe('playerStorage', () => {
       vi.spyOn(Date, 'now').mockReturnValue(100);
       savePlayer({ name: 'Alice', avatarId: 'cat', colorId: 'blue' });
       vi.spyOn(Date, 'now').mockReturnValue(200);
-      savePlayer({ name: 'Bob', avatarId: 'dog', colorId: 'red' });
+      savePlayer({ name: 'Bob', avatarId: 'robot', colorId: 'red' });
       vi.restoreAllMocks();
 
       // Alice is oldest, touch her to make her most recent
@@ -229,6 +233,137 @@ describe('playerStorage', () => {
       const players = getPlayers();
       expect(players[0].name).toBe('Alice');
       expect(players[1].name).toBe('Bob');
+    });
+  });
+
+  describe('v1 → v2 migration', () => {
+    it('adds totalScore=0 and gamesPlayed=0 to v1 players', () => {
+      const v1Store = {
+        version: 1,
+        players: [
+          { name: 'Alice', avatarId: 'cat', colorId: 'blue', lastActive: 100, createdAt: 50 },
+        ],
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(v1Store));
+
+      const players = getPlayers();
+      expect(players[0].totalScore).toBe(0);
+      expect(players[0].gamesPlayed).toBe(0);
+
+      // Verify store was updated to v2
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!) as PlayerStore;
+      expect(stored.version).toBe(2);
+    });
+  });
+
+  describe('avatar/color remapping', () => {
+    it('remaps removed avatar IDs to their replacements on load', () => {
+      const store = {
+        version: 2,
+        players: [
+          { name: 'A', avatarId: 'dog', colorId: 'blue', lastActive: 100, createdAt: 50, totalScore: 0, gamesPlayed: 0 },
+          { name: 'B', avatarId: 'planet', colorId: 'red', lastActive: 200, createdAt: 60, totalScore: 0, gamesPlayed: 0 },
+          { name: 'C', avatarId: 'flower', colorId: 'purple', lastActive: 300, createdAt: 70, totalScore: 0, gamesPlayed: 0 },
+          { name: 'D', avatarId: 'crown', colorId: 'pink', lastActive: 400, createdAt: 80, totalScore: 0, gamesPlayed: 0 },
+        ],
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+
+      const players = getPlayers();
+      expect(players.find((p) => p.name === 'A')!.avatarId).toBe('cat');
+      expect(players.find((p) => p.name === 'B')!.avatarId).toBe('rocket');
+      expect(players.find((p) => p.name === 'C')!.avatarId).toBe('star');
+      expect(players.find((p) => p.name === 'D')!.avatarId).toBe('star');
+    });
+
+    it('remaps removed color IDs to their replacements on load', () => {
+      const store = {
+        version: 2,
+        players: [
+          { name: 'A', avatarId: 'cat', colorId: 'orange', lastActive: 100, createdAt: 50, totalScore: 0, gamesPlayed: 0 },
+          { name: 'B', avatarId: 'star', colorId: 'green', lastActive: 200, createdAt: 60, totalScore: 0, gamesPlayed: 0 },
+        ],
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+
+      const players = getPlayers();
+      expect(players.find((p) => p.name === 'A')!.colorId).toBe('red');
+      expect(players.find((p) => p.name === 'B')!.colorId).toBe('teal');
+    });
+
+    it('persists remapped avatars and colors after load', () => {
+      const store = {
+        version: 2,
+        players: [
+          { name: 'A', avatarId: 'dog', colorId: 'orange', lastActive: 100, createdAt: 50, totalScore: 0, gamesPlayed: 0 },
+        ],
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+
+      // Trigger the load + remap
+      getPlayers();
+
+      // Read raw storage to verify persistence
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!) as PlayerStore;
+      expect(stored.players[0].avatarId).toBe('cat');
+      expect(stored.players[0].colorId).toBe('red');
+    });
+
+    it('AVATAR_REMAP maps dog→cat, planet→rocket, flower→star, crown→star', () => {
+      expect(AVATAR_REMAP).toEqual({ dog: 'cat', planet: 'rocket', flower: 'star', crown: 'star' });
+    });
+
+    it('COLOR_REMAP maps orange→red, green→teal', () => {
+      expect(COLOR_REMAP).toEqual({ orange: 'red', green: 'teal' });
+    });
+  });
+
+  describe('clearAllStorage', () => {
+    it('clears all localStorage and sessionStorage', () => {
+      localStorage.setItem('test_key', 'value');
+      sessionStorage.setItem('session_key', 'value');
+
+      clearAllStorage();
+
+      expect(localStorage.length).toBe(0);
+      expect(sessionStorage.length).toBe(0);
+    });
+
+    it('clears player data from localStorage', () => {
+      savePlayer({ name: 'Mia', avatarId: 'cat', colorId: 'blue' });
+      expect(getPlayers()).toHaveLength(1);
+
+      clearAllStorage();
+      expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+    });
+  });
+
+  describe('updatePlayerScore', () => {
+    it('increments totalScore and gamesPlayed for existing player', () => {
+      savePlayer({ name: 'Mia', avatarId: 'cat', colorId: 'blue' });
+
+      updatePlayerScore('Mia', 15);
+      let players = getPlayers();
+      expect(players[0].totalScore).toBe(15);
+      expect(players[0].gamesPlayed).toBe(1);
+
+      updatePlayerScore('Mia', 20);
+      players = getPlayers();
+      expect(players[0].totalScore).toBe(35);
+      expect(players[0].gamesPlayed).toBe(2);
+    });
+
+    it('finds player case-insensitively', () => {
+      savePlayer({ name: 'Mia', avatarId: 'cat', colorId: 'blue' });
+
+      updatePlayerScore('mia', 10);
+      const players = getPlayers();
+      expect(players[0].totalScore).toBe(10);
+    });
+
+    it('is a no-op if player does not exist', () => {
+      updatePlayerScore('Ghost', 10);
+      expect(getPlayers()).toHaveLength(0);
     });
   });
 });

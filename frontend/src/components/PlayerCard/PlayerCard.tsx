@@ -10,26 +10,32 @@ interface PlayerCardProps {
 }
 
 /**
- * Displays a player card with avatar, name, color accent, and delete button.
- * The card itself is a button for selecting the player.
+ * Single-line player card: avatar | name | avg score | color dot | delete button.
  */
 export default function PlayerCard({ player, onSelect, onDelete }: PlayerCardProps) {
   const color = COLORS.find((c) => c.id === player.colorId);
+  const avgScore =
+    player.gamesPlayed > 0
+      ? `Avg: ${Math.round(player.totalScore / player.gamesPlayed)}`
+      : '—';
 
   return (
-    <div className={styles.card} style={{ borderLeftColor: color?.hex, borderLeftWidth: 4 }}>
+    <div className={styles.card}>
       <button
-        className={styles.card}
-        style={{ border: 'none', background: 'transparent', padding: 0, flex: 1, display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
+        className={styles.selectButton}
         aria-label={`Play as ${player.name}`}
         onClick={() => onSelect(player)}
       >
         <span className={styles.avatar} aria-hidden="true">
           {getAvatarEmoji(player.avatarId)}
         </span>
-        <div className={styles.info}>
-          <span className={styles.name}>{player.name}</span>
-        </div>
+        <span className={styles.name}>{player.name}</span>
+        <span className={styles.score}>{avgScore}</span>
+        <span
+          className={styles.colorDot}
+          style={{ backgroundColor: color?.hex }}
+          aria-hidden="true"
+        />
       </button>
       <button
         className={styles.deleteButton}

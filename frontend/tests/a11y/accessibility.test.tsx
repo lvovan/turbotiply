@@ -9,6 +9,7 @@ import NewPlayerForm from '../../src/components/WelcomeScreen/NewPlayerForm';
 import AvatarPicker from '../../src/components/AvatarPicker/AvatarPicker';
 import ColorPicker from '../../src/components/ColorPicker/ColorPicker';
 import PlayerList from '../../src/components/WelcomeScreen/PlayerList';
+import ClearAllConfirmation from '../../src/components/ClearAllConfirmation/ClearAllConfirmation';
 import FormulaDisplay from '../../src/components/GamePlay/FormulaDisplay/FormulaDisplay';
 import AnswerInput from '../../src/components/GamePlay/AnswerInput/AnswerInput';
 import RoundFeedback from '../../src/components/GamePlay/RoundFeedback/RoundFeedback';
@@ -68,8 +69,8 @@ describe('Accessibility (axe)', () => {
 
   it('PlayerList has no a11y violations', async () => {
     const players = [
-      { name: 'Alice', avatarId: 'cat', colorId: 'blue', lastActive: 200, createdAt: 100 },
-      { name: 'Bob', avatarId: 'dog', colorId: 'red', lastActive: 100, createdAt: 50 },
+      { name: 'Alice', avatarId: 'cat', colorId: 'blue', lastActive: 200, createdAt: 100, totalScore: 0, gamesPlayed: 0 },
+      { name: 'Bob', avatarId: 'robot', colorId: 'red', lastActive: 100, createdAt: 50, totalScore: 0, gamesPlayed: 0 },
     ];
     const { container } = render(
       <PlayerList
@@ -77,7 +78,16 @@ describe('Accessibility (axe)', () => {
         onSelectPlayer={() => {}}
         onDeletePlayer={() => {}}
         onNewPlayer={() => {}}
+        onClearAll={() => {}}
       />,
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  it('ClearAllConfirmation has no a11y violations', async () => {
+    const { container } = render(
+      <ClearAllConfirmation onConfirm={() => {}} onCancel={() => {}} />,
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();

@@ -1,8 +1,9 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useSession } from '../hooks/useSession.tsx';
 import { useGame } from '../hooks/useGame';
 import { useRoundTimer } from '../hooks/useRoundTimer';
+import { updatePlayerScore } from '../services/playerStorage';
 import { FEEDBACK_DURATION_MS } from '../constants/scoring';
 import Header from '../components/Header/Header';
 import FormulaDisplay from '../components/GamePlay/FormulaDisplay/FormulaDisplay';
@@ -22,6 +23,18 @@ export default function MainPage() {
     useGame();
   const { displayRef, start, stop, reset } = useRoundTimer();
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scorePersistedRef = useRef(false);
+
+  // Persist score when game completes
+  useEffect(() => {
+    if (gameState.status === 'completed' && session && !scorePersistedRef.current) {
+      scorePersistedRef.current = true;
+      updatePlayerScore(session.playerName, gameState.score);
+    }
+    if (gameState.status === 'not-started') {
+      scorePersistedRef.current = false;
+    }
+  }, [gameState.status, gameState.score, session]);
 
   const handleStartGame = useCallback(() => {
     startGame();

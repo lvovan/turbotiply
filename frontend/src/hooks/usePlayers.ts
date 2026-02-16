@@ -6,12 +6,13 @@ import {
   deletePlayer as storageDeletePlayer,
   playerExists as storagePlayerExists,
   isStorageAvailable,
+  clearAllStorage,
 } from '../services/playerStorage';
 import type { SavePlayerResult } from '../services/playerStorage';
 
 /** Shape returned by the usePlayers hook. */
 export interface UsePlayersReturn {
-  /** All stored players, ordered by lastActive desc. */
+  /** All stored players, sorted alphabetically by name (case-insensitive). */
   players: Player[];
   /** Whether localStorage is available. */
   storageAvailable: boolean;
@@ -21,15 +22,21 @@ export interface UsePlayersReturn {
   deletePlayer: (name: string) => void;
   /** Check if a name is already taken (case-insensitive). */
   playerExists: (name: string) => boolean;
+  /** Clear all player data and reload the page. */
+  clearAllPlayers: () => void;
 }
 
 /** Hook for managing the player list via localStorage. */
 export function usePlayers(): UsePlayersReturn {
-  const [players, setPlayers] = useState<Player[]>(() => getPlayers());
+  const [players, setPlayers] = useState<Player[]>(() =>
+    getPlayers().sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })),
+  );
   const storageAvailable = isStorageAvailable();
 
   const refreshPlayers = useCallback(() => {
-    setPlayers(getPlayers());
+    setPlayers(
+      getPlayers().sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })),
+    );
   }, []);
 
   const savePlayer = useCallback(
@@ -53,11 +60,17 @@ export function usePlayers(): UsePlayersReturn {
     return storagePlayerExists(name);
   }, []);
 
+  const clearAllPlayers = useCallback((): void => {
+    clearAllStorage();
+    window.location.reload();
+  }, []);
+
   return {
     players,
     storageAvailable,
     savePlayer,
     deletePlayer,
     playerExists,
+    clearAllPlayers,
   };
 }

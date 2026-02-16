@@ -16,9 +16,10 @@ import styles from './WelcomePage.module.css';
 export default function WelcomePage() {
   const navigate = useNavigate();
   const { isActive, startSession } = useSession();
-  const { players, storageAvailable, savePlayer, deletePlayer, playerExists } = usePlayers();
+  const { players, storageAvailable, savePlayer, deletePlayer, playerExists, clearAllPlayers } = usePlayers();
   const [showNewPlayerForm, setShowNewPlayerForm] = useState(false);
   const [evictionMessage, setEvictionMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // If session is active already, redirect to main experience
   if (isActive) {
@@ -66,6 +67,14 @@ export default function WelcomePage() {
     deletePlayer(name);
   };
 
+  const handleClearAll = () => {
+    try {
+      clearAllPlayers();
+    } catch {
+      setErrorMessage('Failed to clear profiles. Please try again.');
+    }
+  };
+
   // Show new player form when no players exist, or when user explicitly chose "New player"
   const shouldShowForm = players.length === 0 || showNewPlayerForm;
 
@@ -78,6 +87,18 @@ export default function WelcomePage() {
       {evictionMessage && (
         <div className={styles.evictionNotice} role="status">
           {evictionMessage}
+        </div>
+      )}
+      {errorMessage && (
+        <div className={styles.errorBanner} role="alert">
+          <span>{errorMessage}</span>
+          <button
+            className={styles.dismissButton}
+            onClick={() => setErrorMessage(null)}
+            aria-label="Dismiss error"
+          >
+            ✕
+          </button>
         </div>
       )}
       <div className={styles.content}>
@@ -99,6 +120,7 @@ export default function WelcomePage() {
             onSelectPlayer={handleSelectPlayer}
             onDeletePlayer={handleDeletePlayer}
             onNewPlayer={() => setShowNewPlayerForm(true)}
+            onClearAll={handleClearAll}
           />
         )}
       </div>
