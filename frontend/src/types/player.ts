@@ -10,6 +10,10 @@ export interface Player {
   lastActive: number;
   /** Timestamp of profile creation, immutable after creation (Date.now() epoch ms). */
   createdAt: number;
+  /** Sum of all completed game scores. Default 0. */
+  totalScore: number;
+  /** Count of completed games. Default 0. */
+  gamesPlayed: number;
 }
 
 /** Represents a single play session, stored in sessionStorage (tab-scoped). */

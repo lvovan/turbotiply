@@ -5,8 +5,8 @@ import PlayerList from '../../src/components/WelcomeScreen/PlayerList';
 import type { Player } from '../../src/types/player';
 
 const mockPlayers: Player[] = [
-  { name: 'Alice', avatarId: 'cat', colorId: 'blue', lastActive: 200, createdAt: 100 },
-  { name: 'Bob', avatarId: 'dog', colorId: 'red', lastActive: 100, createdAt: 50 },
+  { name: 'Alice', avatarId: 'cat', colorId: 'blue', lastActive: 200, createdAt: 100, totalScore: 0, gamesPlayed: 0 },
+  { name: 'Bob', avatarId: 'robot', colorId: 'red', lastActive: 100, createdAt: 50, totalScore: 0, gamesPlayed: 0 },
 ];
 
 describe('PlayerList', () => {
@@ -15,6 +15,7 @@ describe('PlayerList', () => {
     onSelectPlayer: vi.fn(),
     onDeletePlayer: vi.fn(),
     onNewPlayer: vi.fn(),
+    onClearAll: vi.fn(),
   };
 
   it('renders a card for each player', () => {
@@ -69,5 +70,44 @@ describe('PlayerList', () => {
     await user.click(screen.getByRole('button', { name: /^remove$/i }));
 
     expect(onDeletePlayer).toHaveBeenCalledWith('Alice');
+  });
+
+  it('shows "Clear all profiles" button when players exist', () => {
+    render(<PlayerList {...defaultProps} />);
+    expect(screen.getByRole('button', { name: /clear all profiles/i })).toBeInTheDocument();
+  });
+
+  it('hides "Clear all profiles" button when no players', () => {
+    render(<PlayerList {...defaultProps} players={[]} />);
+    expect(screen.queryByRole('button', { name: /clear all profiles/i })).not.toBeInTheDocument();
+  });
+
+  it('shows ClearAllConfirmation dialog when clear-all button is clicked', async () => {
+    const user = userEvent.setup();
+    render(<PlayerList {...defaultProps} />);
+
+    await user.click(screen.getByRole('button', { name: /clear all profiles/i }));
+    expect(screen.getByRole('dialog', { name: /clear all profiles/i })).toBeInTheDocument();
+  });
+
+  it('calls onClearAll when confirmed in ClearAllConfirmation', async () => {
+    const onClearAll = vi.fn();
+    const user = userEvent.setup();
+    render(<PlayerList {...defaultProps} onClearAll={onClearAll} />);
+
+    await user.click(screen.getByRole('button', { name: /clear all profiles/i }));
+    await user.click(screen.getByRole('button', { name: /clear all$/i }));
+    expect(onClearAll).toHaveBeenCalledOnce();
+  });
+
+  it('hides ClearAllConfirmation when cancelled', async () => {
+    const user = userEvent.setup();
+    render(<PlayerList {...defaultProps} />);
+
+    await user.click(screen.getByRole('button', { name: /clear all profiles/i }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /cancel/i }));
+    expect(screen.queryByRole('dialog', { name: /clear all profiles/i })).not.toBeInTheDocument();
   });
 });

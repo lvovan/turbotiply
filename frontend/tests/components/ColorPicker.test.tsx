@@ -10,10 +10,10 @@ describe('ColorPicker', () => {
     onSelect: vi.fn(),
   };
 
-  it('renders all 8 colors', () => {
+  it('renders all 6 colors', () => {
     render(<ColorPicker {...defaultProps} />);
     const options = screen.getAllByRole('radio');
-    expect(options).toHaveLength(8);
+    expect(options).toHaveLength(6);
   });
 
   it('has role="radiogroup" with accessible label', () => {
@@ -33,10 +33,10 @@ describe('ColorPicker', () => {
     const user = userEvent.setup();
     render(<ColorPicker {...defaultProps} onSelect={onSelect} />);
 
-    const greenOption = screen.getByRole('radio', { name: /green/i });
-    await user.click(greenOption);
+    const tealOption = screen.getByRole('radio', { name: /teal/i });
+    await user.click(tealOption);
 
-    expect(onSelect).toHaveBeenCalledWith('green');
+    expect(onSelect).toHaveBeenCalledWith('teal');
   });
 
   it('supports arrow key navigation', async () => {
@@ -48,7 +48,7 @@ describe('ColorPicker', () => {
     redOption.focus();
 
     await user.keyboard('{ArrowRight}');
-    expect(onSelect).toHaveBeenCalledWith('orange');
+    expect(onSelect).toHaveBeenCalledWith('gold');
   });
 
   it('wraps around from last to first on ArrowRight', async () => {

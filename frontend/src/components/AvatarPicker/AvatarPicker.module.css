@@ -1,14 +1,8 @@
 .avatarGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
   padding: 8px;
-}
-
-@media (min-width: 600px) {
-  .avatarGrid {
-    grid-template-columns: repeat(4, 1fr);
-  }
 }
 
 .avatarOption {
@@ -45,6 +39,6 @@
 }
 
 .avatarEmoji {
-  font-size: 2rem;
+  font-size: 1.75rem;
   line-height: 1;
 }

@@ -4,10 +4,24 @@ import type { Player, PlayerStore } from '../types/player';
 export const STORAGE_KEY = 'turbotiply_players';
 
 /** Current schema version. */
-const CURRENT_VERSION = 1;
+const CURRENT_VERSION = 2;
 
 /** Maximum number of players stored. */
 const MAX_PLAYERS = 50;
+
+/** Mapping from removed avatar IDs to their replacement IDs. */
+export const AVATAR_REMAP: Record<string, string> = {
+  dog: 'cat',
+  planet: 'rocket',
+  flower: 'star',
+  crown: 'star',
+};
+
+/** Mapping from removed color IDs to their replacement IDs. */
+export const COLOR_REMAP: Record<string, string> = {
+  orange: 'red',
+  green: 'teal',
+};
 
 /** Error thrown when localStorage is not available or writable. */
 export class StorageUnavailableError extends Error {
@@ -45,7 +59,33 @@ function readStore(): PlayerStore {
     if (!parsed || !Array.isArray(parsed.players)) {
       return { version: CURRENT_VERSION, players: [] };
     }
-    // Migrate if needed (future versions)
+
+    // Migrate v1 → v2: add totalScore and gamesPlayed fields
+    if (parsed.version === 1) {
+      for (const player of parsed.players) {
+        if (player.totalScore === undefined) player.totalScore = 0;
+        if (player.gamesPlayed === undefined) player.gamesPlayed = 0;
+      }
+      parsed.version = 2;
+      writeStore(parsed);
+    }
+
+    // Remap removed avatars and colors
+    let dirty = false;
+    for (const player of parsed.players) {
+      if (player.avatarId in AVATAR_REMAP) {
+        player.avatarId = AVATAR_REMAP[player.avatarId];
+        dirty = true;
+      }
+      if (player.colorId in COLOR_REMAP) {
+        player.colorId = COLOR_REMAP[player.colorId];
+        dirty = true;
+      }
+    }
+    if (dirty) {
+      writeStore(parsed);
+    }
+
     return parsed;
   } catch {
     return { version: CURRENT_VERSION, players: [] };
@@ -121,6 +161,8 @@ export function savePlayer(data: Pick<Player, 'name' | 'avatarId' | 'colorId'>):
       colorId: data.colorId,
       lastActive: now,
       createdAt: existing.createdAt,
+      totalScore: existing.totalScore ?? 0,
+      gamesPlayed: existing.gamesPlayed ?? 0,
     };
     store.players[existingIndex] = player;
   } else {
@@ -131,6 +173,8 @@ export function savePlayer(data: Pick<Player, 'name' | 'avatarId' | 'colorId'>):
       colorId: data.colorId,
       lastActive: now,
       createdAt: now,
+      totalScore: 0,
+      gamesPlayed: 0,
     };
     store.players.push(player);
   }
@@ -169,6 +213,36 @@ export function touchPlayer(name: string): void {
   const player = store.players.find((p) => p.name.toLowerCase() === lowerName);
   if (player) {
     player.lastActive = Date.now();
+    writeStore(store);
+  }
+}
+
+/**
+ * Clear all app data from browser storage (full reset).
+ * Clears both localStorage and sessionStorage.
+ * Throws StorageUnavailableError if the operation fails.
+ */
+export function clearAllStorage(): void {
+  try {
+    localStorage.clear();
+    sessionStorage.clear();
+  } catch {
+    throw new StorageUnavailableError();
+  }
+}
+
+/**
+ * Update a player's cumulative score data after a game completes.
+ * Finds player by name (case-insensitive), adds gameScore to totalScore,
+ * increments gamesPlayed by 1, and writes back.
+ */
+export function updatePlayerScore(name: string, gameScore: number): void {
+  const store = readStore();
+  const lowerName = name.toLowerCase();
+  const player = store.players.find((p) => p.name.toLowerCase() === lowerName);
+  if (player) {
+    player.totalScore = (player.totalScore ?? 0) + gameScore;
+    player.gamesPlayed = (player.gamesPlayed ?? 0) + 1;
     writeStore(store);
   }
 }

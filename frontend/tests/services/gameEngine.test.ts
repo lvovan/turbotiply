@@ -83,7 +83,7 @@ describe('getCurrentRound', () => {
 
   it('returns correct round during playing', () => {
     const formulas = createMockFormulas();
-    let state = gameReducer(initialGameState, {
+    const state = gameReducer(initialGameState, {
       type: 'START_GAME',
       formulas,
     });
@@ -139,7 +139,7 @@ describe('gameReducer', () => {
 
     it('is a no-op when not in not-started state', () => {
       const formulas = createMockFormulas();
-      let state = gameReducer(initialGameState, { type: 'START_GAME', formulas });
+      const state = gameReducer(initialGameState, { type: 'START_GAME', formulas });
       const state2 = gameReducer(state, { type: 'START_GAME', formulas });
       expect(state2).toBe(state);
     });
@@ -268,7 +268,7 @@ describe('gameReducer', () => {
 
     it('is a no-op during input phase', () => {
       const formulas = createMockFormulas();
-      let state = gameReducer(initialGameState, { type: 'START_GAME', formulas });
+      const state = gameReducer(initialGameState, { type: 'START_GAME', formulas });
 
       const state2 = gameReducer(state, { type: 'NEXT_ROUND' });
       expect(state2).toBe(state);
