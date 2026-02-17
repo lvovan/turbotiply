@@ -31,7 +31,7 @@ const pt: Dictionary = {
 
   // ── Cabeçalho ──────────────────────────────────────────────────
 
-  'header.greeting': 'Oi, {playerName}!',
+  'header.greeting': 'Oi, {playerName}',
   'header.switchPlayer': 'Trocar jogador',
   'header.changeLanguage': 'Mudar idioma',
 

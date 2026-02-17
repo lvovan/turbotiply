@@ -3,7 +3,7 @@ import type { ChallengingPair } from '../types/game';
 import { getPlayers } from './playerStorage';
 
 /** Maximum number of tricky numbers to display. */
-const MAX_TRICKY_NUMBERS = 8;
+const MAX_TRICKY_NUMBERS = 3;
 
 /**
  * Analyze rounds (potentially from multiple games) to identify challenging multiplication pairs.
@@ -66,23 +66,49 @@ export function identifyChallengingPairs(allRounds: RoundResult[]): ChallengingP
 }
 
 /**
- * Extract unique factor numbers from challenging pairs for display.
+ * Extract the top 3 most challenging individual factor numbers.
+ *
+ * Ranks each factor (2–12) by its total mistake count summed across
+ * all challenging pairs containing it. Ties broken by weighted average
+ * response time (slowest first). Returns at most 3 factors, sorted ascending.
  *
  * @param pairs Output of identifyChallengingPairs().
- * @returns Sorted ascending array of unique factor numbers, capped at 8.
+ * @returns Sorted ascending array of up to 3 factor numbers.
  */
 export function extractTrickyNumbers(pairs: ChallengingPair[]): number[] {
   if (pairs.length === 0) return [];
 
-  const numberSet = new Set<number>();
+  // Build per-factor aggregates
+  const factorMap = new Map<number, { totalMistakes: number; weightedMsSum: number; totalOccurrences: number }>();
+
   for (const pair of pairs) {
-    numberSet.add(pair.factorA);
-    numberSet.add(pair.factorB);
+    for (const factor of [pair.factorA, pair.factorB]) {
+      let stats = factorMap.get(factor);
+      if (!stats) {
+        stats = { totalMistakes: 0, weightedMsSum: 0, totalOccurrences: 0 };
+        factorMap.set(factor, stats);
+      }
+      stats.totalMistakes += pair.mistakeCount;
+      stats.weightedMsSum += pair.avgMs;
+      stats.totalOccurrences += 1;
+    }
   }
 
-  return Array.from(numberSet)
-    .sort((a, b) => a - b)
-    .slice(0, MAX_TRICKY_NUMBERS);
+  // Convert to sortable array
+  const factors = Array.from(factorMap.entries()).map(([factor, stats]) => ({
+    factor,
+    aggregateMistakes: stats.totalMistakes,
+    weightedAvgMs: stats.weightedMsSum / stats.totalOccurrences,
+  }));
+
+  // Sort by aggregate mistakes desc, then weighted avgMs desc
+  factors.sort((a, b) => b.aggregateMistakes - a.aggregateMistakes || b.weightedAvgMs - a.weightedAvgMs);
+
+  // Take top 3, sort ascending for display
+  return factors
+    .slice(0, MAX_TRICKY_NUMBERS)
+    .map((f) => f.factor)
+    .sort((a, b) => a - b);
 }
 
 /** Maximum number of recent games to analyze for challenging pairs. */

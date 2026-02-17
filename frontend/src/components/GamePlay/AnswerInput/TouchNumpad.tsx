@@ -18,7 +18,7 @@ const MAX_DIGITS = 3;
 /**
  * Custom in-page numpad for touch devices.
  *
- * Renders a 4×3 calculator-style grid (1-2-3 / 4-5-6 / 7-8-9 / 0-⌫-Go)
+ * Renders a 4×3 calculator-style grid (1-2-3 / 4-5-6 / 7-8-9 / ⌫-0-Go)
  * plus a read-only answer display. Digits are composed by tapping buttons,
  * "Go" submits, "⌫" deletes the last digit.
  *
@@ -122,16 +122,7 @@ export default function TouchNumpad({ onSubmit, acceptingInput }: TouchNumpadPro
           ))
         )}
 
-        {/* Row 4: 0, ⌫, Go */}
-        <button
-          type="button"
-          className={styles.button}
-          aria-label={t('a11y.digit', { digit: '0' })}
-          disabled={!acceptingInput}
-          onClick={() => appendDigit('0')}
-        >
-          0
-        </button>
+        {/* Row 4: ⌫, 0, Go */}
         <button
           type="button"
           className={`${styles.button} ${styles.backspace}`}
@@ -140,6 +131,15 @@ export default function TouchNumpad({ onSubmit, acceptingInput }: TouchNumpadPro
           onClick={deleteLastDigit}
         >
           ⌫
+        </button>
+        <button
+          type="button"
+          className={styles.button}
+          aria-label={t('a11y.digit', { digit: '0' })}
+          disabled={!acceptingInput}
+          onClick={() => appendDigit('0')}
+        >
+          0
         </button>
         <button
           type="button"

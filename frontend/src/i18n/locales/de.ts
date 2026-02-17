@@ -28,7 +28,7 @@ const de: Dictionary = {
   'player.replaceDialog': '{playerName} ersetzen',
 
   // ── Kopfzeile ──────────────────────────────────────────────────
-  'header.greeting': 'Hallo, {playerName}!',
+  'header.greeting': 'Hallo, {playerName}',
   'header.switchPlayer': 'Spieler wechseln',
   'header.changeLanguage': 'Sprache ändern',
 

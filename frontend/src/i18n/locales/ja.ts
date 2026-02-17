@@ -28,7 +28,7 @@ const ja: Dictionary = {
   'player.replaceDialog': '{playerName} を置き換える',
 
   // ── ヘッダー ──────────────────────────────────────────────────
-  'header.greeting': 'やあ、{playerName}！',
+  'header.greeting': 'やあ、{playerName}',
   'header.switchPlayer': 'プレイヤーを変える',
   'header.changeLanguage': '言語を変更',
 

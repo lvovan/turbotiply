@@ -63,10 +63,10 @@ describe('ModeSelector', () => {
   it('renders tricky numbers in Improve descriptor', () => {
     render(
       <ModeSelector
-        {...defaultProps({ showImprove: true, trickyNumbers: [6, 7, 8, 9] })}
+        {...defaultProps({ showImprove: true, trickyNumbers: [7, 8, 9] })}
       />,
     );
-    expect(screen.getByText(/6, 7, 8, 9/)).toBeInTheDocument();
+    expect(screen.getByText(/7, 8, 9/)).toBeInTheDocument();
   });
 
   it('shows encouraging message when showEncouragement is true and showImprove is false', () => {
@@ -114,41 +114,41 @@ describe('ModeSelector', () => {
     expect(screen.getByText(/3, 5, 7/)).toBeInTheDocument();
   });
 
-  it('renders ellipsis when more than 8 numbers', () => {
+  it('renders ellipsis when more than 3 numbers', () => {
     render(
       <ModeSelector
         {...defaultProps({
           showImprove: true,
-          trickyNumbers: [2, 3, 4, 5, 6, 7, 8, 9, 10],
+          trickyNumbers: [2, 3, 4, 5],
         })}
       />,
     );
-    // Should show first 8 + ellipsis
-    expect(screen.getByText(/2, 3, 4, 5, 6, 7, 8, 9/)).toBeInTheDocument();
+    // Should show first 3 + ellipsis
+    expect(screen.getByText(/2, 3, 4/)).toBeInTheDocument();
     expect(screen.getByText(/…/)).toBeInTheDocument();
   });
 
-  it('renders exactly 8 numbers without ellipsis when exactly 8', () => {
+  it('renders exactly 3 numbers without ellipsis when exactly 3', () => {
     render(
       <ModeSelector
         {...defaultProps({
           showImprove: true,
-          trickyNumbers: [2, 3, 4, 5, 6, 7, 8, 9],
+          trickyNumbers: [7, 8, 9],
         })}
       />,
     );
-    expect(screen.getByText(/2, 3, 4, 5, 6, 7, 8, 9/)).toBeInTheDocument();
+    expect(screen.getByText(/7, 8, 9/)).toBeInTheDocument();
     expect(screen.queryByText(/…/)).not.toBeInTheDocument();
   });
 
   it('Improve button aria-label includes all tricky numbers', () => {
     render(
       <ModeSelector
-        {...defaultProps({ showImprove: true, trickyNumbers: [6, 7, 8, 9] })}
+        {...defaultProps({ showImprove: true, trickyNumbers: [7, 8, 9] })}
       />,
     );
     const btn = screen.getByRole('button', { name: /improve/i });
-    expect(btn.getAttribute('aria-label')).toContain('6, 7, 8, 9');
+    expect(btn.getAttribute('aria-label')).toContain('7, 8, 9');
   });
 
   describe('accessibility', () => {

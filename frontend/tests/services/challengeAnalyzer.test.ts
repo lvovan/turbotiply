@@ -173,25 +173,39 @@ describe('identifyChallengingPairs', () => {
 });
 
 describe('extractTrickyNumbers', () => {
-  it('collects unique factors from challenging pairs, sorted ascending', () => {
+  it('returns top factors ranked by aggregate mistake count, sorted ascending', () => {
     const pairs = [
       { factorA: 7, factorB: 8, mistakeCount: 2, avgMs: 5000 },
       { factorA: 6, factorB: 9, mistakeCount: 1, avgMs: 4000 },
     ];
+    // factor 7: 2 mistakes, factor 8: 2 mistakes, factor 6: 1 mistake, factor 9: 1 mistake
+    // Top 3 by aggregate: 7 (2), 8 (2), then 6 or 9 (both 1, same avgMs — stable sort picks 6)
     const result = extractTrickyNumbers(pairs);
-    expect(result).toEqual([6, 7, 8, 9]);
+    expect(result).toHaveLength(3);
+    expect(result).toContain(7);
+    expect(result).toContain(8);
+    // 3rd slot is one of the tied factors (6 or 9)
+    expect([6, 9]).toContain(result.find((n) => n !== 7 && n !== 8));
   });
 
-  it('deduplicates factors that appear in multiple pairs', () => {
+  it('ranks factors by aggregate mistakes across multiple pairs', () => {
+    // 7×8 = 5 mistakes, 4×7 = 2 mistakes, 6×9 = 3 mistakes
+    // factor 7: 5+2 = 7 aggregate, factor 8: 5, factor 9: 3, factor 6: 3, factor 4: 2
     const pairs = [
-      { factorA: 7, factorB: 8, mistakeCount: 2, avgMs: 5000 },
-      { factorA: 7, factorB: 9, mistakeCount: 1, avgMs: 4000 },
+      { factorA: 7, factorB: 8, mistakeCount: 5, avgMs: 5000 },
+      { factorA: 4, factorB: 7, mistakeCount: 2, avgMs: 3000 },
+      { factorA: 6, factorB: 9, mistakeCount: 3, avgMs: 4000 },
     ];
     const result = extractTrickyNumbers(pairs);
-    expect(result).toEqual([7, 8, 9]);
+    // Top 3: factor 7 (7), factor 8 (5), factor 6 or 9 (both 3) — tiebreak by avgMs
+    expect(result).toHaveLength(3);
+    expect(result).toContain(7);
+    expect(result).toContain(8);
+    // 6 and 9 both have 3 aggregate mistakes; 9 has avgMs from pair (6,9)=4000,
+    // 6 also has avgMs from pair (6,9)=4000 — identical, so tied. Stable sort order.
   });
 
-  it('caps at 8 numbers', () => {
+  it('caps at 3 numbers', () => {
     const pairs = [
       { factorA: 2, factorB: 3, mistakeCount: 5, avgMs: 5000 },
       { factorA: 4, factorB: 5, mistakeCount: 4, avgMs: 4500 },
@@ -200,18 +214,54 @@ describe('extractTrickyNumbers', () => {
       { factorA: 10, factorB: 11, mistakeCount: 1, avgMs: 3000 },
     ];
     const result = extractTrickyNumbers(pairs);
-    expect(result).toHaveLength(8);
-    expect(result).toEqual([2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(result).toHaveLength(3);
+  });
+
+  it('breaks ties by weighted avgMs (slowest first)', () => {
+    // factor 6 and factor 9 both have 1 mistake, but different avgMs
+    const pairs = [
+      { factorA: 6, factorB: 12, mistakeCount: 1, avgMs: 6000 },
+      { factorA: 9, factorB: 12, mistakeCount: 1, avgMs: 3000 },
+    ];
+    // factor 12: 2 aggregate mistakes (top)
+    // factor 6: 1 mistake, weightedAvgMs=6000
+    // factor 9: 1 mistake, weightedAvgMs=3000
+    // Top 3: 12, 6, 9 → sorted ascending: [6, 9, 12]
+    const result = extractTrickyNumbers(pairs);
+    expect(result).toEqual([6, 9, 12]);
+  });
+
+  it('returns fewer than 3 factors when only 2 available', () => {
+    const pairs = [
+      { factorA: 7, factorB: 8, mistakeCount: 2, avgMs: 5000 },
+    ];
+    const result = extractTrickyNumbers(pairs);
+    expect(result).toEqual([7, 8]);
+  });
+
+  it('returns single factor when pair has identical factors', () => {
+    const pairs = [{ factorA: 3, factorB: 3, mistakeCount: 1, avgMs: 2000 }];
+    const result = extractTrickyNumbers(pairs);
+    expect(result).toEqual([3]);
   });
 
   it('returns empty array for empty input', () => {
     expect(extractTrickyNumbers([])).toEqual([]);
   });
 
-  it('returns single pair factors correctly', () => {
-    const pairs = [{ factorA: 3, factorB: 3, mistakeCount: 1, avgMs: 2000 }];
+  it('handles all-correct pairs (zero mistakes) by avgMs ranking', () => {
+    // When all pairs have 0 mistakes, rank factors by avgMs desc
+    const pairs = [
+      { factorA: 7, factorB: 8, mistakeCount: 0, avgMs: 4000 },
+      { factorA: 6, factorB: 9, mistakeCount: 0, avgMs: 3000 },
+      { factorA: 3, factorB: 4, mistakeCount: 0, avgMs: 1500 },
+    ];
     const result = extractTrickyNumbers(pairs);
-    expect(result).toEqual([3]);
+    // factor 7: avgMs 4000, factor 8: 4000, factor 6: 3000, factor 9: 3000, factor 3: 1500, factor 4: 1500
+    // Top 3 by aggregate mistakes (all 0), tiebreak by avgMs: 7(4000), 8(4000), 6(3000) or 9(3000)
+    expect(result).toHaveLength(3);
+    expect(result).toContain(7);
+    expect(result).toContain(8);
   });
 });
 
@@ -343,6 +393,72 @@ describe('getChallengingPairsForPlayer', () => {
     expect(result[0].factorA).toBe(7);
     expect(result[0].factorB).toBe(8);
     expect(result[0].mistakeCount).toBe(2);
+  });
+
+  it('includes interleaved Play and Improve games in analysis (regression)', () => {
+    savePlayer({ name: 'TestKid', avatarId: 'cat' });
+
+    // Play game: mistake on (7,8)
+    const rounds1 = makeRounds([
+      undefined, undefined, undefined, undefined, undefined,
+      undefined, undefined, undefined, undefined,
+      { factorA: 7, factorB: 8, isCorrect: false, elapsedMs: 6000 },
+    ]);
+    saveGameRecord('TestKid', 30, rounds1, 'play');
+
+    // Improve game: mistake on (6,9)
+    const rounds2 = makeRounds([
+      undefined, undefined, undefined, undefined, undefined,
+      undefined, undefined, undefined, undefined,
+      { factorA: 6, factorB: 9, isCorrect: false, elapsedMs: 4000 },
+    ]);
+    saveGameRecord('TestKid', 0, rounds2, 'improve');
+
+    // Another Play game: mistake on (4,7)
+    const rounds3 = makeRounds([
+      undefined, undefined, undefined, undefined, undefined,
+      undefined, undefined, undefined, undefined,
+      { factorA: 4, factorB: 7, isCorrect: false, elapsedMs: 3500 },
+    ]);
+    saveGameRecord('TestKid', 25, rounds3, 'play');
+
+    const result = getChallengingPairsForPlayer('TestKid');
+    // All three games (Play, Improve, Play) contribute
+    const factors = result.map((p) => `${p.factorA},${p.factorB}`);
+    expect(factors).toContain('7,8');
+    expect(factors).toContain('6,9');
+    expect(factors).toContain('4,7');
+  });
+
+  it('produces tricky pairs from Improve-only game history (regression)', () => {
+    savePlayer({ name: 'TestKid', avatarId: 'cat' });
+
+    // Only Improve games, no Play games at all
+    const rounds1 = makeRounds([
+      undefined, undefined, undefined, undefined, undefined,
+      undefined, undefined, undefined, undefined,
+      { factorA: 7, factorB: 8, isCorrect: false, elapsedMs: 5000 },
+    ]);
+    saveGameRecord('TestKid', 0, rounds1, 'improve');
+
+    const rounds2 = makeRounds([
+      undefined, undefined, undefined, undefined, undefined,
+      undefined, undefined, undefined, undefined,
+      { factorA: 6, factorB: 9, isCorrect: false, elapsedMs: 4500 },
+    ]);
+    saveGameRecord('TestKid', 0, rounds2, 'improve');
+
+    const result = getChallengingPairsForPlayer('TestKid');
+    // Improve-only history still produces tricky pairs
+    expect(result.length).toBeGreaterThanOrEqual(2);
+    // Both pairs have 1 mistake each; order depends on avgMs tiebreaker
+    const factors = result.map((p) => `${p.factorA},${p.factorB}`);
+    expect(factors).toContain('7,8');
+    expect(factors).toContain('6,9');
+    const pair78 = result.find((p) => p.factorA === 7 && p.factorB === 8)!;
+    const pair69 = result.find((p) => p.factorA === 6 && p.factorB === 9)!;
+    expect(pair78.mistakeCount).toBe(1);
+    expect(pair69.mistakeCount).toBe(1);
   });
 
   it('skips legacy records without rounds data', () => {
