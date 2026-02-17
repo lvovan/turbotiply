@@ -21,6 +21,7 @@ const de: Dictionary = {
   'player.replace': 'Ersetzen',
   'player.newPlayer': '➕ Neuer Spieler',
   'player.clearAll': 'Alle Profile löschen',
+  'player.charCount': '{current}/{max}',
   'player.playAs': 'Spielen als {playerName}',
   'player.avgScore': 'Ø: {score}',
   'player.noScore': '—',

@@ -49,14 +49,47 @@ describe('NewPlayerForm', () => {
     expect(submitBtn).toBeDisabled();
   });
 
-  it('enforces 20-character limit on name input', async () => {
+  it('enforces 10-character limit on name input', async () => {
     const user = userEvent.setup();
     render(<NewPlayerForm {...defaultProps} />);
 
     const nameInput = screen.getByRole('textbox', { name: /your name/i });
-    await user.type(nameInput, 'A'.repeat(25));
+    await user.type(nameInput, 'A'.repeat(15));
 
-    expect((nameInput as HTMLInputElement).value).toHaveLength(20);
+    expect((nameInput as HTMLInputElement).value).toHaveLength(10);
+  });
+
+  it('displays a character counter showing current/max', async () => {
+    const user = userEvent.setup();
+    render(<NewPlayerForm {...defaultProps} />);
+
+    // Initially shows 0/10
+    expect(screen.getByText('0/10')).toBeInTheDocument();
+
+    const nameInput = screen.getByRole('textbox', { name: /your name/i });
+    await user.type(nameInput, 'Mia');
+
+    // After typing 3 chars shows 3/10
+    expect(screen.getByText('3/10')).toBeInTheDocument();
+  });
+
+  it('character counter has aria-live="polite" for screen readers', () => {
+    render(<NewPlayerForm {...defaultProps} />);
+
+    const counter = screen.getByText('0/10');
+    expect(counter).toHaveAttribute('aria-live', 'polite');
+  });
+
+  it('truncates pasted text to 10 characters', async () => {
+    const user = userEvent.setup();
+    render(<NewPlayerForm {...defaultProps} />);
+
+    const nameInput = screen.getByRole('textbox', { name: /your name/i });
+    await user.click(nameInput);
+    await user.paste('ABCDEFGHIJKLMNOPQRSTUVWXY');
+
+    expect((nameInput as HTMLInputElement).value).toHaveLength(10);
+    expect((nameInput as HTMLInputElement).value).toBe('ABCDEFGHIJ');
   });
 
   it('has default avatar pre-selected', () => {

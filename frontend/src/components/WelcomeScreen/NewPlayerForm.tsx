@@ -6,7 +6,7 @@ import AvatarPicker from '../AvatarPicker/AvatarPicker';
 import styles from './NewPlayerForm.module.css';
 
 /** Maximum name length. */
-const MAX_NAME_LENGTH = 20;
+const MAX_NAME_LENGTH = 10;
 
 interface NewPlayerFormProps {
   /** Called when the form is submitted with valid player data. */
@@ -95,6 +95,15 @@ export default function NewPlayerForm({ onSubmit, playerExists }: NewPlayerFormP
             maxLength={MAX_NAME_LENGTH}
             autoComplete="off"
           />
+          <span
+            className={`${styles.charCounter}${name.length >= MAX_NAME_LENGTH ? ` ${styles.charCounterWarning}` : ''}`}
+            aria-live="polite"
+          >
+            {t('player.charCount', {
+              current: String(name.length),
+              max: String(MAX_NAME_LENGTH),
+            })}
+          </span>
         </div>
 
         <div className={styles.fieldGroup}>

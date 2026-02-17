@@ -27,7 +27,7 @@ export interface GameRecord {
 
 /** Represents a player profile stored in localStorage. */
 export interface Player {
-  /** Display name chosen by the child (1–20 chars, trimmed). */
+  /** Display name chosen by the child (1–10 chars, trimmed). */
   name: string;
   /** Identifier referencing a predefined avatar (e.g., "cat", "rocket"). */
   avatarId: string;

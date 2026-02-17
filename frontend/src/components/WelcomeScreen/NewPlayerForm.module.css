@@ -136,3 +136,14 @@
   outline: 3px solid #E65100;
   outline-offset: 2px;
 }
+
+.charCounter {
+  font-size: 0.875rem;
+  color: #666;
+  text-align: right;
+  margin-top: -4px;
+}
+
+.charCounterWarning {
+  color: #E65100;
+}

@@ -53,6 +53,8 @@ const en = {
   'player.newPlayer': '➕ New player',
   /** "Clear all profiles" button in the player list. */
   'player.clearAll': 'Clear all profiles',
+  /** Character counter hint. Placeholders: {current}, {max} */
+  'player.charCount': '{current}/{max}',
   /** Aria-label for the "Play as {playerName}" button. Placeholder: {playerName} */
   'player.playAs': 'Play as {playerName}',
   /** Average score label in player card. Placeholder: {score} */

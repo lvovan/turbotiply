@@ -21,6 +21,7 @@ const ja: Dictionary = {
   'player.replace': '置き換える',
   'player.newPlayer': '➕ 新しいプレイヤー',
   'player.clearAll': 'すべてのプロフィールを消す',
+  'player.charCount': '{current}/{max}',
   'player.playAs': '{playerName} で遊ぶ',
   'player.avgScore': '平均: {score}',
   'player.noScore': '—',
