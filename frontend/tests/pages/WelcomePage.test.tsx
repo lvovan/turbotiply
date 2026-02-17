@@ -39,6 +39,16 @@ describe('WelcomePage (new player flow)', () => {
     expect(screen.getByRole('button', { name: /let's go/i })).toBeInTheDocument();
   });
 
+  it('displays the app title in the header', () => {
+    renderWelcomePage();
+    expect(screen.getByText('Multis!')).toBeInTheDocument();
+  });
+
+  it('does not render an inline h1 title', () => {
+    renderWelcomePage();
+    expect(screen.queryByRole('heading', { level: 1 })).not.toBeInTheDocument();
+  });
+
   it('displays copyright text at the bottom', () => {
     renderWelcomePage();
     expect(screen.getByText('© 2025, Luc Vo Van - Built with AI')).toBeInTheDocument();
@@ -116,6 +126,9 @@ describe('WelcomePage (storage unavailable)', () => {
     // Warning message is shown
     expect(screen.getByRole('alert')).toHaveTextContent(/storage is not available/i);
     expect(screen.getByText(/won't be saved/i)).toBeInTheDocument();
+
+    // App title is shown in header
+    expect(screen.getByText('Multis!')).toBeInTheDocument();
 
     // Form is still rendered
     const nameInput = screen.getByRole('textbox', { name: /your name/i });

@@ -6,7 +6,7 @@ import { useTranslation } from '../i18n';
 import type { Player } from '../types/player';
 import NewPlayerForm from '../components/WelcomeScreen/NewPlayerForm';
 import PlayerList from '../components/WelcomeScreen/PlayerList';
-import LanguageSwitcher from '../components/LanguageSwitcher/LanguageSwitcher';
+import Header from '../components/Header/Header';
 import { setPlayerTypeTag } from '../services/clarityService';
 import styles from './WelcomePage.module.css';
 
@@ -39,10 +39,7 @@ export default function WelcomePage() {
 
     return (
       <div className={styles.welcomePage}>
-        <div className={styles.languageArea}>
-          <LanguageSwitcher />
-        </div>
-        <h1 className={styles.title}>Multis!</h1>
+        <Header />
         <div className={styles.storageWarning} role="alert">
           <p>{t('welcome.storageWarning')}</p>
           <p>{t('welcome.storageWarningDetail')}</p>
@@ -90,10 +87,7 @@ export default function WelcomePage() {
 
   return (
     <div className={styles.welcomePage}>
-      <div className={styles.languageArea}>
-        <LanguageSwitcher />
-      </div>
-      <h1 className={styles.title}>Multis!</h1>
+      <Header />
       <p className={styles.subtitle}>
         {shouldShowForm ? t('welcome.subtitle') : t('welcome.subtitleReturning')}
       </p>

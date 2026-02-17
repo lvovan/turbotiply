@@ -81,6 +81,11 @@ describe('MainPage', () => {
     expect(screen.getByRole('button', { name: /^play/i })).toBeInTheDocument();
   });
 
+  it('displays app title "Multis!" in the header', () => {
+    renderMainPage();
+    expect(screen.getByText('Multis!')).toBeInTheDocument();
+  });
+
   it('clicking start begins game with round 1 displayed', async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMainPage();

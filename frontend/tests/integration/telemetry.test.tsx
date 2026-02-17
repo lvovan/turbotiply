@@ -37,6 +37,6 @@ describe('Telemetry graceful degradation', () => {
     render(<App />);
 
     // The WelcomePage should render with the title
-    expect(screen.getByText('Turbotiply!')).toBeInTheDocument();
+    expect(screen.getByText('Multis!')).toBeInTheDocument();
   });
 });
