@@ -66,8 +66,36 @@ describe('Header', () => {
     expect(sessionStorage.getItem('multis_session')).toBeNull();
   });
 
-  it('renders nothing when no session is active', () => {
-    const { container } = renderHeader(null);
-    expect(container.innerHTML).toBe('');
+  it('shows app title "Multis!" when session is active', () => {
+    renderHeader(mockSession);
+    expect(screen.getByText('Multis!')).toBeInTheDocument();
+  });
+});
+
+describe('Header (unauthenticated)', () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  it('renders a header element when no session is active', () => {
+    renderHeader(null);
+    expect(screen.getByRole('banner')).toBeInTheDocument();
+  });
+
+  it('shows app title "Multis!" when no session is active', () => {
+    renderHeader(null);
+    expect(screen.getByText('Multis!')).toBeInTheDocument();
+  });
+
+  it('does not show greeting when no session is active', () => {
+    renderHeader(null);
+    expect(screen.queryByText(/hi,/i)).not.toBeInTheDocument();
+  });
+
+  it('does not show "Switch player" button when no session is active', () => {
+    renderHeader(null);
+    expect(screen.queryByRole('button', { name: /switch player/i })).not.toBeInTheDocument();
   });
 });
