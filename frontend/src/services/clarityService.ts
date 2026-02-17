@@ -112,6 +112,15 @@ export function trackReplayCompleted(): void {
 }
 
 /**
+ * Track a virtual page view in the SPA.
+ * Sets session tag: page = <pageName>
+ * Called on every internal route change.
+ */
+export function trackPageView(pageName: string): void {
+  safeSet('page', pageName);
+}
+
+/**
  * Set the current language session tag.
  * Called on app init and when user switches language.
  */

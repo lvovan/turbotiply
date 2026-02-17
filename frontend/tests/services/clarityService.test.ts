@@ -23,6 +23,7 @@ import {
   trackGameCompleted,
   trackReplayStarted,
   trackReplayCompleted,
+  trackPageView,
   setLanguageTag,
   setPlayerTypeTag,
   _resetForTesting,
@@ -174,6 +175,30 @@ describe('safe wrappers when not initialized', () => {
   it('setPlayerTypeTag is a no-op', () => {
     setPlayerTypeTag('new');
     expect(mockSetTag).not.toHaveBeenCalled();
+  });
+
+  it('trackPageView is a no-op', () => {
+    trackPageView('welcome');
+    expect(mockSetTag).not.toHaveBeenCalled();
+  });
+});
+
+// ===================== trackPageView =====================
+
+describe('trackPageView', () => {
+  beforeEach(() => {
+    setProjectId('abc123');
+    initClarity();
+  });
+
+  it('sets page tag with given page name', () => {
+    trackPageView('welcome');
+    expect(mockSetTag).toHaveBeenCalledWith('page', 'welcome');
+  });
+
+  it('sets page tag for play page', () => {
+    trackPageView('play');
+    expect(mockSetTag).toHaveBeenCalledWith('page', 'play');
   });
 });
 
