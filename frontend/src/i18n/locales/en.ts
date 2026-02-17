@@ -67,7 +67,7 @@ const en = {
   // ── Header ─────────────────────────────────────────────────────
 
   /** Greeting shown in the header when logged in. Placeholder: {playerName} */
-  'header.greeting': 'Hi, {playerName}!',
+  'header.greeting': 'Hi, {playerName}',
   /** "Switch player" button label. */
   'header.switchPlayer': 'Switch player',
   /** Aria-label for the language switcher flag button. */

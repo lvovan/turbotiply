@@ -28,7 +28,7 @@ const fr: Dictionary = {
   'player.replaceDialog': 'Remplacer {playerName}',
 
   // ── En-tête ────────────────────────────────────────────────────
-  'header.greeting': 'Salut, {playerName} !',
+  'header.greeting': 'Salut, {playerName}',
   'header.switchPlayer': 'Changer de joueur',
   'header.changeLanguage': 'Changer de langue',
 

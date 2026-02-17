@@ -23,7 +23,7 @@ export default function ModeSelector({
   showEncouragement,
 }: ModeSelectorProps) {
   const { t } = useTranslation();
-  const MAX_DISPLAY = 8;
+  const MAX_DISPLAY = 3;
   const sortedNumbers = [...trickyNumbers].sort((a, b) => a - b);
   const displayNumbers = sortedNumbers.slice(0, MAX_DISPLAY);
   const hasMore = sortedNumbers.length > MAX_DISPLAY;
