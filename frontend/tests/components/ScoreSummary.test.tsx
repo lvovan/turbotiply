@@ -292,5 +292,49 @@ describe('ScoreSummary', () => {
       );
       expect(screen.queryByRole('img', { name: /score progression/i })).not.toBeInTheDocument();
     });
+
+    it('does not render sparkline when gameMode is improve with sufficient history', () => {
+      const rounds = createMockRounds();
+      render(
+        <ScoreSummary
+          rounds={rounds}
+          score={6}
+          onPlayAgain={vi.fn()}
+          onBackToMenu={vi.fn()}
+          gameMode="improve"
+          history={createHistory(5)}
+        />,
+      );
+      expect(screen.queryByRole('img', { name: /score progression/i })).not.toBeInTheDocument();
+    });
+
+    it('renders sparkline when gameMode is play with sufficient history', () => {
+      const rounds = createMockRounds();
+      render(
+        <ScoreSummary
+          rounds={rounds}
+          score={6}
+          onPlayAgain={vi.fn()}
+          onBackToMenu={vi.fn()}
+          gameMode="play"
+          history={createHistory(3)}
+        />,
+      );
+      expect(screen.getByRole('img', { name: /score progression/i })).toBeInTheDocument();
+    });
+
+    it('does not render sparkline when gameMode is improve and history is undefined', () => {
+      const rounds = createMockRounds();
+      render(
+        <ScoreSummary
+          rounds={rounds}
+          score={6}
+          onPlayAgain={vi.fn()}
+          onBackToMenu={vi.fn()}
+          gameMode="improve"
+        />,
+      );
+      expect(screen.queryByRole('img', { name: /score progression/i })).not.toBeInTheDocument();
+    });
   });
 });

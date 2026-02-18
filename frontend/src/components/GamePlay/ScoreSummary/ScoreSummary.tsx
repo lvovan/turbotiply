@@ -66,7 +66,7 @@ export default function ScoreSummary({ rounds, score, onPlayAgain, onBackToMenu,
         </>
       )}
 
-      {history && <ProgressionGraph history={history} />}
+      {!isImprove && history && <ProgressionGraph history={history} />}
 
       <div className={styles.tableWrapper}>
         <table className={styles.table}>
