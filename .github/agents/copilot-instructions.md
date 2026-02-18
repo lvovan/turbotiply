@@ -39,6 +39,8 @@ Auto-generated from all feature plans. Last updated: 2026-02-14
 - TypeScript ~5.9.3 + React ^19.2.0, React Router DOM ^7.13.0, Vite ^7.3.1 (022-player-name-limit)
 - Browser localStorage (key `multis_players`) (022-player-name-limit)
 - TypeScript ~5.9.3, React ^19.2.0 + Vite ^7.3.1, React Router DOM ^7.13.0, CSS Modules (023-inline-answer-input)
+- TypeScript (React 18+, Vite) + React, react-router-dom, CSS Modules, custom i18n (no library) (024-switch-player-emoji)
+- N/A (no data changes) (024-switch-player-emoji)
 
 - TypeScript 5.x (frontend), Python 3.11+ (backend — serves static files only for this feature) + React 18+, Vite (bundler), React Router (navigation), FastAPI (backend — static file serving only) (main)
 
@@ -59,9 +61,9 @@ cd src; pytest; ruff check .
 TypeScript 5.x (frontend): Follow standard conventions
 
 ## Recent Changes
+- 024-switch-player-emoji: Added TypeScript (React 18+, Vite) + React, react-router-dom, CSS Modules, custom i18n (no library)
 - 023-inline-answer-input: Added TypeScript ~5.9.3, React ^19.2.0 + Vite ^7.3.1, React Router DOM ^7.13.0, CSS Modules
 - 022-player-name-limit: Added TypeScript ~5.9.3 + React ^19.2.0, React Router DOM ^7.13.0, Vite ^7.3.1
-- 021-practice-score-separation: Added TypeScript 5.x (React 18, Vite) + React, React Router, Vitest, React Testing Library, axe-core
 
 
 <!-- MANUAL ADDITIONS START -->
