@@ -50,11 +50,11 @@
 }
 
 .switchButton {
-  padding: 8px 16px;
+  padding: 8px 12px;
   border: 2px solid #ccc;
   border-radius: 8px;
   background: white;
-  font-size: 0.875rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: #666;
   cursor: pointer;
@@ -83,7 +83,7 @@
   }
 
   .switchButton {
-    padding: 6px 12px;
-    font-size: 0.75rem;
+    padding: 6px 8px;
+    font-size: 1.125rem;
   }
 }

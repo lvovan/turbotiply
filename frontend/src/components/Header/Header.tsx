@@ -8,7 +8,7 @@ import styles from './Header.module.css';
 /**
  * Shared header bar rendered on every page.
  * - Unauthenticated: app title + language switcher.
- * - Authenticated: app title + avatar + greeting + language switcher + "Switch player" button.
+ * - Authenticated: app title + avatar + greeting + language switcher + switch-player button (👥 emoji).
  */
 export default function Header() {
   const navigate = useNavigate();
@@ -38,8 +38,12 @@ export default function Header() {
       <div className={styles.actions}>
         <LanguageSwitcher />
         {isActive && session && (
-          <button className={styles.switchButton} onClick={handleSwitchPlayer}>
-            {t('header.switchPlayer')}
+          <button
+            className={styles.switchButton}
+            onClick={handleSwitchPlayer}
+            aria-label={t('header.switchPlayer')}
+          >
+            <span aria-hidden="true">👥</span>
           </button>
         )}
       </div>
