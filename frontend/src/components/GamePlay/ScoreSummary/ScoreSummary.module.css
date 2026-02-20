@@ -1,26 +1,47 @@
-.noBg {
-  background: transparent !important;
-  background-color: transparent !important;
-}
+/* Light mode row backgrounds */
 .greenRow {
-  background: rgba(46, 125, 50, 0.22);
+  background: #e6f7e6;
+  color: #205c20;
 }
+
 .orangeRow {
-  background: rgba(255, 152, 0, 0.22);
+  background: #fff4e0;
+  color: #b26a00;
 }
+
 .neutralRow {
-  background: rgba(128, 128, 128, 0.18);
+  background: #f5f5f5;
+  color: #444;
 }
+
 .redRow {
-  background: rgba(250, 10, 10, 1);
+  background: #ffe5e5;
+  color: #a80000;
 }
-.scoreCenter {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 8px;
+
+.noBg {
+  background: none !important;
 }
+
+@media (prefers-color-scheme: dark) {
+  .greenRow {
+    background: #204020;
+    color: #b6ffb6;
+  }
+  .orangeRow {
+    background: #4a2a00;
+    color: #ffd580;
+  }
+  .neutralRow {
+    background: #222;
+    color: #ccc;
+  }
+  .redRow {
+    background: #4a1a1a;
+    color: #ffb6b6;
+  }
+}
+
 .headerRow {
   display: flex;
   justify-content: space-between;
@@ -52,59 +73,10 @@
   margin-bottom: 16px;
 }
 
-/* Compact heading and score styles */
-.heading {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0;
-  color: #333;
-  letter-spacing: 0.5px;
-}
-
-.totalLabel {
-  font-size: 0.85rem;
-  color: #888;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 2px;
-}
-
-.totalValue {
-  font-size: 2rem;
-  font-weight: 800;
-  color: #6c63ff;
-  margin: 0;
-}
-
-.practiceHint {
-  font-size: 0.95rem;
-  color: #666;
-  margin-bottom: 12px;
-  font-style: italic;
-}
-
-@media (max-width: 480px) {
-  .headerRow {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 4px;
-  }
-  .actionsRow {
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-  .totalValue {
-    font-size: 1.3rem;
-  }
-  .heading {
-    font-size: 1rem;
-  }
-}
 .summary {
   max-width: 600px;
   margin: 0 auto;
-  padding: 24px 16px;
+  padding: 12px 16px;
   text-align: center;
 }
 
@@ -113,6 +85,7 @@
   font-weight: 700;
   margin: 0 0 8px;
   color: #333;
+  letter-spacing: 0.5px;
 }
 
 .practiceHint {
@@ -122,19 +95,27 @@
   font-style: italic;
 }
 
+.improveResult {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #6c63ff;
+  margin: 0 0 12px;
+}
+
 .totalScore {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  margin-bottom: 24px;
+  gap: 2px;
+  margin-bottom: 16px;
 }
 
 .totalLabel {
-  font-size: 0.9rem;
+  font-size: 1.3rem;
   color: #666;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
+  font-weight: 600;
 }
 
 .totalValue {
@@ -160,13 +141,26 @@
   padding: 8px 6px;
   border-bottom: 2px solid #ddd;
   font-weight: 600;
-  color: #555;
-  white-space: nowrap;
+  color: #222;
+  background: #fafafa;
+}
+
+@media (prefers-color-scheme: dark) {
+  .table th {
+    color: #eee;
+    background: #222;
+  }
 }
 
 .table td {
   padding: 8px 6px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #ddd;
+}
+
+@media (prefers-color-scheme: dark) {
+  .table td {
+    border-bottom: 1px solid #444;
+  }
 }
 
 .correctRow {
@@ -175,6 +169,53 @@
 
 .incorrectRow {
   background: #ffe8e8;
+}
+
+/* Score-based row colours — light mode */
+.greenRow {
+  background: #e6f7e6;
+}
+
+.greenRow td {
+  color: #1b5e20;
+}
+
+.orangeRow {
+  background: #fff4e0;
+}
+
+.orangeRow td {
+  color: #7a4f01;
+}
+
+.redRow {
+  background: #ffe5e5;
+}
+
+.redRow td {
+  color: #8b0000;
+}
+
+/* Score-based row colours — dark mode */
+@media (prefers-color-scheme: dark) {
+  .greenRow {
+    background: #1b3d1b;
+  }
+  .greenRow td {
+    color: #a5d6a7;
+  }
+  .orangeRow {
+    background: #3e2700;
+  }
+  .orangeRow td {
+    color: #ffd180;
+  }
+  .redRow {
+    background: #3e1010;
+  }
+  .redRow td {
+    color: #ef9a9a;
+  }
 }
 
 .correctBadge {
@@ -197,6 +238,7 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
+  margin-bottom: 24px;
 }
 
 .playAgainButton {
@@ -230,27 +272,54 @@
 }
 
 .backButton:hover {
-  color: #333;
-  border-color: #999;
+  color: #222;
+}
+
+.sparklineWrapper {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0 24px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .heading {
+    color: #eee;
+  }
+  .totalLabel {
+    color: #aaa;
+  }
+  .backButton {
+    color: #aaa;
+    border-color: #555;
+  }
+  .backButton:hover {
+    color: #eee;
+  }
 }
 
 @media (max-width: 480px) {
   .summary {
-    padding: 16px 8px;
+    padding: 8px 8px;
   }
-
+  .headerRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+  .actionsRow {
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
   .heading {
-    font-size: 1.25rem;
+    font-size: 1rem;
   }
-
   .totalValue {
     font-size: 2.2rem;
   }
-
   .table {
     font-size: 0.85rem;
   }
-
   .table th,
   .table td {
     padding: 6px 4px;

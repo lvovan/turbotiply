@@ -89,7 +89,7 @@ async function playFullGame(user: ReturnType<typeof userEvent.setup>, formulas: 
 
   // Wait for completed state
   await waitFor(() => {
-    expect(screen.getByText(/game over/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /play again/i })).toBeInTheDocument();
   });
 }
 

@@ -37,13 +37,13 @@ describe('ProgressionGraph', () => {
     expect(polyline).toBeInTheDocument();
   });
 
-  // T005: SVG has dynamic viewBox width based on data count
-  it('sets viewBox width to Y_LABEL_GUTTER + count * UNIT_WIDTH', () => {
+  // T005: SVG has fixed viewBox width based on MAX_GAMES (10)
+  it('sets viewBox width to Y_LABEL_GUTTER + MAX_GAMES * UNIT_WIDTH regardless of data count', () => {
     const history = makeHistory([10, 30, 20]);
     render(<ProgressionGraph history={history} />);
     const svg = screen.getByRole('img');
-    // 3 games → 24 + 3*30 = 114, height fixed at 100
-    expect(svg.getAttribute('viewBox')).toBe('0 0 114 100');
+    // Always 24 + 10*30 = 324, height fixed at 100
+    expect(svg.getAttribute('viewBox')).toBe('0 0 324 100');
   });
 
   // T006: SVG uses preserveAspectRatio="xMinYMid meet"
@@ -119,24 +119,24 @@ describe('ProgressionGraph', () => {
     expect(ticks.length).toBe(10);
   });
 
-  // T012: chart renders with 2 data points (minimum) — proportionally narrow
-  it('renders with 2 data points and a narrow viewBox', () => {
+  // T012: chart renders with 2 data points (minimum) — full-width viewBox
+  it('renders with 2 data points but full-width viewBox', () => {
     const history = makeHistory([10, 20]);
     render(<ProgressionGraph history={history} />);
     const svg = screen.getByRole('img');
-    // 2 games → 24 + 2*30 = 84
-    expect(svg.getAttribute('viewBox')).toBe('0 0 84 100');
+    // Always 24 + 10*30 = 324 regardless of data count
+    expect(svg.getAttribute('viewBox')).toBe('0 0 324 100');
     const ticks = svg.querySelectorAll('line[class*="tickMark"]');
     expect(ticks.length).toBe(2);
   });
 
-  // T013: chart with 5 data points has correct viewBox width
-  it('renders 5 data points with viewBox width = Y_LABEL_GUTTER + 5 * UNIT_WIDTH', () => {
+  // T013: chart with 5 data points has full-width viewBox
+  it('renders 5 data points with full-width viewBox = Y_LABEL_GUTTER + MAX_GAMES * UNIT_WIDTH', () => {
     const history = makeHistory([10, 20, 30, 25, 15]);
     render(<ProgressionGraph history={history} />);
     const svg = screen.getByRole('img');
-    // 5 games → 24 + 5*30 = 174
-    expect(svg.getAttribute('viewBox')).toBe('0 0 174 100');
+    // Always 24 + 10*30 = 324 regardless of data count
+    expect(svg.getAttribute('viewBox')).toBe('0 0 324 100');
   });
 
   // T014: aria-label includes game count, score range, and "scale 0 to 50"

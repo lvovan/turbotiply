@@ -139,7 +139,7 @@ describe('MainPage', () => {
 
     // After all 10 correct rounds, should show score summary
     await waitFor(() => {
-      expect(screen.getByText(/game over/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /play again/i })).toBeInTheDocument();
     });
 
     // Should have Play Again and Back to Menu buttons
@@ -170,7 +170,7 @@ describe('MainPage', () => {
     }
 
     await waitFor(() => {
-      expect(screen.getByText(/game over/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /play again/i })).toBeInTheDocument();
     });
 
     // Click Play Again
@@ -205,7 +205,7 @@ describe('MainPage', () => {
     }
 
     await waitFor(() => {
-      expect(screen.getByText(/game over/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /play again/i })).toBeInTheDocument();
     });
 
     // Click Back to menu
@@ -324,7 +324,7 @@ describe('MainPage — Replay UI (US2)', () => {
 
     // Game should be completed now
     await waitFor(() => {
-      expect(screen.getByText(/game over/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /play again/i })).toBeInTheDocument();
     });
   });
 
@@ -372,7 +372,7 @@ describe('MainPage — Replay UI (US2)', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/game over/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /play again/i })).toBeInTheDocument();
     });
   });
 
@@ -389,7 +389,7 @@ describe('MainPage — Replay UI (US2)', () => {
 
     // Should go directly to completed — no replay shown
     await waitFor(() => {
-      expect(screen.getByText(/game over/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /play again/i })).toBeInTheDocument();
     });
     // Replay indicator should not have appeared
     expect(screen.queryByText(/Replay/i)).not.toBeInTheDocument();
@@ -500,7 +500,7 @@ describe('MainPage — Scoring Display (US3)', () => {
     }
 
     await waitFor(() => {
-      expect(screen.getByText(/game over/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /play again/i })).toBeInTheDocument();
     });
 
     // Should show per-round points ("+5" for fast correct answers)
@@ -540,11 +540,11 @@ describe('MainPage — Scoring Display (US3)', () => {
     }
 
     await waitFor(() => {
-      expect(screen.getByText(/game over/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /play again/i })).toBeInTheDocument();
     });
 
     // Total score should be negative: 10 × -2 = -20 (replay rounds award no points)
-    const totalLabel = screen.getByText('Total Score');
+    const totalLabel = screen.getByText('Score');
     const totalSection = totalLabel.parentElement!;
     expect(totalSection).toHaveTextContent('-20');
   });
@@ -578,7 +578,7 @@ describe('MainPage — Scoring Display (US3)', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/game over/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /play again/i })).toBeInTheDocument();
     });
 
     // The replay round should have null points, which ScoreSummary shows as "—"

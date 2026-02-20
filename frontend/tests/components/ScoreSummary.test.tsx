@@ -38,9 +38,9 @@ describe('ScoreSummary', () => {
       <ScoreSummary rounds={rounds} score={6} onPlayAgain={vi.fn()} onBackToMenu={vi.fn()} />,
     );
 
-    expect(screen.getByText('Total Score')).toBeInTheDocument();
+    expect(screen.getByText('Score')).toBeInTheDocument();
     // Score value is within the total score section
-    const totalLabel = screen.getByText('Total Score');
+    const totalLabel = screen.getByText('Score');
     const totalSection = totalLabel.parentElement!;
     expect(totalSection).toHaveTextContent('6');
   });
@@ -108,7 +108,7 @@ describe('ScoreSummary', () => {
       <ScoreSummary rounds={rounds} score={-2} onPlayAgain={vi.fn()} onBackToMenu={vi.fn()} />,
     );
 
-    const totalLabel = screen.getByText('Total Score');
+    const totalLabel = screen.getByText('Score');
     const totalSection = totalLabel.parentElement!;
     expect(totalSection).toHaveTextContent('-2');
   });
@@ -148,8 +148,7 @@ describe('ScoreSummary', () => {
         />,
       );
       expect(screen.getByText(`You got ${correctCount}/3 right!`)).toBeInTheDocument();
-      expect(screen.queryByText('Total Score')).not.toBeInTheDocument();
-      expect(screen.queryByText('Game Over!')).not.toBeInTheDocument();
+      expect(screen.queryByText('Score')).not.toBeInTheDocument();
     });
 
     it('lists incorrect pairs with "Keep practising:" message', () => {
@@ -210,7 +209,7 @@ describe('ScoreSummary', () => {
           gameMode="improve"
         />,
       );
-      expect(screen.queryByText('Total Score')).not.toBeInTheDocument();
+      expect(screen.queryByText('Score')).not.toBeInTheDocument();
     });
 
     it('shows Play Again and Back to Menu buttons in improve mode', () => {
@@ -228,7 +227,7 @@ describe('ScoreSummary', () => {
       expect(screen.getByRole('button', { name: /back to menu/i })).toBeInTheDocument();
     });
 
-    it('shows score and Game Over heading in play mode', () => {
+    it('shows score label and value in play mode', () => {
       const rounds = createMockRounds();
       render(
         <ScoreSummary
@@ -239,8 +238,7 @@ describe('ScoreSummary', () => {
           gameMode="play"
         />,
       );
-      expect(screen.getByText('Game Over!')).toBeInTheDocument();
-      expect(screen.getByText('Total Score')).toBeInTheDocument();
+      expect(screen.getByText('Score')).toBeInTheDocument();
     });
   });
 

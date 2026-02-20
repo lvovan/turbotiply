@@ -1,127 +1,142 @@
+import React from 'react';
+import type { ScoreSummaryProps } from './types';
 import type { Round } from '../../../types/game';
-import type { GameMode, GameRecord } from '../../../types/player';
-import { getCorrectAnswer } from '../../../services/gameEngine';
-import { useTranslation } from '../../../i18n';
 import ProgressionGraph from '../ProgressionGraph/ProgressionGraph';
 import styles from './ScoreSummary.module.css';
 
-interface ScoreSummaryProps {
-  rounds: Round[];
-  score: number;
-  onPlayAgain: () => void;
-  onBackToMenu: () => void;
-  gameMode?: GameMode;
-  history?: GameRecord[];
+/** Format elapsed milliseconds as seconds to one decimal place, e.g. "1.5s". */
+function formatTime(ms: number | null): string {
+  if (ms == null) return '—';
+  return `${(ms / 1000).toFixed(1)}s`;
 }
 
-/**
- * End-of-game results screen.
- * Displays round-by-round breakdown table with formula, answer,
- * correct/incorrect status, response time, and points.
- * In improve mode, shows "You got X/N right!" and lists incorrect pairs.
- * Includes "Play again" button and "Back to menu" button (per FR-016, FR-020).
- */
-export default function ScoreSummary({ rounds, score, onPlayAgain, onBackToMenu, gameMode = 'play', history }: ScoreSummaryProps) {
-  const { t } = useTranslation();
-  const formatTime = (ms: number | null): string => {
-    if (ms === null) return '—';
-    return `${(ms / 1000).toFixed(1)}s`;
-  };
+/** Format the formula for display, e.g. "3 × 7 = ?" or "? × 5 = 20". */
+function formatFormula(round: Round): string {
+  const { factorA, factorB, product, hiddenPosition } = round.formula;
+  const a = hiddenPosition === 'A' ? '?' : String(factorA);
+  const b = hiddenPosition === 'B' ? '?' : String(factorB);
+  const c = hiddenPosition === 'C' ? '?' : String(product);
+  return `${a} × ${b} = ${c}`;
+}
 
-  const formatPoints = (points: number | null): string => {
-    if (points === null) return '—';
-    if (points > 0) return `+${points}`;
-    return String(points);
-  };
+/** Format points with a leading +/- sign. */
+function formatPoints(pts: number | null): string {
+  if (pts == null) return '—';
+  return pts >= 0 ? `+${pts}` : String(pts);
+}
 
-  const formatFormula = (round: Round): string => {
-    const { factorA, factorB, product } = round.formula;
-    return `${factorA} × ${factorB} = ${product}`;
-  };
+/** Map round points to a row colour class. */
+const getRowClass = (round: Round) => {
+  const pts = round.points ?? 0;
+  if (pts >= 5) return styles.greenRow;
+  if (pts >= 2) return styles.orangeRow;
+  return styles.redRow;
+};
 
+const ScoreSummary: React.FC<ScoreSummaryProps> = ({
+  rounds,
+  score,
+  onPlayAgain,
+  onBackToMenu,
+  gameMode,
+  history,
+}) => {
+  const hasRounds = Array.isArray(rounds) && rounds.length > 0;
   const isImprove = gameMode === 'improve';
   const correctCount = rounds.filter((r) => r.isCorrect).length;
-  const incorrectPairs = rounds
-    .filter((r) => !r.isCorrect)
-    .map((r) => `${r.formula.factorA} × ${r.formula.factorB}`);
+  const incorrectRounds = rounds.filter((r) => !r.isCorrect);
+  const showSparkline =
+    !isImprove && Array.isArray(history) && history.length >= 2;
 
   return (
     <div className={styles.summary}>
-      {!isImprove && (
-        <div className={styles.scoreCenter}>
-          <span className={styles.totalLabel}>{t('summary.totalScore')}</span>
-          <span className={styles.totalValue}>{score}</span>
-        </div>
-      )}
       {isImprove ? (
-        <div className={styles.headerLeft}>
-          <span className={styles.heading}>{t('summary.correctCount', { count: String(correctCount), total: String(rounds.length) })}</span>
+        <>
+          <p className={styles.improveResult}>
+            {`You got ${correctCount}/${rounds.length} right!`}
+          </p>
+          {incorrectRounds.length > 0 && (
+            <p className={styles.practiceHint}>
+              {`Keep practising: ${incorrectRounds.map((r) => `${r.formula.factorA} × ${r.formula.factorB}`).join(', ')}`}
+            </p>
+          )}
+        </>
+      ) : (
+        <div className={styles.totalScore}>
+          <span className={styles.totalLabel}>Score</span>
+          <span
+            className={styles.totalValue}
+            aria-live="polite"
+            aria-label={`Score: ${score}`}
+          >
+            {score}
+          </span>
         </div>
-      ) : null}
-      {isImprove && incorrectPairs.length > 0 && (
-        <div className={styles.practiceHint}>{t('summary.practiceHint', { pairs: incorrectPairs.join(', ') })}</div>
       )}
-      <div className={styles.actionsRow}>
-        <button className={styles.playAgainButton} onClick={onPlayAgain} aria-label={t('summary.playAgain')} tabIndex={0}>
-          {t('summary.playAgain')}
+
+      <div className={styles.actions}>
+        <button
+          className={styles.playAgainButton}
+          onClick={onPlayAgain}
+          aria-label="Play again"
+        >
+          Play Again
         </button>
-        <button className={styles.backButton} onClick={onBackToMenu} aria-label={t('summary.backToMenu')} tabIndex={0}>
-          {t('summary.backToMenu')}
+        <button
+          className={styles.backButton}
+          onClick={onBackToMenu}
+          aria-label="Back to menu"
+        >
+          Back to Menu
         </button>
       </div>
 
-      {!isImprove && history && <ProgressionGraph history={history} />}
+      {showSparkline && history && (
+        <div className={styles.sparklineWrapper}>
+          <ProgressionGraph history={history} />
+        </div>
+      )}
 
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>{t('summary.colNumber')}</th>
-              <th>{t('summary.colFormula')}</th>
-              <th>{t('summary.colAnswer')}</th>
-              <th>{t('summary.colResult')}</th>
-              <th>{t('summary.colTime')}</th>
-              <th>{t('summary.colPoints')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rounds.map((round, index) => {
-              const correctAnswer = getCorrectAnswer(round.formula);
-              let rowClass = '';
-              if (round.points === null) {
-                rowClass = styles.neutralRow;
-              } else if (round.points >= 5) {
-                rowClass = '';
-              } else if (round.points >= 3) {
-                rowClass = styles.orangeRow;
-              } else if (round.points < 0) {
-                rowClass = styles.redRow;
-              } else {
-                rowClass = styles.incorrectRow;
-              }
-              return (
-                <tr key={index} className={rowClass}>
-                  <td className={styles.noBg}>{index + 1}</td>
-                  <td>{formatFormula(round)}</td>
+      {hasRounds && (
+        <div className={styles.tableWrapper}>
+          <table className={styles.table} aria-label="Game summary table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Formula</th>
+                <th scope="col">Answer</th>
+                <th scope="col">Result</th>
+                <th scope="col">Time</th>
+                <th scope="col">Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rounds.map((r, i) => (
+                <tr key={i} className={getRowClass(r)}>
+                  <td>{i + 1}</td>
+                  <td>{formatFormula(r)}</td>
+                  <td>{r.playerAnswer ?? '—'}</td>
                   <td>
-                    {round.playerAnswer ?? '—'}
-                    {!round.isCorrect && round.playerAnswer !== null && (
-                      <span className={styles.correctAnswerHint}> ({correctAnswer})</span>
+                    {r.isCorrect ? (
+                      <span className={styles.correctBadge} aria-label="Correct">
+                        ✓
+                      </span>
+                    ) : (
+                      <span className={styles.incorrectBadge} aria-label="Incorrect">
+                        ✗
+                      </span>
                     )}
                   </td>
-                  <td>
-                    <span className={round.isCorrect ? styles.correctBadge : styles.incorrectBadge}>
-                      {round.isCorrect ? '✓' : '✗'}
-                    </span>
-                  </td>
-                  <td>{formatTime(round.elapsedMs)}</td>
-                  <td>{formatPoints(round.points)}</td>
+                  <td>{formatTime(r.elapsedMs)}</td>
+                  <td>{formatPoints(r.points)}</td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default ScoreSummary;

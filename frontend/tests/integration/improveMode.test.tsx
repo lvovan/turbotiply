@@ -441,7 +441,7 @@ describe('Improve Mode — Full Flow Integration', () => {
       expect(screen.getByText(/you got/i)).toBeInTheDocument();
     });
     expect(screen.queryByText('Game Over!')).not.toBeInTheDocument();
-    expect(screen.queryByText('Total Score')).not.toBeInTheDocument();
+    expect(screen.queryByText('Score')).not.toBeInTheDocument();
 
     // 6. Verify scores unchanged
     const playerAfter = getPlayers().find((p) => p.name === 'FlowTestPlayer')!;
