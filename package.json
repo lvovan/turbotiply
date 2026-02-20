@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "axe-core": "^4.11.1",
+    "victory": "^37.3.6"
+  }
+}

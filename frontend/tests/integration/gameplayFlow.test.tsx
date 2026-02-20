@@ -147,7 +147,7 @@ describe('Gameplay Flow Integration', () => {
 
     // === SCORE SUMMARY ===
     await waitFor(() => {
-      expect(screen.getByText(/game over/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /play again/i })).toBeInTheDocument();
     });
 
     // Verify score summary has a table
@@ -158,7 +158,7 @@ describe('Gameplay Flow Integration', () => {
     expect(screen.getByRole('button', { name: /back to menu/i })).toBeInTheDocument();
 
     // Scoring: 8 correct fast (+5 each) + 2 incorrect (-2 each) = 40 - 4 = 36
-    const totalLabel = screen.getByText('Total Score');
+    const totalLabel = screen.getByText('Score');
     const totalSection = totalLabel.parentElement!;
     expect(totalSection).toHaveTextContent('36');
 
@@ -200,7 +200,7 @@ describe('Gameplay Flow Integration', () => {
     }
 
     await waitFor(() => {
-      expect(screen.getByText(/game over/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /play again/i })).toBeInTheDocument();
     });
 
     await user.click(screen.getByRole('button', { name: /back to menu/i }));

@@ -48,8 +48,8 @@ export default function ProgressionGraph({ history }: ProgressionGraphProps) {
   const scores = recent.map((r) => r.score);
   const count = scores.length;
 
-  // Dynamic viewBox width
-  const viewWidth = Y_LABEL_GUTTER + count * UNIT_WIDTH;
+  // Fixed viewBox width — always sized for MAX_GAMES to keep layout stable
+  const viewWidth = Y_LABEL_GUTTER + MAX_GAMES * UNIT_WIDTH;
 
   // Build polyline points using coordinate helpers
   const points = scores.map((s, i) => `${gameToX(i)},${scoreToY(s)}`).join(' ');

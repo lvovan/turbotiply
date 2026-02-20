@@ -71,3 +71,41 @@ export default defineConfig([
   },
 ])
 ```
+
+## ScoreSummary Component Usage
+
+The `ScoreSummary` component displays the player's final score, a sparkline (in normal mode), and a summary table of round scores with color-coded backgrounds. It also provides Play Again and Back to Menu actions.
+
+### Usage Example
+
+```tsx
+import React from 'react';
+import ScoreSummary from './components/GamePlay/ScoreSummary/ScoreSummary';
+
+const rounds = [
+  { round: 1, score: 5 },
+  { round: 2, score: 3 },
+  { round: 3, score: 0 },
+  { round: 4, score: -2 },
+];
+
+export default function Demo() {
+  return (
+    <ScoreSummary
+      finalScore={6}
+      onPlayAgain={() => alert('Play again!')}
+      onBackToMenu={() => alert('Back to menu!')}
+      rounds={rounds}
+      mode="normal"
+    />
+  );
+}
+```
+
+### Accessibility
+- All interactive elements have ARIA labels.
+- Color contrast and keyboard navigation are tested.
+- Sparkline and table are accessible to screen readers.
+
+### Styling
+- See `ScoreSummary.module.css` for color classes and responsive layout.
