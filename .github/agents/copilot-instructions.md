@@ -67,9 +67,9 @@ cd src; pytest; ruff check .
 TypeScript 5.x (frontend): Follow standard conventions
 
 ## Recent Changes
+- 028-stable-panel-height: Added TypeScript 5.x / React 18 + React, Vite, CSS Modules
 - 027-first-try-result: Added TypeScript ~5.9.3, React ^19.2.0 + Vite ^7.3.1, react-router-dom ^7.13.0
 - 026-high-scores-medals: Added TypeScript ~5.9.3, React 19.2.0 + Vite, Vitest 4.0.18, React Testing Library 16.3.2
-- 025-hide-practice-sparkline: Added TypeScript ~5.9.3 / React 19.2.0 + Vite 7.3.1, react-router-dom 7.13.0
 
 
 <!-- MANUAL ADDITIONS START -->

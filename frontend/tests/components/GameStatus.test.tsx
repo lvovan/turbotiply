@@ -474,4 +474,124 @@ describe('GameStatus', () => {
       expect(screen.getByText('Correct!')).toBeInTheDocument();
     });
   });
+
+  // --- T001/T004: Panel height stability tests (028-stable-panel-height) ---
+
+  describe('panel height stability', () => {
+    it('root element uses the same status container class in input and correct-feedback phases', () => {
+      const { container: inputContainer } = render(
+        <GameStatus {...defaultProps({ currentPhase: 'input' })} />,
+      );
+      const inputRoot = inputContainer.firstElementChild as HTMLElement;
+
+      const { container: feedbackContainer } = render(
+        <GameStatus
+          {...defaultProps({
+            currentPhase: 'feedback',
+            isCorrect: true,
+            correctAnswer: 21,
+            completedRound: 1,
+          })}
+        />,
+      );
+      const feedbackRoot = feedbackContainer.firstElementChild as HTMLElement;
+
+      expect(inputRoot.className).toContain('status');
+      expect(feedbackRoot.className).toContain('status');
+    });
+
+    it('root element uses the same status container class in input and incorrect-feedback phases', () => {
+      const { container: inputContainer } = render(
+        <GameStatus {...defaultProps({ currentPhase: 'input' })} />,
+      );
+      const inputRoot = inputContainer.firstElementChild as HTMLElement;
+
+      const { container: feedbackContainer } = render(
+        <GameStatus
+          {...defaultProps({
+            currentPhase: 'feedback',
+            isCorrect: false,
+            correctAnswer: 144,
+            completedRound: 5,
+          })}
+        />,
+      );
+      const feedbackRoot = feedbackContainer.firstElementChild as HTMLElement;
+
+      expect(inputRoot.className).toContain('status');
+      expect(feedbackRoot.className).toContain('status');
+    });
+
+    it('all feedback content renders without errors for incorrect answers (FR-007 regression guard)', () => {
+      render(
+        <GameStatus
+          {...defaultProps({
+            currentPhase: 'feedback',
+            isCorrect: false,
+            correctAnswer: 144,
+            completedRound: 7,
+            totalRounds: 10,
+          })}
+        />,
+      );
+
+      expect(screen.getByText('✗')).toBeInTheDocument();
+      expect(screen.getByText('Not quite!')).toBeInTheDocument();
+      expect(screen.getByText(/the answer was 144/i)).toBeInTheDocument();
+      expect(screen.getByText(/Round 7 of 10 completed/)).toBeInTheDocument();
+    });
+
+    it('panel uses same root container class in play mode and improve mode', () => {
+      const { container: playContainer } = render(
+        <GameStatus {...defaultProps({ gameMode: 'play' })} />,
+      );
+      const playRoot = playContainer.firstElementChild as HTMLElement;
+
+      const { container: improveContainer } = render(
+        <GameStatus {...defaultProps({ gameMode: 'improve' })} />,
+      );
+      const improveRoot = improveContainer.firstElementChild as HTMLElement;
+
+      expect(playRoot.className).toContain('status');
+      expect(improveRoot.className).toContain('status');
+    });
+
+    it('panel uses same root container class in normal and replay modes', () => {
+      const { container: normalContainer } = render(
+        <GameStatus {...defaultProps({ isReplay: false })} />,
+      );
+      const normalRoot = normalContainer.firstElementChild as HTMLElement;
+
+      const { container: replayContainer } = render(
+        <GameStatus {...defaultProps({ isReplay: true })} />,
+      );
+      const replayRoot = replayContainer.firstElementChild as HTMLElement;
+
+      expect(normalRoot.className).toContain('status');
+      expect(replayRoot.className).toContain('status');
+    });
+
+    it('panel uses same root container class in improve mode feedback phase', () => {
+      const { container: inputContainer } = render(
+        <GameStatus {...defaultProps({ gameMode: 'improve', currentPhase: 'input' })} />,
+      );
+      const inputRoot = inputContainer.firstElementChild as HTMLElement;
+
+      const { container: feedbackContainer } = render(
+        <GameStatus
+          {...defaultProps({
+            gameMode: 'improve',
+            currentPhase: 'feedback',
+            isCorrect: true,
+            correctAnswer: 42,
+            completedRound: 3,
+          })}
+        />,
+      );
+      const feedbackRoot = feedbackContainer.firstElementChild as HTMLElement;
+
+      expect(inputRoot.className).toContain('status');
+      expect(feedbackRoot.className).toContain('status');
+    });
+  });
 });

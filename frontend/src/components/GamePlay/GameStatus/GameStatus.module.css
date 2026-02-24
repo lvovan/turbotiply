@@ -8,8 +8,9 @@
   border-radius: 8px;
   font-size: 0.95rem;
   flex-wrap: wrap;
-  min-height: 5rem;
+  height: 5rem;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .roundInfo {
@@ -66,7 +67,7 @@
     font-size: 0.9rem;
     gap: 8px;
     padding: 8px 12px;
-    min-height: 4rem;
+    height: 4rem;
   }
 
   .feedbackIcon {
