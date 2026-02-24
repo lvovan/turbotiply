@@ -132,7 +132,7 @@ export default function MainPage() {
   const currentPlayer = getPlayers().find(
     (p) => p.name.toLowerCase() === session.playerName.toLowerCase(),
   );
-  const recentScores = currentPlayer ? getRecentHighScores(currentPlayer, 3) : [];
+  const recentScores = currentPlayer ? getRecentHighScores(currentPlayer) : [];
   const gameHistory = currentPlayer ? getGameHistory(currentPlayer) : [];
   const hasNoGames = !currentPlayer || currentPlayer.gamesPlayed === 0;
 

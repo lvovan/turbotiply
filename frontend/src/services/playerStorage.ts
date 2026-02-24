@@ -335,23 +335,25 @@ export function getRecentAverage(player: Player, count: number = 10): number | n
 }
 
 /**
- * Returns the player's most recent play-mode game scores sorted by score descending.
+ * Returns the player's top play-mode game scores from a sliding window of recent games.
  * Excludes improve-mode games.
  * Ties broken by most recent completedAt first.
  * @param player — Player object
- * @param count — Number of recent games to retrieve (default: 5)
- * @returns Sorted array of GameRecord
+ * @param windowSize — Number of most recent play-mode games to consider (default: 10)
+ * @param topN — Number of top scores to return from the window (default: 3)
+ * @returns Sorted array of up to topN GameRecord entries
  */
-export function getRecentHighScores(player: Player, count: number = 5): GameRecord[] {
+export function getRecentHighScores(player: Player, windowSize: number = 10, topN: number = 3): GameRecord[] {
   const history = (player.gameHistory ?? []).filter(
     (r) => (r.gameMode ?? 'play') === 'play',
   );
   if (history.length === 0) return [];
-  const slice = history.slice(-count);
-  return [...slice].sort((a, b) => {
+  const recent = history.slice(-windowSize);
+  const sorted = [...recent].sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
     return b.completedAt - a.completedAt;
   });
+  return sorted.slice(0, topN);
 }
 
 /**

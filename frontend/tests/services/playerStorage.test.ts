@@ -674,22 +674,136 @@ describe('playerStorage', () => {
       expect(getRecentHighScores(player)).toEqual([]);
     });
 
-    it('returns last 5 records sorted by score descending', () => {
+    // T003 [US1]: returns top 3 from last 10 by default
+    it('returns top 3 from last 10 records sorted by score descending', () => {
+      const history: GameRecord[] = [
+        { score: 12, completedAt: 100 },
+        { score: 30, completedAt: 200 },
+        { score: 25, completedAt: 300 },
+        { score: 40, completedAt: 400 },
+        { score: 18, completedAt: 500 },
+        { score: 35, completedAt: 600 },
+        { score: 22, completedAt: 700 },
+        { score: 45, completedAt: 800 },
+        { score: 10, completedAt: 900 },
+        { score: 28, completedAt: 1000 },
+      ];
+      const player = {
+        name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 10,
+        gameHistory: history,
+      };
+      const result = getRecentHighScores(player);
+      expect(result).toHaveLength(3);
+      expect(result.map(r => r.score)).toEqual([45, 40, 35]);
+    });
+
+    // T004 [US1]: 15 games — only last 10 considered, top 3 returned
+    it('considers only the last 10 games when more than 10 exist', () => {
+      const history: GameRecord[] = [
+        // Older 5 — should be excluded from the window
+        { score: 99, completedAt: 100 },
+        { score: 98, completedAt: 200 },
+        { score: 97, completedAt: 300 },
+        { score: 96, completedAt: 400 },
+        { score: 95, completedAt: 500 },
+        // Most recent 10 — window starts here
+        { score: 10, completedAt: 600 },
+        { score: 20, completedAt: 700 },
+        { score: 30, completedAt: 800 },
+        { score: 40, completedAt: 900 },
+        { score: 15, completedAt: 1000 },
+        { score: 25, completedAt: 1100 },
+        { score: 35, completedAt: 1200 },
+        { score: 5, completedAt: 1300 },
+        { score: 12, completedAt: 1400 },
+        { score: 8, completedAt: 1500 },
+      ];
+      const player = {
+        name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 15,
+        gameHistory: history,
+      };
+      const result = getRecentHighScores(player);
+      expect(result).toHaveLength(3);
+      // Best 3 from last 10 are 40, 35, 30 (NOT the older 99, 98, 97)
+      expect(result.map(r => r.score)).toEqual([40, 35, 30]);
+    });
+
+    // T005 [US1]: specific scores verification
+    it('returns [{score:45},{score:40},{score:35}] for scores [12,30,25,40,18,35,22,45,10,28]', () => {
+      const scores = [12, 30, 25, 40, 18, 35, 22, 45, 10, 28];
+      const history: GameRecord[] = scores.map((score, i) => ({
+        score,
+        completedAt: (i + 1) * 100,
+      }));
+      const player = {
+        name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 10,
+        gameHistory: history,
+      };
+      const result = getRecentHighScores(player);
+      expect(result.map(r => r.score)).toEqual([45, 40, 35]);
+    });
+
+    // T006 [US1]: custom windowSize and topN params
+    it('respects custom windowSize and topN parameters', () => {
+      const history: GameRecord[] = [
+        { score: 99, completedAt: 100 }, // outside window of 5
+        { score: 98, completedAt: 200 }, // outside window of 5
+        { score: 97, completedAt: 300 }, // outside window of 5
+        { score: 10, completedAt: 400 },
+        { score: 50, completedAt: 500 },
+        { score: 30, completedAt: 600 },
+        { score: 40, completedAt: 700 },
+        { score: 20, completedAt: 800 },
+      ];
+      const player = {
+        name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 8,
+        gameHistory: history,
+      };
+      const result = getRecentHighScores(player, 5, 2);
+      expect(result).toHaveLength(2);
+      expect(result.map(r => r.score)).toEqual([50, 40]);
+    });
+
+    // T010 [US2]: 0 play-mode games (undefined gameHistory)
+    it('returns empty array when gameHistory is undefined', () => {
+      const player = { name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 0 };
+      expect(getRecentHighScores(player)).toEqual([]);
+    });
+
+    // T011 [US2]: 2 play-mode games — returns both (topN=3 but only 2 available)
+    it('returns fewer than topN when less games available', () => {
       const history: GameRecord[] = [
         { score: 10, completedAt: 100 },
-        { score: 50, completedAt: 200 },
-        { score: 30, completedAt: 300 },
-        { score: 40, completedAt: 400 },
-        { score: 20, completedAt: 500 },
+        { score: 20, completedAt: 200 },
+      ];
+      const player = {
+        name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 2,
+        gameHistory: history,
+      };
+      const result = getRecentHighScores(player);
+      expect(result).toHaveLength(2);
+      expect(result.map(r => r.score)).toEqual([20, 10]);
+    });
+
+    // T012 [US2]: 5 play-mode games — returns top 3 from all 5
+    it('returns top 3 from all 5 games when fewer than 10 available', () => {
+      const history: GameRecord[] = [
+        { score: 15, completedAt: 100 },
+        { score: 40, completedAt: 200 },
+        { score: 25, completedAt: 300 },
+        { score: 35, completedAt: 400 },
+        { score: 10, completedAt: 500 },
       ];
       const player = {
         name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 5,
         gameHistory: history,
       };
       const result = getRecentHighScores(player);
-      expect(result.map(r => r.score)).toEqual([50, 40, 30, 20, 10]);
+      expect(result).toHaveLength(3);
+      expect(result.map(r => r.score)).toEqual([40, 35, 25]);
     });
 
+    // T014 [US3]: tie-breaking — more recent ranks first
     it('breaks ties by most recent completedAt first', () => {
       const history: GameRecord[] = [
         { score: 30, completedAt: 100 },
@@ -704,23 +818,45 @@ describe('playerStorage', () => {
       expect(result.map(r => r.completedAt)).toEqual([300, 200, 100]);
     });
 
-    it('returns fewer when less than 5 games', () => {
-      const history: GameRecord[] = [
-        { score: 10, completedAt: 100 },
-        { score: 20, completedAt: 200 },
-      ];
+    // T015 [US3]: 10 identical scores — 3 most recent hold medal positions
+    it('gives medals to 3 most recent when all 10 scores are identical', () => {
+      const history: GameRecord[] = Array.from({ length: 10 }, (_, i) => ({
+        score: 25,
+        completedAt: (i + 1) * 100,
+      }));
       const player = {
-        name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 2,
+        name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 10,
         gameHistory: history,
       };
       const result = getRecentHighScores(player);
-      expect(result).toHaveLength(2);
-      expect(result.map(r => r.score)).toEqual([20, 10]);
+      expect(result).toHaveLength(3);
+      // Most recent 3: completedAt 1000, 900, 800
+      expect(result.map(r => r.completedAt)).toEqual([1000, 900, 800]);
     });
 
-    it('takes only from the last N chronological entries', () => {
+    // T016 [US3]: improve-mode games excluded from window
+    it('excludes improve-mode games from the window', () => {
       const history: GameRecord[] = [
-        { score: 99, completedAt: 100 }, // older, should be excluded with count=3
+        { score: 50, completedAt: 100, gameMode: 'play' },
+        { score: 99, completedAt: 200, gameMode: 'improve' }, // excluded
+        { score: 40, completedAt: 300, gameMode: 'play' },
+        { score: 88, completedAt: 400, gameMode: 'improve' }, // excluded
+        { score: 30, completedAt: 500, gameMode: 'play' },
+      ];
+      const player = {
+        name: 'A', avatarId: 'cat', lastActive: 0, createdAt: 0, totalScore: 0, gamesPlayed: 3,
+        gameHistory: history,
+      };
+      const result = getRecentHighScores(player);
+      expect(result).toHaveLength(3);
+      expect(result.map(r => r.score)).toEqual([50, 40, 30]);
+      // improve-mode scores 99 and 88 should not appear
+      expect(result.every(r => (r.gameMode ?? 'play') === 'play')).toBe(true);
+    });
+
+    it('takes only from the last N chronological entries with custom windowSize', () => {
+      const history: GameRecord[] = [
+        { score: 99, completedAt: 100 }, // older, should be excluded with windowSize=3
         { score: 10, completedAt: 200 },
         { score: 30, completedAt: 300 },
         { score: 20, completedAt: 400 },
