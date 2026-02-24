@@ -28,6 +28,8 @@ export interface Round {
   elapsedMs: number | null;
   /** Points awarded (primary rounds) or null (unanswered or replay). */
   points: number | null;
+  /** Whether the player's first answer was correct. Set once during primary play; preserved during replay. Null while unanswered. */
+  firstTryCorrect: boolean | null;
 }
 
 /** A challenging multiplication pair identified by the analysis algorithm. Not persisted. */

@@ -13,6 +13,7 @@ function createMockRounds(): Round[] {
       isCorrect: true,
       elapsedMs: 1500,
       points: 5,
+      firstTryCorrect: true,
     },
     {
       formula: { factorA: 4, factorB: 5, product: 20, hiddenPosition: 'A' },
@@ -20,6 +21,7 @@ function createMockRounds(): Round[] {
       isCorrect: true,
       elapsedMs: 2500,
       points: 3,
+      firstTryCorrect: true,
     },
     {
       formula: { factorA: 6, factorB: 8, product: 48, hiddenPosition: 'B' },
@@ -27,6 +29,7 @@ function createMockRounds(): Round[] {
       isCorrect: false,
       elapsedMs: 3000,
       points: -2,
+      firstTryCorrect: false,
     },
   ];
 }
@@ -91,8 +94,8 @@ describe('ScoreSummary', () => {
     expect(screen.getByText('21')).toBeInTheDocument();
     expect(screen.getByText('9')).toBeInTheDocument();
     // Correct/incorrect indicators
-    expect(screen.getAllByText('✓').length).toBeGreaterThanOrEqual(2);
-    expect(screen.getAllByText('✗').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('✅').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText('❌').length).toBeGreaterThanOrEqual(1);
     // Points
     expect(screen.getByText(/\+5/)).toBeInTheDocument();
     expect(screen.getByText(/\+3/)).toBeInTheDocument();

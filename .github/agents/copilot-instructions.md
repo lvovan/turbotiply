@@ -45,6 +45,8 @@ Auto-generated from all feature plans. Last updated: 2026-02-14
 - Browser localStorage (no change) (025-hide-practice-sparkline)
 - TypeScript ~5.9.3, React 19.2.0 + Vite, Vitest 4.0.18, React Testing Library 16.3.2 (026-high-scores-medals)
 - Browser localStorage (player.gameHistory, 100-record cap) (026-high-scores-medals)
+- TypeScript ~5.9.3, React ^19.2.0 + Vite ^7.3.1, react-router-dom ^7.13.0 (027-first-try-result)
+- Browser localStorage (no schema change needed — `RoundResult` persistence type unaffected) (027-first-try-result)
 
 - TypeScript 5.x (frontend), Python 3.11+ (backend — serves static files only for this feature) + React 18+, Vite (bundler), React Router (navigation), FastAPI (backend — static file serving only) (main)
 
@@ -65,9 +67,9 @@ cd src; pytest; ruff check .
 TypeScript 5.x (frontend): Follow standard conventions
 
 ## Recent Changes
+- 027-first-try-result: Added TypeScript ~5.9.3, React ^19.2.0 + Vite ^7.3.1, react-router-dom ^7.13.0
 - 026-high-scores-medals: Added TypeScript ~5.9.3, React 19.2.0 + Vite, Vitest 4.0.18, React Testing Library 16.3.2
 - 025-hide-practice-sparkline: Added TypeScript ~5.9.3 / React 19.2.0 + Vite 7.3.1, react-router-dom 7.13.0
-- 024-switch-player-emoji: Added TypeScript (React 18+, Vite) + React, react-router-dom, CSS Modules, custom i18n (no library)
 
 
 <!-- MANUAL ADDITIONS START -->

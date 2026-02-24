@@ -13,6 +13,7 @@ function createMockRounds(): Round[] {
       isCorrect: true,
       elapsedMs: 1500,
       points: 5,
+      firstTryCorrect: true,
     },
     {
       formula: { factorA: 4, factorB: 5, product: 20, hiddenPosition: 'A' },
@@ -20,6 +21,7 @@ function createMockRounds(): Round[] {
       isCorrect: true,
       elapsedMs: 2500,
       points: 3,
+      firstTryCorrect: true,
     },
     {
       formula: { factorA: 6, factorB: 8, product: 48, hiddenPosition: 'B' },
@@ -27,6 +29,7 @@ function createMockRounds(): Round[] {
       isCorrect: false,
       elapsedMs: 3000,
       points: -2,
+      firstTryCorrect: false,
     },
   ];
 }
@@ -64,8 +67,8 @@ describe('ScoreSummary', () => {
     );
 
     // Should show correct indicators for rounds 1-2 and incorrect for round 3
-    const correctIndicators = screen.getAllByText('✓');
-    const incorrectIndicators = screen.getAllByText('✗');
+    const correctIndicators = screen.getAllByText('✅');
+    const incorrectIndicators = screen.getAllByText('❌');
     expect(correctIndicators.length).toBeGreaterThanOrEqual(2);
     expect(incorrectIndicators.length).toBeGreaterThanOrEqual(1);
   });
@@ -102,6 +105,7 @@ describe('ScoreSummary', () => {
         isCorrect: false,
         elapsedMs: 1500,
         points: -2,
+        firstTryCorrect: false,
       },
     ];
     render(
@@ -177,6 +181,7 @@ describe('ScoreSummary', () => {
           isCorrect: true,
           elapsedMs: 1500,
           points: 5,
+          firstTryCorrect: true,
         },
         {
           formula: { factorA: 4, factorB: 5, product: 20, hiddenPosition: 'A' },
@@ -184,6 +189,7 @@ describe('ScoreSummary', () => {
           isCorrect: true,
           elapsedMs: 2500,
           points: 3,
+          firstTryCorrect: true,
         },
       ];
       render(
@@ -333,6 +339,88 @@ describe('ScoreSummary', () => {
         />,
       );
       expect(screen.queryByRole('img', { name: /score progression/i })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('First-try result indicators', () => {
+    it('shows ✅ and ❌ correctly in improve (practice) mode', () => {
+      const rounds = createMockRounds();
+      render(
+        <ScoreSummary
+          rounds={rounds}
+          score={6}
+          onPlayAgain={vi.fn()}
+          onBackToMenu={vi.fn()}
+          gameMode="improve"
+        />,
+      );
+
+      const correctBadges = screen.getAllByText('✅');
+      const incorrectBadges = screen.getAllByText('❌');
+      expect(correctBadges).toHaveLength(2);
+      expect(incorrectBadges).toHaveLength(1);
+    });
+
+    it('renders ✅ emoji with correct aria-label for first-try correct rounds', () => {
+      const rounds: Round[] = [
+        {
+          formula: { factorA: 3, factorB: 7, product: 21, hiddenPosition: 'C' },
+          playerAnswer: 21,
+          isCorrect: true,
+          elapsedMs: 1500,
+          points: 5,
+          firstTryCorrect: true,
+        },
+      ];
+      render(
+        <ScoreSummary rounds={rounds} score={5} onPlayAgain={vi.fn()} onBackToMenu={vi.fn()} />,
+      );
+
+      const badge = screen.getByRole('img', { name: /correct on first try/i });
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveTextContent('✅');
+    });
+
+    it('renders ❌ emoji with correct aria-label for first-try incorrect rounds', () => {
+      const rounds: Round[] = [
+        {
+          formula: { factorA: 6, factorB: 8, product: 48, hiddenPosition: 'B' },
+          playerAnswer: 9,
+          isCorrect: false,
+          elapsedMs: 3000,
+          points: -2,
+          firstTryCorrect: false,
+        },
+      ];
+      render(
+        <ScoreSummary rounds={rounds} score={-2} onPlayAgain={vi.fn()} onBackToMenu={vi.fn()} />,
+      );
+
+      const badge = screen.getByRole('img', { name: /incorrect on first try/i });
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveTextContent('❌');
+    });
+
+    it('renders ❌ for a round with firstTryCorrect: false even when isCorrect: true (replayed-then-correct)', () => {
+      const rounds: Round[] = [
+        {
+          formula: { factorA: 6, factorB: 8, product: 48, hiddenPosition: 'B' },
+          playerAnswer: 8,
+          isCorrect: true, // overwritten by replay
+          elapsedMs: 2000,
+          points: null, // replay round
+          firstTryCorrect: false, // was incorrect on first try
+        },
+      ];
+      render(
+        <ScoreSummary rounds={rounds} score={0} onPlayAgain={vi.fn()} onBackToMenu={vi.fn()} />,
+      );
+
+      const badge = screen.getByRole('img', { name: /incorrect on first try/i });
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveTextContent('❌');
+      // Must NOT show ✅
+      expect(screen.queryByRole('img', { name: /^correct on first try$/i })).not.toBeInTheDocument();
     });
   });
 });

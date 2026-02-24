@@ -14,6 +14,7 @@ function createMockRounds(): Round[] {
       isCorrect: true,
       elapsedMs: 1500,
       points: 5,
+      firstTryCorrect: true,
     },
     {
       formula: { factorA: 4, factorB: 5, product: 20, hiddenPosition: 'A' },
@@ -21,6 +22,7 @@ function createMockRounds(): Round[] {
       isCorrect: true,
       elapsedMs: 2500,
       points: 3,
+      firstTryCorrect: true,
     },
     {
       formula: { factorA: 6, factorB: 8, product: 48, hiddenPosition: 'B' },
@@ -28,6 +30,7 @@ function createMockRounds(): Round[] {
       isCorrect: false,
       elapsedMs: 3000,
       points: -2,
+      firstTryCorrect: false,
     },
   ];
 }

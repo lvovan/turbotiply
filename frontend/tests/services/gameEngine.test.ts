@@ -398,4 +398,89 @@ describe('gameReducer', () => {
       expect(state2).toBe(state);
     });
   });
+
+  describe('firstTryCorrect tracking', () => {
+    it('sets firstTryCorrect to true when a correct answer is submitted during primary play', () => {
+      const formulas = createMockFormulas();
+      let state = gameReducer(initialGameState, { type: 'START_GAME', formulas });
+
+      const correctAnswer = getCorrectAnswer(formulas[0]);
+      state = gameReducer(state, {
+        type: 'SUBMIT_ANSWER',
+        answer: correctAnswer,
+        elapsedMs: 1500,
+      });
+
+      expect(state.rounds[0].firstTryCorrect).toBe(true);
+    });
+
+    it('sets firstTryCorrect to false when an incorrect answer is submitted during primary play', () => {
+      const formulas = createMockFormulas();
+      let state = gameReducer(initialGameState, { type: 'START_GAME', formulas });
+
+      state = gameReducer(state, {
+        type: 'SUBMIT_ANSWER',
+        answer: -999,
+        elapsedMs: 1000,
+      });
+
+      expect(state.rounds[0].firstTryCorrect).toBe(false);
+    });
+
+    it('preserves firstTryCorrect as false after a correct replay answer overwrites isCorrect to true', () => {
+      const formulas = createMockFormulas();
+      let state = gameReducer(initialGameState, { type: 'START_GAME', formulas });
+
+      // Answer round 0 incorrectly
+      state = gameReducer(state, { type: 'SUBMIT_ANSWER', answer: -999, elapsedMs: 1000 });
+      state = gameReducer(state, { type: 'NEXT_ROUND' });
+
+      // Answer rounds 1–9 correctly
+      state = playCorrectRounds(state, 9);
+      expect(state.status).toBe('replay');
+
+      // Round 0 should have firstTryCorrect === false before replay
+      expect(state.rounds[0].firstTryCorrect).toBe(false);
+
+      // Answer correctly during replay
+      const correctAnswer = getCorrectAnswer(formulas[0]);
+      state = gameReducer(state, { type: 'SUBMIT_ANSWER', answer: correctAnswer, elapsedMs: 1500 });
+
+      // isCorrect should now be true (overwritten by replay), but firstTryCorrect should stay false
+      expect(state.rounds[0].isCorrect).toBe(true);
+      expect(state.rounds[0].firstTryCorrect).toBe(false);
+    });
+
+    it('initializes firstTryCorrect as null for each round', () => {
+      const formulas = createMockFormulas();
+      const state = gameReducer(initialGameState, { type: 'START_GAME', formulas });
+
+      state.rounds.forEach((round) => {
+        expect(round.firstTryCorrect).toBeNull();
+      });
+    });
+
+    it('has firstTryCorrect set for all rounds at game completion', () => {
+      const formulas = createMockFormulas();
+      let state = gameReducer(initialGameState, { type: 'START_GAME', formulas });
+
+      // Answer round 0 incorrectly, rest correctly
+      state = gameReducer(state, { type: 'SUBMIT_ANSWER', answer: -999, elapsedMs: 1000 });
+      state = gameReducer(state, { type: 'NEXT_ROUND' });
+      state = playCorrectRounds(state, 9);
+
+      // Complete replay
+      expect(state.status).toBe('replay');
+      const correct = getCorrectAnswer(formulas[0]);
+      state = gameReducer(state, { type: 'SUBMIT_ANSWER', answer: correct, elapsedMs: 1500 });
+      state = gameReducer(state, { type: 'NEXT_ROUND' });
+
+      expect(state.status).toBe('completed');
+      state.rounds.forEach((round) => {
+        expect(round.firstTryCorrect).not.toBeNull();
+      });
+      expect(state.rounds[0].firstTryCorrect).toBe(false);
+      expect(state.rounds[1].firstTryCorrect).toBe(true);
+    });
+  });
 });

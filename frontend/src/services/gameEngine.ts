@@ -79,6 +79,7 @@ function handleStartGame(state: GameState, formulas: Formula[], mode?: 'play' | 
     isCorrect: null,
     elapsedMs: null,
     points: null,
+    firstTryCorrect: null,
   }));
 
   return {
@@ -130,6 +131,8 @@ function handleSubmitAnswer(state: GameState, answer: number, elapsedMs: number)
     isCorrect,
     elapsedMs,
     points,
+    // Set firstTryCorrect only during primary play; preserve existing value during replay
+    firstTryCorrect: state.status === 'playing' ? isCorrect : round.firstTryCorrect,
   };
 
   // During replay, if incorrect, re-append to queue

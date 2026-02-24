@@ -117,13 +117,13 @@ const ScoreSummary: React.FC<ScoreSummaryProps> = ({
                   <td>{formatFormula(r)}</td>
                   <td>{r.playerAnswer ?? '—'}</td>
                   <td>
-                    {r.isCorrect ? (
-                      <span className={styles.correctBadge} aria-label="Correct">
-                        ✓
+                    {r.firstTryCorrect ? (
+                      <span className={styles.correctBadge} role="img" aria-label="Correct on first try">
+                        ✅
                       </span>
                     ) : (
-                      <span className={styles.incorrectBadge} aria-label="Incorrect">
-                        ✗
+                      <span className={styles.incorrectBadge} role="img" aria-label="Incorrect on first try">
+                        ❌
                       </span>
                     )}
                   </td>

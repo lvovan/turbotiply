@@ -129,6 +129,7 @@ describe('Accessibility — Gameplay (axe)', () => {
         isCorrect: true,
         elapsedMs: 1500,
         points: 5,
+        firstTryCorrect: true,
       },
       {
         formula: { factorA: 6, factorB: 8, product: 48, hiddenPosition: 'B' },
@@ -136,6 +137,7 @@ describe('Accessibility — Gameplay (axe)', () => {
         isCorrect: false,
         elapsedMs: 3000,
         points: -2,
+        firstTryCorrect: false,
       },
     ];
     const { container } = render(
